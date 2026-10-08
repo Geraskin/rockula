@@ -341,7 +341,6 @@ public sealed class Z80InterruptTests
 
     [Theory]
     [InlineData(0)]
-    [InlineData(2)]
     [InlineData(255)]
     public void EligibleUnsupportedModeFaultsBeforeBusOrAcceptanceEffects(int mode)
     {

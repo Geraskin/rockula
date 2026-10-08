@@ -57,6 +57,12 @@ public abstract class Z80Bus : IZ80Bus
         return value;
     }
 
+    public void NotifyReti() => OnReti();
+
+    protected virtual void OnReti()
+    {
+    }
+
     protected abstract byte ReadMemory(ushort address);
 
     protected abstract void WriteMemory(ushort address, byte value);

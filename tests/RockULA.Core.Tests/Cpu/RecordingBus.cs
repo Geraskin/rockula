@@ -15,6 +15,10 @@ internal sealed class RecordingBus : Z80Bus
 
     public Func<ushort, byte>? InterruptAcknowledging { get; set; }
 
+    public List<ulong> RetiNotifications { get; } = [];
+
+    protected override void OnReti() => RetiNotifications.Add(TStates);
+
     public int InterruptAcknowledgements { get; private set; }
 
     public Action<ulong>? Advancing { get; set; }
