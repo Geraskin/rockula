@@ -36,6 +36,8 @@ jobs:
         run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --about
       - name: Synthetic CPU demo
         run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo
+      - name: Synthetic loop and stack demo
+        run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo-loop
       - name: Check formatting
         if: runner.os == 'Linux'
         run: dotnet format RockULA.slnx --verify-no-changes --no-restore

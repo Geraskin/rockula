@@ -1,7 +1,7 @@
 namespace RockULA.Core.Cpu;
 
 /// <summary>Instruction-boundary stepping for the explicitly supported base-opcode slice.</summary>
-public sealed class Z80Cpu
+public sealed partial class Z80Cpu
 {
     private readonly IZ80Bus _bus;
 
@@ -52,6 +52,11 @@ public sealed class Z80Cpu
 
     private void Execute(byte opcode, ushort address)
     {
+        if (TryExecuteAlu(opcode) || TryExecuteControl(opcode, address))
+        {
+            return;
+        }
+
         if (opcode >= 0x40 && opcode <= 0x7F && opcode != 0x76)
         {
             byte value = ReadRegister(opcode & 7);

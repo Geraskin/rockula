@@ -4,6 +4,29 @@ namespace RockULA.Core.Tests.Cpu;
 
 public sealed class Z80ControlTests
 {
+    [Fact]
+    public void BoundedLoopCallsSubroutineAndPreservesItsCounterOnStack()
+    {
+        var bus = new RecordingBus();
+        byte[] program = [0x31, 0x00, 0x80, 0x06, 0x03, 0xAF, 0xCD, 0x20, 0x00,
+            0x10, 0xFB, 0x32, 0x00, 0x40, 0xC3, 0x12, 0x00];
+        program.CopyTo(bus.Memory, 0);
+        byte[] subroutine = [0xC5, 0x80, 0xC1, 0xC9];
+        subroutine.CopyTo(bus.Memory, 0x20);
+        ulong[] costs = [10, 7, 4, 17, 11, 4, 10, 10, 13, 17, 11, 4, 10, 10, 13,
+            17, 11, 4, 10, 10, 8, 13, 10];
+        var cpu = new Z80Cpu(bus);
+        foreach (ulong cost in costs) Assert.Equal(cost, cpu.Step());
+        Assert.Equal((ushort)0x12, cpu.Registers.PC);
+        Assert.Equal((ushort)0x8000, cpu.Registers.SP);
+        Assert.Equal((ushort)0, cpu.Registers.BC);
+        Assert.Equal((byte)6, cpu.Registers.A);
+        Assert.Equal((byte)0, cpu.Registers.F);
+        Assert.Equal((byte)23, cpu.Registers.R);
+        Assert.Equal((byte)6, bus.Memory[0x4000]);
+        Assert.Equal(234UL, bus.TStates);
+    }
+
     public static IEnumerable<object[]> ConditionalEncodings()
     {
         // Zilog UM008011 pp.263–264,283–287. Literal opcodes/flag masks, not decoder output.
