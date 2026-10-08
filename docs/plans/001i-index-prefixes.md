@@ -1,5 +1,5 @@
 # Work order 001i: DD/FD and indexed CB
-Status: independent expectations prepared before decoder changes.
+Status: implemented; Windows/Linux CI verified, with limits below.
 Branch feat/z80-foundation, PR #6 to main.
 
 ## Scope and sources
@@ -49,3 +49,21 @@ prefix-only bound and a synthetic IX/IY program. Existing suites must remain gre
 Windows/Linux restore/Release build/test, both demos and Linux format; local SDK absent.
 No Q, remaining ED/I/O/SCF/CCF, IM0 acceptance, complete save states, electrical
 sampling/contention, Spectrum boot, UI or game compatibility claims.
+
+## Verification evidence
+Independent test-first commit 471e9ab85389b2ba885d579342a40cd7c315f0667:
+[CI 37754120098](https://github.com/Geraskin/rockula/actions/runs/37754120098)
+built successfully on Windows/Linux; each reported 645 expected failures and
+701 passes, zero skips, 1,346 total. Actual logs show DD/FD rejection, not a
+compile failure. Implementation CI then exposed a test-count mistake: the mixed
+index/ED sequence contains eight M1 fetches, not seven. The expectation was
+corrected by counting its bytes; production refresh logic was unchanged.
+
+Verified head 069d4e9c2c040b520693ba178f73c16cbe6a1fab:
+[CI 37754791932](https://github.com/Geraskin/rockula/actions/runs/37754791932).
+Both Windows and Linux restored, built Release with zero warnings/errors and
+passed all 1,382 tests with zero failures/skips. Both demos completed with the
+independent 51/234-T expected states; Linux format passed. Actual job logs were
+inspected. Markdown links and project XML/SDK JSON passed local checks.
+No local .NET SDK was available. External exercisers, full-chip pin traces,
+interactive UI, ROM boot and games were not run and are not claimed.

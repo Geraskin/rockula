@@ -81,3 +81,8 @@ cancellation, mixed/repeated prefixes, EI/HALT/NMI boundaries, waits/live reads,
 partial-cycle failures, ignored ROM writes, the prefix-only execution bound and
 a self-authored index program. The ignored-prefix comparison supplements literal
 expectations and existing base suites; it is not an external independent oracle.
+
+Current indexed-slice evidence: [CI 37754791932](https://github.com/Geraskin/rockula/actions/runs/37754791932),
+1,382 tests passed on each of Windows/Linux, zero failures/skips/warnings/errors,
+both demos and Linux format passed. [001i](plans/001i-index-prefixes.md) records
+red/green commits and remaining verification limits.
