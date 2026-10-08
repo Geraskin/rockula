@@ -3,7 +3,7 @@ using RockULA.Headless;
 if (args.Length == 0 || (args.Length == 1 && args[0] == "--about"))
 {
     Console.WriteLine("RockULA! - Rock Your Spectrum.");
-    Console.WriteLine("Status: Z80 load/byte ALU/branch/stack slices. Spectrum devices and game loading are not implemented.");
+    Console.WriteLine("Status: 245 Z80 base encodings including word ALU, DAA, rotations and exchanges. Spectrum devices are not implemented.");
     return 0;
 }
 
