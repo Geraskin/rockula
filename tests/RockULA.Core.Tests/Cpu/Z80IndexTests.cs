@@ -580,7 +580,8 @@ public sealed class Z80IndexTests
             }
             Assert.Equal((ushort)0x1234, r.IX);
             Assert.Equal((ushort)0x5678, r.IY);
-            Assert.Equal((byte)3, r.R);
+            // LD R,A overwrites the three fetch increments with the original A=1.
+            Assert.Equal(payload == 0x4F ? (byte)1 : (byte)3, r.R);
         }
     }
 
