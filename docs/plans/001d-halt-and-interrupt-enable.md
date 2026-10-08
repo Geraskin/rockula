@@ -1,5 +1,5 @@
 # Work order 001d: HALT and interrupt enable state
-Status: implementation awaiting green CI.
+Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
 Branch `feat/z80-foundation`, PR #6 to `main`.
 Starting commit: `52d554f4a01d9c79560a29ee5210757615a9c49e`.
 
@@ -41,5 +41,19 @@ Spectrum device, interactive UI or game compatibility claim.
 ## Red evidence
 Test commit `49494f7e70901a4cf627947992118a1117700510`,
 [CI 37724796870](https://github.com/Geraskin/rockula/actions/runs/37724796870):
-build succeeded; 14 new cases failed on unsupported instructions, 296 previous cases
-passed, zero skipped, 310 total (Linux log inspected before implementation).
+Windows/Linux builds succeeded; 14 new cases failed on unsupported instructions, 296 previous cases
+passed, zero skipped, 310 total (Linux log inspected before implementation; Windows result also confirmed).
+
+## Green evidence
+Implementation commit `9887ed75a0306103d5d9c02fe6ff9b5dabb4609e`,
+[CI 37724954991](https://github.com/Geraskin/rockula/actions/runs/37724954991):
+- Windows/Linux restore and Release build passed, zero warnings/errors.
+- All 310 tests passed on each platform, zero failures/skips.
+- 2,048 DI/EI flag/IFF input vectors, multi-cycle delay retirement and repeated EI/DI.
+- HALT wrap, ignored data, ordered wait/live-sampling traces, fault/reset behavior.
+- Both demos passed unchanged: 51 and 234 T-states; Linux formatting passed.
+- Local XML/JSON and documentation links checked; literal opcode set contains 248 unique
+  bytes, leaving exactly 37, 3F, CB, D3, DB, DD, ED and FD unsupported.
+
+No local .NET SDK, external CPU corpus, silicon or interactive UI check was used.
+This establishes the scoped boundary contract, not complete interrupt or Spectrum emulation.
