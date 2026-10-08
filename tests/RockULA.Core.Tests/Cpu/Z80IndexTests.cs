@@ -552,7 +552,7 @@ public sealed class Z80IndexTests
     [InlineData(0xFD)]
     public void EdCancellationPreservesIndexAndRejectsEveryUnsupportedPayload(int prefix)
     {
-        var supported = new HashSet<int> { 0x44, 0x45, 0x46, 0x4D, 0x56, 0x5E };
+        var supported = new HashSet<int> { 0x44, 0x45, 0x46, 0x4D, 0x56, 0x5E, 0x42, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x72, 0x7A, 0x43, 0x4B, 0x53, 0x5B, 0x63, 0x6B, 0x73, 0x7B, 0x47, 0x4F, 0x57, 0x5F, 0x67, 0x6F };
         for (int payload = 0; payload < 256; payload++)
         {
             var bus = new RecordingBus();
@@ -563,7 +563,12 @@ public sealed class Z80IndexTests
             var cpu = new Z80Cpu(bus, r);
             if (supported.Contains(payload))
             {
-                Assert.Equal(payload is 0x45 or 0x4D ? 18UL : 12UL, cpu.Step());
+                ulong expected = payload is 0x45 or 0x4D ? 18UL
+                    : payload is 0x42 or 0x4A or 0x52 or 0x5A or 0x62 or 0x6A or 0x72 or 0x7A ? 19UL
+                    : payload is 0x43 or 0x4B or 0x53 or 0x5B or 0x63 or 0x6B or 0x73 or 0x7B ? 24UL
+                    : payload is 0x47 or 0x4F or 0x57 or 0x5F ? 13UL
+                    : payload is 0x67 or 0x6F ? 22UL : 12UL;
+                Assert.Equal(expected, cpu.Step());
             }
             else
             {
