@@ -29,3 +29,18 @@ in GitHub Actions or a .NET-equipped workstation. Do not infer a pass from valid
 ## Scope limits
 ROM validation is not memory mapping or execution. The welcome window and CLI report foundation
 status. Formats contains no parser. No Z80/ULA/tape/audio implementation is part of this order.
+
+## Recorded evidence
+Bootstrap code commit: `101e810098cbad62159048fe833d4fee67224659`.
+[CI run 1](https://github.com/Geraskin/rockula/actions/runs/37719280891) completed successfully
+on both ubuntu-latest and windows-latest:
+- Restore and Release solution build succeeded.
+- Linux build reported 0 warnings and 0 errors.
+- Six ROM-input tests passed on both runners; no skipped tests.
+- Headless status command succeeded on both runners.
+- Linux formatting verification succeeded.
+- Static XML/JSON/YAML, relative Markdown links, project/solution references and newline checks passed.
+- Remote tree contains all 56 new files plus the original LICENSE with its unchanged blob hash.
+
+Interactive GUI launch, dev-container construction and emulator compatibility are not verified.
+This evidence covers the foundation only; the CPU and machine are still unimplemented.

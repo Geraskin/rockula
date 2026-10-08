@@ -3,7 +3,7 @@ Updated: 2026-10-08. Status is about implemented evidence, not intended scope.
 
 | Milestone | Status | Deliverable | Exit gate |
 | --- | --- | --- | --- |
-| M0 Foundation | Scaffold prepared; validation recorded in bootstrap plan | Solution, shell, CLI, ROM validation, docs, agent workflow, CI | Build/tests plus honest validation record |
+| M0 Foundation | Build/test verified; interactive UI check pending | Solution, shell, CLI, ROM validation, docs, agent workflow, CI | Build/tests plus honest validation record |
 | M1 Z80 foundation | Not started | State, bus, ALU, unprefixed instruction slices | Independent semantic and nominal bus tests |
 | M2 Complete CPU | Not started | CB/ED/DD/FD/indexed-CB, interrupts, undocumented NMOS behavior | Coverage matrix and external oracle/exerciser reports |
 | M3 48K machine | Not started | Memory, keyboard/ports, basic ULA, interrupts, run loop | Deterministic synthetic machine programs |
