@@ -1,5 +1,5 @@
 # Implemented Z80 coverage
-Status: 248 standalone base encodings plus five ED commands and NMI/IM 1/2 responses; full M1/M2 are incomplete.
+Status: 248 standalone base encodings plus six ED commands and NMI/IM 1/2 responses; full M1/M2 are incomplete.
 Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
 
 | Encoding | Meaning | Count | Nominal T-states |
@@ -30,14 +30,15 @@ Tests use literal encoding/state/timing expectations and fail explicitly for oth
 | F3,FB | DI/EI | 2 | 4 |
 
 Total: **248 base-byte encodings**.
-ED is recognized as a prefix for five additional two-byte instructions:
+ED is recognized as a prefix for six additional two-byte instructions:
 
 | Encoding | Meaning | Nominal T-states |
 | --- | --- | --- |
+| ED44 | NEG | 8 |
 | ED46, ED56, ED5E | IM 0, IM 1, IM 2 | 8 |
 | ED45, ED4D | RETN, RETI | 14 |
 
-ED is not counted as a standalone base instruction. Other 251 ED payloads fault
+ED is not counted as a standalone base instruction. Other 250 ED payloads fault
 with original address, prefix and payload after two fetches (8 T). Unsupported
 aliases and ED NOPs are not silently accepted. Seven other base bytes still fault
 after one fetch: SCF/CCF (37/3F), IN/OUT (DB/D3), CB/DD/FD.
@@ -47,7 +48,7 @@ DI/EI update IFFs and track inhibition through the following instruction. Interr
 request acceptance implements NMI and IM 1/2. Eligible IM 0/invalid modes fault
 explicitly before bus effects. ED mode commands preserve all F and both IFFs.
 RETN/RETI pop PC, restore IFF1 from IFF2 and preserve F; RETI also emits a logical
-completion notification. Prefix/payload are atomic with respect to interrupt polling. R updates are verified for the unprefixed slice only.
+completion notification. Prefix/payload are atomic with respect to interrupt polling. R increments once per opcode fetch, including both ED bytes.
 Faulted CPUs cannot step again until Reset. Reset leaves bus time and memory untouched.
 HALT and EI-delay are inspectable CPU control state, cleared by Reset. A halted Step
 performs one logical M1 at the fixed next PC, ignores data and updates R. Reset or

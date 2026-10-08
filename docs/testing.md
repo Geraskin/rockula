@@ -59,3 +59,6 @@ a round trip.
 Benchmark in Release with trace disabled and fixed input/budget; report hardware/runtime/commit.
 Measure CPU-only and complete-machine throughput separately. Do not remove accuracy or sampling
 events to improve a benchmark. Benchmarks are planned, not present in this foundation.
+
+001g adds all 65,536 NEG AF inputs, fetch/refresh wrap, waits and payload failure.
+Current unsupported ED coverage rejects all 250 remaining payloads, including aliases.

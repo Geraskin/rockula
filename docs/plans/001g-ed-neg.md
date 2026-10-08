@@ -1,5 +1,5 @@
 # Work order 001g: ED NEG
-Status: independent tests published before implementation.
+Status: implementation under CI verification.
 Branch feat/z80-foundation, PR #6 to main.
 
 Implement documented ED44 only: A becomes 0−A in 8 T through two M1 fetches.
@@ -16,3 +16,8 @@ PC/R wrapping, waits and failed payload fetch retaining AF. Aliases stay unsuppo
 Acceptance: Windows/Linux restore, Release build/test, both demos and Linux format.
 Local SDK unavailable; inspect CI red and green logs. No IM0, Q/WZ, complete ED,
 physical pin timing, Spectrum compatibility or external corpus claims.
+
+## Red evidence
+[CI 37747977012](https://github.com/Geraskin/rockula/actions/runs/37747977012):
+Linux Release build passed; two new semantic/fetch tests fail on unsupported ED44;
+the payload-failure test passes against existing fault handling.

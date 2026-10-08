@@ -10,6 +10,14 @@ public sealed partial class Z80Cpu
         IncrementRefresh();
         switch (opcode)
         {
+            case 0x44:
+                byte accumulator = Registers.A;
+                Registers.A = unchecked((byte)-accumulator);
+                Registers.F = (byte)(ResultFlags(Registers.A) | 2
+                    | ((accumulator & 0x0F) != 0 ? 0x10 : 0)
+                    | (accumulator == 0x80 ? 4 : 0)
+                    | (accumulator != 0 ? 1 : 0));
+                return;
             case 0x46:
                 Registers.InterruptMode = 0;
                 return;
