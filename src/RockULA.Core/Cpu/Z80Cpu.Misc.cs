@@ -2,22 +2,22 @@ namespace RockULA.Core.Cpu;
 
 public sealed partial class Z80Cpu
 {
-    private bool TryExecuteMisc(byte opcode, ushort instructionAddress)
+    private bool TryExecuteMisc(byte opcode, ushort instructionAddress, int index = 0)
     {
         if ((opcode & 0xC7) == 0x03)
         {
             int pair = (opcode >> 4) & 3;
             int delta = (opcode & 8) == 0 ? 1 : -1;
-            ushort result = unchecked((ushort)(ReadWordPair(pair) + delta));
+            ushort result = unchecked((ushort)(ReadWordPair(pair, index) + delta));
             Internal(instructionAddress, 2);
-            WriteWordPair(pair, result);
+            WriteWordPair(pair, result, index);
             return true;
         }
 
         if ((opcode & 0xCF) == 0x09)
         {
-            ushort before = Registers.HL;
-            ushort operand = ReadWordPair((opcode >> 4) & 3);
+            ushort before = ReadHl(index);
+            ushort operand = ReadWordPair((opcode >> 4) & 3, index);
             int sum = before + operand;
             ushort result = unchecked((ushort)sum);
             byte flags = (byte)((Registers.F & 0xC4) | ((result >> 8) & 0x28));
@@ -25,7 +25,7 @@ public sealed partial class Z80Cpu
             if (sum > 0xFFFF) flags |= 1;
             Internal(instructionAddress, 4);
             Internal(instructionAddress, 3);
-            Registers.HL = result;
+            WriteHl(index, result);
             Registers.WZ = Increment(before);
             Registers.F = flags;
             return true;
@@ -58,33 +58,33 @@ public sealed partial class Z80Cpu
                 (Registers.HL, Registers.AlternateHL) = (Registers.AlternateHL, Registers.HL);
                 return true;
             case 0xE3:
-                ExchangeStackWord();
+                ExchangeStackWord(index);
                 return true;
             case 0xF9:
                 Internal(instructionAddress, 2);
-                Registers.SP = Registers.HL;
+                Registers.SP = ReadHl(index);
                 return true;
             default:
                 return false;
         }
     }
 
-    private ushort ReadWordPair(int pair) => pair switch
+    private ushort ReadWordPair(int pair, int index = 0) => pair switch
     {
         0 => Registers.BC,
         1 => Registers.DE,
-        2 => Registers.HL,
+        2 => ReadHl(index),
         3 => Registers.SP,
         _ => throw new ArgumentOutOfRangeException(nameof(pair))
     };
 
-    private void WriteWordPair(int pair, ushort value)
+    private void WriteWordPair(int pair, ushort value, int index = 0)
     {
         switch (pair)
         {
             case 0: Registers.BC = value; break;
             case 1: Registers.DE = value; break;
-            case 2: Registers.HL = value; break;
+            case 2: WriteHl(index, value); break;
             case 3: Registers.SP = value; break;
             default: throw new ArgumentOutOfRangeException(nameof(pair));
         }
@@ -123,18 +123,19 @@ public sealed partial class Z80Cpu
         return (byte)((folded & 1) == 0 ? 4 : 0);
     }
 
-    private void ExchangeStackWord()
+    private void ExchangeStackWord(int index)
     {
         ushort lowAddress = Registers.SP;
         ushort highAddress = Increment(lowAddress);
-        ushort previous = Registers.HL;
+        ushort previous = ReadHl(index);
         byte low = ReadMemory(lowAddress);
         byte high = ReadMemory(highAddress);
         Internal(highAddress, 1);
         WriteMemory(highAddress, (byte)(previous >> 8));
         WriteMemory(lowAddress, unchecked((byte)previous));
         Internal(lowAddress, 2);
-        Registers.HL = (ushort)(low | (high << 8));
-        Registers.WZ = Registers.HL;
+        ushort result = (ushort)(low | (high << 8));
+        WriteHl(index, result);
+        Registers.WZ = result;
     }
 }

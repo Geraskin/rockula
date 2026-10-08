@@ -235,6 +235,223 @@ public sealed class Z80IndexTests
         Assert.Equal(4UL, cpu.Step());
     }
 
+    public static IEnumerable<object[]> Increments()
+    {
+        foreach (int prefix in new[] { 0xDD, 0xFD })
+            foreach (int opcode in new[] { 0x24, 0x25, 0x2C, 0x2D, 0x34, 0x35 }) yield return [prefix, opcode];
+    }
+
+    [Theory]
+    [MemberData(nameof(Increments))]
+    public void ByteIncrementsAllValuesAndFlags(int prefix, int opcode)
+    {
+        var bus = new RecordingBus();
+        bus.Memory[0] = (byte)prefix;
+        bus.Memory[1] = (byte)opcode;
+        bus.Memory[2] = 0;
+        var cpu = new Z80Cpu(bus);
+        int target = (opcode / 8) % 8;
+        bool decrement = opcode % 2 == 1;
+        for (int value = 0; value < 256; value++)
+            for (int flags = 0; flags < 256; flags++)
+            {
+                cpu.Reset();
+                ushort index = target == 4 ? (ushort)(value * 256 + 0x55) : target == 5 ? (ushort)(0x5500 + value) : (ushort)0x4000;
+                if (prefix == 0xDD) cpu.Registers.IX = index;
+                else cpu.Registers.IY = index;
+                bus.Memory[0x4000] = (byte)value;
+                cpu.Registers.F = (byte)flags;
+                bus.Events.Clear();
+                int result = (value + (decrement ? 255 : 1)) % 256;
+                int f = (result & 0xA8) | (flags % 2) | (decrement ? 2 : 0);
+                if (result == 0) f |= 0x40;
+                if (value == (decrement ? 128 : 127)) f |= 4;
+                if (value % 16 == (decrement ? 0 : 15)) f |= 16;
+                Assert.Equal(target == 6 ? 23UL : 8UL, cpu.Step());
+                Assert.Equal((byte)f, cpu.Registers.F);
+                ushort after = prefix == 0xDD ? cpu.Registers.IX : cpu.Registers.IY;
+                Assert.Equal(result, target == 4 ? after / 256 : target == 5 ? after % 256 : bus.Memory[0x4000]);
+            }
+    }
+
+    [Theory]
+    [InlineData(0xDD)]
+    [InlineData(0xFD)]
+    public void WordOperationsAndStackWrap(int prefix)
+    {
+        var bus = new RecordingBus();
+        byte[] program = [(byte)prefix, 0x21, 0xFF, 0xFF, (byte)prefix, 0x23,
+            (byte)prefix, 0x2B, (byte)prefix, 0x09, (byte)prefix, 0x19,
+            (byte)prefix, 0x29, (byte)prefix, 0x39, (byte)prefix, 0x22, 0x00, 0x40,
+            (byte)prefix, 0x2A, 0x00, 0x40, (byte)prefix, 0xE5, (byte)prefix, 0xE1,
+            (byte)prefix, 0xE3, (byte)prefix, 0xF9, (byte)prefix, 0xE9];
+        program.CopyTo(bus.Memory, 0x100);
+        var r = new Z80Registers { PC = 0x100, BC = 1, DE = 0x1000, HL = 0xABCD, SP = 0, F = 0xC4 };
+        var cpu = new Z80Cpu(bus, r);
+        Assert.Equal(14UL, cpu.Step());
+        Assert.Equal((ushort)0xFFFF, Index());
+        Assert.Equal(10UL, cpu.Step());
+        Assert.Equal((ushort)0, Index());
+        Assert.Equal(10UL, cpu.Step());
+        Assert.Equal((ushort)0xFFFF, Index());
+        foreach (int operand in new[] { 1, 0x1000, 0x1000, 0 })
+        {
+            int before = Index();
+            int sum = before + operand;
+            int result = sum % 65536;
+            int f = (r.F & 0xC4) | ((result / 256) & 0x28);
+            if (before % 4096 + operand % 4096 > 4095) f |= 16;
+            if (sum > 65535) f |= 1;
+            Assert.Equal(15UL, cpu.Step());
+            Assert.Equal((ushort)result, Index());
+            Assert.Equal((byte)f, r.F);
+            Assert.Equal(unchecked((ushort)(before + 1)), r.WZ);
+        }
+        Assert.Equal((ushort)0x2000, Index());
+        Assert.Equal(20UL, cpu.Step());
+        Assert.Equal((byte)0x20, bus.Memory[0x4001]);
+        Assert.Equal((ushort)0x4001, r.WZ);
+        Assert.Equal(20UL, cpu.Step());
+        Assert.Equal((ushort)0x2000, Index());
+        Assert.Equal(15UL, cpu.Step());
+        Assert.Equal((ushort)0xFFFE, r.SP);
+        Assert.Equal((byte)0x20, bus.Memory[0xFFFF]);
+        Assert.Equal(14UL, cpu.Step());
+        Assert.Equal((ushort)0, r.SP);
+        bus.Memory[0] = 0x34;
+        bus.Memory[1] = 0x12;
+        Assert.Equal(23UL, cpu.Step());
+        Assert.Equal((ushort)0x1234, Index());
+        Assert.Equal((ushort)0x1234, r.WZ);
+        Assert.Equal((byte)0x20, bus.Memory[1]);
+        Assert.Equal(10UL, cpu.Step());
+        Assert.Equal((ushort)0x1234, r.SP);
+        Assert.Equal(8UL, cpu.Step());
+        Assert.Equal((ushort)0x1234, r.PC);
+        Assert.Equal((ushort)0xABCD, r.HL);
+        ushort Index() => prefix == 0xDD ? r.IX : r.IY;
+    }
+
+    [Theory]
+    [InlineData(0xDD)]
+    [InlineData(0xFD)]
+    public void IgnoredPrefixPreservesOrdinaryRegisterSemantics(int prefix)
+    {
+        // Literal unprefixed table is independently maintained in boundary tests.
+        var unsupported = new HashSet<int> { 0x37, 0x3F, 0xCB, 0xD3, 0xDB, 0xDD, 0xED, 0xFD };
+        var affected = new HashSet<int> { 0x09, 0x19, 0x21, 0x22, 0x23, 0x29, 0x2A, 0x2B, 0x39, 0xE1, 0xE3, 0xE5, 0xE9, 0xF9,
+            0x24, 0x25, 0x26, 0x2C, 0x2D, 0x2E, 0x34, 0x35, 0x36 };
+        foreach (object[] row in Loads()) affected.Add((int)row[1]);
+        foreach (object[] row in AluSources()) affected.Add((int)row[1]);
+        Assert.Equal(85, affected.Count);
+        int count = 0;
+        for (int opcode = 0; opcode < 256; opcode++)
+        {
+            if (unsupported.Contains(opcode) || affected.Contains(opcode)) continue;
+            count++;
+            var plain = new RecordingBus();
+            var indexed = new RecordingBus();
+            plain.Memory[0x100] = (byte)opcode;
+            indexed.Memory[0xFF] = (byte)prefix;
+            indexed.Memory[0x100] = (byte)opcode;
+            var a = Initial(0x100);
+            var b = Initial(0xFF);
+            ulong time = new Z80Cpu(plain, a).Step();
+            Assert.Equal(time + 4, new Z80Cpu(indexed, b).Step());
+            Assert.Equal(a.AF, b.AF);
+            Assert.Equal(a.BC, b.BC);
+            Assert.Equal(a.DE, b.DE);
+            Assert.Equal(a.HL, b.HL);
+            Assert.Equal(a.SP, b.SP);
+            Assert.Equal(a.PC, b.PC);
+            Assert.Equal(a.WZ, b.WZ);
+            Assert.Equal((ushort)0x9876, b.IX);
+            Assert.Equal((ushort)0xFEDC, b.IY);
+            Assert.Equal(plain.Memory, indexed.Memory.Select((v, i) => i == 0xFF ? (byte)0 : v).ToArray());
+        }
+        Assert.Equal(163, count);
+        static Z80Registers Initial(ushort pc) => new() { PC = pc, AF = 0x1234, BC = 0x2233, DE = 0x4455, HL = 0x6677, SP = 0x8000, IX = 0x9876, IY = 0xFEDC, WZ = 0xABCD };
+    }
+
+    [Fact]
+    public void IndexedCbWaitsSampleLiveMemoryAndNmiWaitsForNextStep()
+    {
+        var bus = new RecordingBus();
+        byte[] program = [0xDD, 0xCB, 1, 0x00];
+        program.CopyTo(bus.Memory, 0);
+        var r = new Z80Registers { IX = 0x3FFF, HL = 0x1234, SP = 0x8000, F = 0xFF };
+        var cpu = new Z80Cpu(bus, r);
+        bus.WaitStates = cycle => cycle.Kind == Z80BusCycleKind.MemoryRead && cycle.Address == 0x4000 ? 2 : 0;
+        bus.Advancing = time =>
+        {
+            if (time == 4) cpu.SetNmiLine(true);
+            if (time == 21) bus.Memory[0x4000] = 0x80;
+        };
+        Assert.Equal(25UL, cpu.Step());
+        Assert.Equal((byte)1, r.B);
+        Assert.Equal((byte)1, bus.Memory[0x4000]);
+        Assert.Equal((byte)1, r.F);
+        Assert.True(cpu.IsNmiPending);
+        Assert.Equal(new CycleEvent(Z80BusCycleKind.MemoryRead, 0x4000, 16, 21, 21, 0x80), bus.Events[5]);
+        Assert.Equal(11UL, cpu.Step());
+        Assert.Equal((ushort)0x66, r.PC);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
+    [InlineData(6)]
+    [InlineData(7)]
+    public void IndexedCbFailuresRetainOnlyCompletedEffects(int failedCycle)
+    {
+        var bus = new RecordingBus();
+        byte[] program = [0xFD, 0xCB, 0, 0];
+        program.CopyTo(bus.Memory, 0);
+        bus.Memory[0x4000] = 0x80;
+        int cycleNumber = 0;
+        bus.WaitStates = _ => ++cycleNumber == failedCycle + 1 ? throw new IOException("test bus fault") : 0;
+        var r = new Z80Registers { IY = 0x4000, B = 0xA5, F = 0xFF, WZ = 0x9876 };
+        var cpu = new Z80Cpu(bus, r);
+        Assert.Throws<IOException>(() => cpu.Step());
+        Assert.True(cpu.IsFaulted);
+        Assert.Equal((byte)0xA5, r.B);
+        Assert.Equal((byte)0xFF, r.F);
+        Assert.Equal((byte)0x80, bus.Memory[0x4000]);
+        Assert.Equal(failedCycle >= 5 ? (ushort)0x4000 : (ushort)0x9876, r.WZ);
+        Assert.Throws<InvalidOperationException>(() => cpu.Step());
+    }
+
+    [Fact]
+    public void IgnoredRomWriteStillCopiesComputedResultToOrdinaryH()
+    {
+        var bus = new ReadOnlyOperandBus();
+        var r = new Z80Registers { IX = 0x4000, HL = 0x1234 };
+        Assert.Equal(23UL, new Z80Cpu(bus, r).Step());
+        Assert.Equal((byte)1, r.H);
+        Assert.Equal((byte)0x34, r.L);
+        Assert.Equal((ushort)0x4000, r.IX);
+        Assert.Equal((byte)1, r.F);
+        Assert.Equal(1, bus.Writes);
+    }
+
+    private sealed class ReadOnlyOperandBus : Z80Bus
+    {
+        public int Writes { get; private set; }
+        protected override byte ReadMemory(ushort address) => address switch
+        {
+            0 => 0xDD,
+            1 => 0xCB,
+            2 => 0,
+            3 => 4,
+            0x4000 => 0x80,
+            _ => 0
+        };
+        protected override void WriteMemory(ushort address, byte value) => Writes++;
+    }
+
     private static (byte A, byte F) ExpectedAlu(int operation, int a, int operand, int inputCarry)
     {
         int carry = operation is 1 or 3 ? inputCarry : 0;

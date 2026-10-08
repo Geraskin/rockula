@@ -10,22 +10,36 @@ public sealed partial class Z80Cpu
         IncrementRefresh();
 
         int group = opcode >> 6;
-        int operation = (opcode >> 3) & 7;
         int target = opcode & 7;
         byte value = ReadRegister(target);
         if (target == 6) Internal(Registers.HL, 1);
 
+        (byte result, byte flags) = CalculateBitOperation(opcode, value, Registers.F,
+            target == 6 ? (byte)(Registers.WZ >> 8) : value);
         if (group == 1)
         {
-            int tested = value & (1 << operation);
-            int xy = target == 6 ? Registers.WZ >> 8 : value;
-            Registers.F = (byte)((Registers.F & 1) | (xy & 0x28) | 0x10
-                | (tested == 0 ? 0x44 : 0) | (operation == 7 ? tested : 0));
+            Registers.F = flags;
             return;
         }
 
+        WriteRegister(target, result);
+        // A failed write can retain memory effects, but does not commit these flags.
+        if (group == 0) Registers.F = flags;
+    }
+
+    private static (byte Result, byte Flags) CalculateBitOperation(byte opcode, byte value, byte incomingFlags, byte xy)
+    {
+        int group = opcode >> 6;
+        int operation = (opcode >> 3) & 7;
+        if (group == 1)
+        {
+            int tested = value & (1 << operation);
+            return (value, (byte)((incomingFlags & 1) | (xy & 0x28) | 0x10
+                | (tested == 0 ? 0x44 : 0) | (operation == 7 ? tested : 0)));
+        }
+
         byte result;
-        byte flags = Registers.F;
+        byte flags = incomingFlags;
         if (group == 0)
         {
             int incomingCarry = flags & 1;
@@ -50,8 +64,6 @@ public sealed partial class Z80Cpu
             result = (byte)(group == 2 ? value & ~mask : value | mask);
         }
 
-        WriteRegister(target, result);
-        // A failed write can retain memory effects, but does not commit these flags.
-        if (group == 0) Registers.F = flags;
+        return (result, flags);
     }
 }

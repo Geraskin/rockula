@@ -70,9 +70,10 @@ public sealed partial class Z80Cpu
             IncrementRefresh();
             if (!IsHalted)
             {
-                Execute(opcode, address);
+                byte terminal = opcode is 0xDD or 0xFD ? ExecuteIndex(opcode, address) : opcode;
+                if (opcode is not (0xDD or 0xFD)) Execute(opcode, address);
                 // Retire only after successful execution. Repeated EI renews inhibition.
-                IsEiDelayActive = opcode == 0xFB;
+                IsEiDelayActive = terminal == 0xFB;
             }
             return checked(_bus.TStates - start);
         }
@@ -96,7 +97,7 @@ public sealed partial class Z80Cpu
         IsNmiPending = false;
     }
 
-    private void Execute(byte opcode, ushort address)
+    private void Execute(byte opcode, ushort address, byte? indexPrefix = null)
     {
         if (TryExecuteAlu(opcode) || TryExecuteControl(opcode, address) || TryExecuteMisc(opcode, address))
         {
@@ -194,7 +195,9 @@ public sealed partial class Z80Cpu
                 }
                 return;
             default:
-                throw new UnsupportedOpcodeException(address, opcode);
+                throw indexPrefix.HasValue
+                    ? new UnsupportedOpcodeException(address, indexPrefix.Value, opcode)
+                    : new UnsupportedOpcodeException(address, opcode);
         }
     }
 
