@@ -5,14 +5,15 @@ document was read, every fact is verified, or its contents may be redistributed.
 ## Read during bootstrap
 | Source | Used for | Limit |
 | --- | --- | --- |
-| [Zilog Z80 UM0080](https://www.zilog.com/docs/z80/um0080.pdf) | Register/instruction/bus timing source and CPU work-order scope | 001a read register/refresh, fetch/memory waveforms and selected load entries; arithmetic and undocumented behavior remain future work |
+| [Zilog Z80 UM0080](https://www.zilog.com/docs/z80/um0080.pdf) | Register/instruction/bus timing source and CPU work-order scope | 001a reads register/refresh and loads; 001b reads byte ALU, jumps/calls/returns and PUSH/POP tables; pin-level timing remains unverified |
+| [Young / Jan, Undocumented Z80 v0.90](https://datasheets.chipdb.org/Zilog/Z80/z80-documented-0.90.pdf) | Reference-backed NMOS byte ALU X/Y, CP operand flags and PF/VF distinction (§2.2, §8.4) | No source/vector import or local silicon measurement; broader quirks remain deferred |
 | [48K technical reference](https://worldofspectrum.org/faq/reference/48kreference.htm) | Hardware map and 48K timing reference | Community hardware reference; select/verify issue-specific phase details in M3/M6 |
 | [Avalonia getting started](https://docs.avaloniaui.net/docs/get-started) | Desktop host choice | Platform deployment still requires actual host validation |
 | [Avalonia 12 breaking changes](https://docs.avaloniaui.net/docs/avalonia12-breaking-changes) | Version-aware API assumptions | Not a substitute for compiling the selected packages |
 | [Avalonia 12.1.3 release](https://github.com/AvaloniaUI/Avalonia/releases/tag/12.1.3) | Stable version selection | Pin is deliberate, not an automatic latest-version policy |
 | [Avalonia 12.1.3 license](https://github.com/AvaloniaUI/Avalonia/blob/12.1.3/licence.md) | Direct dependency license | Native/transitive release notices need a separate audit |
 | [.NET SDK selection](https://learn.microsoft.com/en-us/dotnet/core/versions/selection) | global.json and target-framework policy | Runtime/build validation remains distinct |
-| [xUnit v2 getting started](https://xunit.net/docs/getting-started/v2/getting-started) | VSTest-based test project and pinned baseline | Tests here cover ROM input only |
+| [xUnit v2 getting started](https://xunit.net/docs/getting-started/v2/getting-started) | VSTest-based test project and pinned baseline | Selected tests now cover ROM input and declared CPU slices |
 
 The timing reference prevents rounding guest frames to exactly 50 Hz; the Avalonia version guide
 prevents assuming v11 APIs/binding behavior apply unchanged to v12. External process skills from

@@ -1,5 +1,5 @@
 # Work order 001: Z80 state, timed bus and first instruction slices
-Status: first slice implemented and verified in [work order 001a](001a-load-instructions.md); broader M1 is incomplete. Suggested branch: `feat/z80-foundation`.
+Status: loads in [001a](001a-load-instructions.md), byte ALU/control/stack in [001b](001b-alu-control-flow.md); broader M1 is incomplete. Suggested branch: `feat/z80-foundation`.
 Base/merge target: current `main`. Read AGENTS and architecture/timing before coding.
 
 ## Outcome
@@ -10,7 +10,7 @@ unsupported-opcode error for anything not implemented yet.
 ## Sources and decisions
 Read Zilog UM0080's register, instruction-fetch/memory/I/O timing, flags and instruction sections.
 Choose NMOS behavior explicitly. The manual is insufficient for undocumented flags, WZ and
-prefix quirks; keep those deferred with references until M2.
+prefix quirks; 001b uses a scoped X/Y reference while WZ and deeper prefix quirks remain deferred until M2.
 Decide phase convention and visibility sampling points in a short ADR before designing the bus.
 Use independent expected results, not another port of our own ALU.
 

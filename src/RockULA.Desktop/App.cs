@@ -41,7 +41,7 @@ public sealed class App : Application
                         },
                         new TextBlock
                         {
-                            Text = "Initial CPU load slice. Spectrum devices and game loading are planned.",
+                            Text = "CPU loads, byte ALU, branches and stack. Spectrum devices and game loading are planned.",
                             TextWrapping = TextWrapping.Wrap
                         },
                         new TextBlock

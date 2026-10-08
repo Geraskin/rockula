@@ -1,8 +1,6 @@
 # Tests
-`RockULA.Core.Tests` verifies 16 KiB ROM input plus the first Z80 NOP/load slice.
-`Cpu/` contains independently specified encoding/state/bus vectors and a synthetic program.
-Add arithmetic, control flow and machine tests in later slices. Add Formats/compatibility
-projects only when those implementations land.
-Run `dotnet test RockULA.slnx -c Release`.
-External data belongs in ignored local-data with reviewed provenance, not in this directory.
-See [verification strategy](../docs/testing.md).
+`RockULA.Core.Tests` verifies 16 KiB ROM input and declared Z80 CPU slices.
+Independent expectations cover byte ALU flags, conditions, stack, memory/idle traces and waits.
+See [testing](../docs/testing.md) and [opcode coverage](../docs/architecture/z80-coverage.md).
+Add Formats/compatibility projects only when their implementation and reviewed fixtures arrive.
+No firmware, game or external corpus is required by ordinary tests.

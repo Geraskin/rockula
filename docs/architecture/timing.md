@@ -1,7 +1,8 @@
 # Timing and bus contract
-Accepted design. The first CPU load slice implements nominal memory-transaction ordering.
+Accepted design. The CPU slices implement nominal memory-transaction ordering and sequenced internal durations.
 ULA execution and Spectrum contention are not implemented. [ADR 0004](../decisions/0004-initial-cpu-bus.md)
-defines the current logical transfer offsets and the electrical timing/refresh limits.
+defines logical transfers; [ADR 0005](../decisions/0005-internal-cycle-scope.md) defines
+internal logical address labels. Neither establishes electrical address/refresh accuracy.
 
 ## One clock
 Maintain an unsigned 64-bit absolute T-state count for a machine and a derived frame phase.

@@ -1,7 +1,10 @@
 # Verification strategy
-Tests now cover ROM validation, register views/reset, all 84 supported NOP/LD encodings,
-explicitly unsupported bytes, bus ordering/waits and a self-authored guest program.
-CI builds on Windows/Linux, runs xUnit tests and headless status/demo, and checks formatting
+Tests cover ROM validation, registers/reset, all 222 supported base encodings, exhaustive
+byte ALU inputs, all flag values for conditional flow, stack/PC wrap, memory/idle traces,
+waits, explicit unsupported bytes, partial-transfer faults and self-authored guest programs.
+The ALU pair tests execute 1,048,576 vectors inside eight xUnit cases; INC/DEC executes
+8,192 value/carry vectors inside sixteen cases. These are not separate discovered tests.
+CI builds on Windows/Linux, runs xUnit tests and both headless demos, and checks formatting
 on Linux. It does not launch the desktop UI or prove Spectrum/game compatibility.
 
 ## Test layers

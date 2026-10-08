@@ -6,3 +6,4 @@ proposed and superseded choices; new evidence may revise them without hiding the
 - [0002: First model and incremental accuracy](0002-48k-first.md)
 - [0003: Original implementation and user-supplied assets](0003-original-core-and-assets.md)
 - [0004: Initial CPU transaction timing and fault/reset behavior](0004-initial-cpu-bus.md)
+- [0005: Nominal internal cycles and logical address limits](0005-internal-cycle-scope.md)

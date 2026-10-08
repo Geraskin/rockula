@@ -1,5 +1,5 @@
 # Work order 001b: byte ALU, branches and stack
-Status: tests first; implementation/CI pending. Continues PR #6 on `feat/z80-foundation`,
+Status: implemented and verified on Windows/Linux; awaiting PR review/merge. Continues PR #6 on `feat/z80-foundation`,
 merge target `main`. Starting commit: `4c6a6d42a23bfbaf6c214a69bb22a7a2d71486c7`.
 
 ## Scope
@@ -38,3 +38,26 @@ Restore, Release build, tests on Windows/Linux, Linux format verification, both 
 Exhaustive input-pair vectors are looped within tests, not reported as individual xUnit cases.
 Record red and green CI evidence. Full NMOS hidden state, WZ/Q, refresh, silicon bus pins,
 external exercisers, GUI, Spectrum devices and games remain unverified.
+
+## Red-phase evidence
+Commit `5fc38cbface26a9b2008b8afc91e4d66a9b5ce62`,
+[CI run 37722630715](https://github.com/Geraskin/rockula/actions/runs/37722630715):
+builds passed on Windows/Linux; 139 new tests failed on unsupported execution, 127 existing
+tests passed, zero skipped (266 total). The bounded guest-program regression is added with
+implementation, bringing the intended suite to 267 cases.
+
+## Green-phase evidence
+Implementation commit `1cbfa8eacc2e6f20d72083ee041df2498bbf3b2a`,
+[CI run 37722833543](https://github.com/Geraskin/rockula/actions/runs/37722833543):
+- Windows/Linux restore and Release build passed, zero warnings/errors.
+- All 267 tests passed on each platform, zero failed/skipped.
+- 1,048,576 ALU operand/carry vectors and 8,192 INC/DEC value/carry vectors ran inside tests.
+- Conditional JP/CALL/RET/JR checked all 256 flag bytes; nominal bus traces checked both paths.
+- Both headless demos passed: original 51 T-states; loop PC=0012 A=06 F=00 BC=0000
+  SP=8000 R=17 RAM[4000]=06, 23 instructions, 234 T-states.
+- Linux formatting verification passed. Local literal encoding list contains 222 unique entries;
+  relative documentation links and project XML/global JSON checks passed.
+
+No local .NET SDK was available; execution evidence comes from GitHub Actions logs.
+No interactive desktop test, silicon measurement, external exerciser or Spectrum/game check
+was performed. Internal pin addresses and remaining instruction families are still deferred.
