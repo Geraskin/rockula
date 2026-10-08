@@ -1,5 +1,5 @@
 # Work order 001a: first executable Z80 load slice
-Status: in progress. Branch: `feat/z80-foundation`; base/merge target: main at
+Status: implemented and build/test verified; awaiting PR review/merge. Branch: `feat/z80-foundation`; base/merge target: main at
 `9806310c19552c4e845d564ebf765a51e82f851f`.
 
 ## Outcome and scope
@@ -58,3 +58,18 @@ Spectrum contention, electrical pin-edge accuracy, complete NMOS quirks or game 
 tests failed as intended. Linux recorded 119 failed, 8 passed, 0 skipped out of 127.
 Failures include unsupported execution scaffolds and uncoupled pair/byte views.
 No test expectations are weakened for the implementation.
+
+## Green-phase evidence
+[Final code CI run](https://github.com/Geraskin/rockula/actions/runs/37721185463), code commit
+`b662ceb5ee646bcc2d093ab2bc62193a906cb5ff`:
+- Release solution builds passed on Windows and Linux.
+- All 127 tests passed on each platform, with zero failures/skips.
+- Headless --about and --demo succeeded on both platforms.
+- Demo output: PC=000C A=2A B=03 HL=4000 R=06 RAM[4000]=2A RAM[4001]=2A T=51.
+- Linux formatting verification passed.
+- XML/JSON/YAML, relative links and explicit 84-opcode coverage checks passed.
+- Formatter fixes were whitespace only; test expressions and expectations stayed identical.
+
+[PR #6](https://github.com/Geraskin/rockula/pull/6) contains this slice.
+M1 remains incomplete. Interactive desktop, full NMOS behavior, Spectrum hardware and games
+are not verified. No external firmware/test corpus was downloaded or committed.
