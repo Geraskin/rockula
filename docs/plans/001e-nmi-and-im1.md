@@ -1,5 +1,5 @@
 # Work order 001e: NMI and IM 1 acceptance
-Status: implementation awaiting green CI.
+Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
 Branch `feat/z80-foundation`, PR #6 to `main`.
 Starting commit: `00c199da4c2ba6beca677912c0be6454baab09c9`.
 
@@ -59,6 +59,21 @@ restore, prefixes, Spectrum device/pin timing, external oracle or game claim.
 ## Red evidence
 Test commit `0a9db2c62def1843be6bc2d9287808599e32ab5e`,
 [CI 37726052839](https://github.com/Geraskin/rockula/actions/runs/37726052839):
-Linux build passed with zero warnings/errors; 30 new cases failed, 311 passed
+Windows/Linux builds passed with zero warnings/errors; 30 new cases failed, 311 passed
 (all 310 previous cases plus the new DI-blocking case), zero skipped, 341 total.
 Actual failing states/timings and unsupported acknowledgement were inspected before code.
+
+## Green evidence
+Implementation commit `b8a7527b8b893c8f866fd8a734fe0f823573bb93`,
+[CI 37726262519](https://github.com/Geraskin/rockula/actions/runs/37726262519):
+- Windows/Linux restore and Release builds passed, zero warnings/errors.
+- All 341 tests passed on each platform, zero failures/skips.
+- New response sweeps cover 1,536 flag/IFF vectors (1,024 NMI and 512 IM 1).
+- Edge/level semantics, NMI priority/nesting, EI/DI acceptance, HALT resume PC,
+  callback arrivals, live acknowledgement/waits and partial faults passed.
+- Both CLI demos stayed at their expected 51/234 T-states; Linux formatting passed.
+- Local XML/JSON and documentation links checked; 248 unique base encodings remain.
+
+No local SDK, silicon trace, external corpus or interactive UI validation was used.
+Acceptance remains the declared logical boundary contract; IM 0/2, ED instructions,
+RETN/RETI, complete state restore and Spectrum interrupt timing are still unimplemented.

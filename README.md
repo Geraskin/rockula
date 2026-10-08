@@ -6,7 +6,8 @@ and an Avalonia desktop interface. Original project code is licensed under MIT.
 
 **Status: executable CPU foundation, still incomplete.** The core implements registers,
 timed logical memory operations and 248 base encodings: loads, byte/word ALU, INC/DEC,
-branches, stack, DAA, accumulator rotations, exchanges, HALT and DI/EI delay state. NMI and IM 1 interrupt responses can exit HALT at logical instruction boundaries.
+branches, stack, DAA, accumulator rotations, exchanges, HALT and DI/EI delay state.
+NMI and IM 1 interrupt responses can exit HALT at logical instruction boundaries.
 Two self-authored headless demos run without firmware.
 SCF/CCF, ports, IM 0/2, RETN/RETI, prefixes and Spectrum devices remain unimplemented;
 this version cannot run games.
