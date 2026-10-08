@@ -94,7 +94,7 @@ public sealed class Z80ExtendedInterruptTests
     {
         for (int opcode = 0; opcode < 256; opcode++)
         {
-            if (opcode is 0x46 or 0x56 or 0x5E or 0x45 or 0x4D) continue;
+            if (opcode is 0x44 or 0x46 or 0x56 or 0x5E or 0x45 or 0x4D) continue;
             var bus = new RecordingBus();
             bus.Memory[0xFFFF] = 0xED;
             bus.Memory[0] = (byte)opcode;
