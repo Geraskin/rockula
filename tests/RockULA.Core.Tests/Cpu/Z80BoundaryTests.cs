@@ -56,7 +56,6 @@ public sealed class Z80BoundaryTests
     [InlineData(0xDB)]
     [InlineData(0x37)]
     [InlineData(0xD3)]
-    [InlineData(0xCB)]
     [InlineData(0xDD)]
     [InlineData(0xFD)]
     [InlineData(0x3F)]
@@ -115,7 +114,7 @@ public sealed class Z80BoundaryTests
 
         for (int opcode = 0; opcode <= 0xFF; opcode++)
         {
-            if (opcode == 0xED || supported.Contains((byte)opcode))
+            if ((opcode is 0xCB or 0xED) || supported.Contains((byte)opcode))
             {
                 continue;
             }

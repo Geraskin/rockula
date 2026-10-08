@@ -105,6 +105,8 @@ public sealed class Z80Registers
     public ushort IX { get; set; }
     public ushort IY { get; set; }
     public ushort PC { get; set; }
+    /// <summary>Internal MEMPTR at logical instruction boundaries; see ADR 0009.</summary>
+    public ushort WZ { get; set; }
     public ushort SP { get; set; } = 0xFFFF;
     public bool Iff1 { get; set; }
     public bool Iff2 { get; set; }
