@@ -1,7 +1,8 @@
 # Verification strategy
-The bootstrap tests validate ROM size and copy ownership. They do not execute Z80 instructions.
-CI builds on Windows/Linux, runs xUnit tests, checks formatting on Linux and runs headless status.
-CI does not launch the desktop UI or prove compatibility.
+Tests now cover ROM validation, register views/reset, all 84 supported NOP/LD encodings,
+explicitly unsupported bytes, bus ordering/waits and a self-authored guest program.
+CI builds on Windows/Linux, runs xUnit tests and headless status/demo, and checks formatting
+on Linux. It does not launch the desktop UI or prove Spectrum/game compatibility.
 
 ## Test layers
 | Layer | Evidence | Required limits |

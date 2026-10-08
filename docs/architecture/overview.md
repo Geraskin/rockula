@@ -1,5 +1,6 @@
 # Architecture
-Status: accepted design; only the bootstrap components listed in README are implemented.
+Status: accepted design; implemented scope is the initial CPU load slice listed in README and
+[opcode coverage](z80-coverage.md). Spectrum devices, formats and complete save states are future work.
 
 ## Product and scope
 RockULA! is both a playable emulator and an inspectable model of a historical computer.

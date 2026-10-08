@@ -3,23 +3,210 @@ namespace RockULA.Core.Cpu;
 /// <summary>Instruction-boundary stepping for the explicitly supported base-opcode slice.</summary>
 public sealed class Z80Cpu
 {
+    private readonly IZ80Bus _bus;
+
     public Z80Cpu(IZ80Bus bus, Z80Registers? registers = null)
     {
         ArgumentNullException.ThrowIfNull(bus);
+        _bus = bus;
         Registers = registers ?? new Z80Registers();
     }
 
     public Z80Registers Registers { get; }
 
-    public bool IsFaulted => false;
+    public bool IsFaulted { get; private set; }
 
+    /// <summary>Runs one supported instruction and returns actual cycles, including bus waits.</summary>
     public ulong Step()
     {
-        throw new NotImplementedException("Red-phase CPU scaffold.");
+        if (IsFaulted)
+        {
+            throw new InvalidOperationException("The CPU is faulted. Reset it explicitly before further execution.");
+        }
+
+        ulong start = _bus.TStates;
+        ushort address = Registers.PC;
+        try
+        {
+            byte opcode = _bus.Execute(
+                new Z80BusCycle(Z80BusCycleKind.OpcodeFetch, address, 4, 3));
+            Registers.PC = Increment(address);
+            Registers.R = (byte)((Registers.R & 0x80) | ((Registers.R + 1) & 0x7F));
+            Execute(opcode, address);
+            return checked(_bus.TStates - start);
+        }
+        catch
+        {
+            // A failure may already have advanced time or transferred data. Never skip it.
+            IsFaulted = true;
+            throw;
+        }
     }
 
+    /// <summary>Resets CPU state only; the owner must coordinate any whole-machine reset.</summary>
     public void Reset()
     {
-        throw new NotImplementedException("Red-phase CPU reset scaffold.");
+        Registers.Reset();
+        IsFaulted = false;
     }
+
+    private void Execute(byte opcode, ushort address)
+    {
+        if (opcode >= 0x40 && opcode <= 0x7F && opcode != 0x76)
+        {
+            byte value = ReadRegister(opcode & 7);
+            WriteRegister((opcode >> 3) & 7, value);
+            return;
+        }
+
+        if ((opcode & 0xC7) == 0x06)
+        {
+            byte value = ReadNextByte();
+            WriteRegister((opcode >> 3) & 7, value);
+            return;
+        }
+
+        if ((opcode & 0xCF) == 0x01)
+        {
+            ushort value = ReadNextWord();
+            switch ((opcode >> 4) & 3)
+            {
+                case 0:
+                    Registers.BC = value;
+                    break;
+                case 1:
+                    Registers.DE = value;
+                    break;
+                case 2:
+                    Registers.HL = value;
+                    break;
+                case 3:
+                    Registers.SP = value;
+                    break;
+            }
+
+            return;
+        }
+
+        switch (opcode)
+        {
+            case 0x00:
+                return;
+            case 0x02:
+                WriteMemory(Registers.BC, Registers.A);
+                return;
+            case 0x12:
+                WriteMemory(Registers.DE, Registers.A);
+                return;
+            case 0x0A:
+                Registers.A = ReadMemory(Registers.BC);
+                return;
+            case 0x1A:
+                Registers.A = ReadMemory(Registers.DE);
+                return;
+            case 0x22:
+                WriteWord(ReadNextWord(), Registers.HL);
+                return;
+            case 0x2A:
+                Registers.HL = ReadWord(ReadNextWord());
+                return;
+            case 0x32:
+                WriteMemory(ReadNextWord(), Registers.A);
+                return;
+            case 0x3A:
+                Registers.A = ReadMemory(ReadNextWord());
+                return;
+            default:
+                throw new UnsupportedOpcodeException(address, opcode);
+        }
+    }
+
+    private byte ReadRegister(int code)
+    {
+        return code switch
+        {
+            0 => Registers.B,
+            1 => Registers.C,
+            2 => Registers.D,
+            3 => Registers.E,
+            4 => Registers.H,
+            5 => Registers.L,
+            6 => ReadMemory(Registers.HL),
+            7 => Registers.A,
+            _ => throw new ArgumentOutOfRangeException(nameof(code))
+        };
+    }
+
+    private void WriteRegister(int code, byte value)
+    {
+        switch (code)
+        {
+            case 0:
+                Registers.B = value;
+                break;
+            case 1:
+                Registers.C = value;
+                break;
+            case 2:
+                Registers.D = value;
+                break;
+            case 3:
+                Registers.E = value;
+                break;
+            case 4:
+                Registers.H = value;
+                break;
+            case 5:
+                Registers.L = value;
+                break;
+            case 6:
+                WriteMemory(Registers.HL, value);
+                break;
+            case 7:
+                Registers.A = value;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(code));
+        }
+    }
+
+    private byte ReadNextByte()
+    {
+        ushort address = Registers.PC;
+        byte value = ReadMemory(address);
+        Registers.PC = Increment(address);
+        return value;
+    }
+
+    private ushort ReadNextWord()
+    {
+        byte low = ReadNextByte();
+        byte high = ReadNextByte();
+        return (ushort)(low | (high << 8));
+    }
+
+    private ushort ReadWord(ushort address)
+    {
+        byte low = ReadMemory(address);
+        byte high = ReadMemory(Increment(address));
+        return (ushort)(low | (high << 8));
+    }
+
+    private void WriteWord(ushort address, ushort value)
+    {
+        WriteMemory(address, unchecked((byte)value));
+        WriteMemory(Increment(address), (byte)(value >> 8));
+    }
+
+    private byte ReadMemory(ushort address)
+    {
+        return _bus.Execute(new Z80BusCycle(Z80BusCycleKind.MemoryRead, address, 3, 3));
+    }
+
+    private void WriteMemory(ushort address, byte value)
+    {
+        _bus.Execute(new Z80BusCycle(Z80BusCycleKind.MemoryWrite, address, 3, 3, value));
+    }
+
+    private static ushort Increment(ushort address) => unchecked((ushort)(address + 1));
 }

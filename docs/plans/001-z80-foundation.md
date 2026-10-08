@@ -1,5 +1,5 @@
 # Work order 001: Z80 state, timed bus and first instruction slices
-Status: ready to implement after M0 build validation. Suggested branch: `feat/z80-foundation`.
+Status: first slice underway in [work order 001a](001a-load-instructions.md); broader M1 is incomplete. Suggested branch: `feat/z80-foundation`.
 Base/merge target: current `main`. Read AGENTS and architecture/timing before coding.
 
 ## Outcome

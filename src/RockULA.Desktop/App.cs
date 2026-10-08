@@ -41,12 +41,12 @@ public sealed class App : Application
                         },
                         new TextBlock
                         {
-                            Text = "Foundation only. The emulator core and game loading are planned.",
+                            Text = "Initial CPU load slice. Spectrum devices and game loading are planned.",
                             TextWrapping = TextWrapping.Wrap
                         },
                         new TextBlock
                         {
-                            Text = "Next: Z80 state, a timed bus and independently tested instructions.",
+                            Text = "The headless --demo command runs a small Z80 program without firmware.",
                             TextWrapping = TextWrapping.Wrap
                         }
                     }

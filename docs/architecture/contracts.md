@@ -1,6 +1,7 @@
 # State and host contracts
-Proposed contracts, to be implemented milestone by milestone. The only existing domain type is
-`RockULA.Core.RomImage`; none of the names below imply an implemented API.
+Whole-machine contracts remain proposals. Existing Core APIs include RomImage, Z80Registers,
+Z80Cpu, IZ80Bus and Z80Bus for the initial load slice; see [opcode coverage](z80-coverage.md).
+Complete CPU/device state capture, interrupts and machine restore are not yet implemented.
 
 ## Execution and ownership
 A machine has reset, instruction stepping, bounded running, input submission, inspection and

@@ -5,7 +5,7 @@ document was read, every fact is verified, or its contents may be redistributed.
 ## Read during bootstrap
 | Source | Used for | Limit |
 | --- | --- | --- |
-| [Zilog Z80 UM0080](https://www.zilog.com/docs/z80/um0080.pdf) | Register/instruction/bus timing source and CPU work-order scope | Bootstrap inspected the manual structure; instruction-specific sections remain required in M1 |
+| [Zilog Z80 UM0080](https://www.zilog.com/docs/z80/um0080.pdf) | Register/instruction/bus timing source and CPU work-order scope | 001a read register/refresh, fetch/memory waveforms and selected load entries; arithmetic and undocumented behavior remain future work |
 | [48K technical reference](https://worldofspectrum.org/faq/reference/48kreference.htm) | Hardware map and 48K timing reference | Community hardware reference; select/verify issue-specific phase details in M3/M6 |
 | [Avalonia getting started](https://docs.avaloniaui.net/docs/get-started) | Desktop host choice | Platform deployment still requires actual host validation |
 | [Avalonia 12 breaking changes](https://docs.avaloniaui.net/docs/avalonia12-breaking-changes) | Version-aware API assumptions | Not a substitute for compiling the selected packages |

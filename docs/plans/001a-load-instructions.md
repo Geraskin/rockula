@@ -8,6 +8,7 @@ unprefixed LD encodings: register/register or (HL), immediate 8/16-bit, BC/DE ac
 indirection, absolute A/HL transfers. LD SP,HL is deferred with internal-cycle details.
 This is 84 of 256 base-byte encodings, not a complete CPU or Spectrum machine.
 No arithmetic, branches, stack, HALT, interrupts, prefixes, ULA or game loading in this slice.
+The desktop welcome text is updated for truthful status only; no new GUI functionality.
 
 ## Source
 Zilog UM008011-0816: register/refresh discussion (printed pp. 2–3), fetch/memory timing
@@ -50,3 +51,10 @@ Release build, xUnit tests, formatting and headless --demo. Demo final state:
 PC=000C, A=2A, B=03, HL=4000, R=06, RAM[4000]=RAM[4001]=2A, 51 T-states.
 Only nominal transaction ordering and declared logical transfer offsets are verified; no
 Spectrum contention, electrical pin-edge accuracy, complete NMOS quirks or game compatibility.
+
+## Red-phase evidence
+[CI run](https://github.com/Geraskin/rockula/actions/runs/37720384562), commit
+`499ebcc4b9ece424049d668efd7e21e760188007`: build succeeded on Windows/Linux;
+tests failed as intended. Linux recorded 119 failed, 8 passed, 0 skipped out of 127.
+Failures include unsupported execution scaffolds and uncoupled pair/byte views.
+No test expectations are weakened for the implementation.

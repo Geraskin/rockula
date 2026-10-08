@@ -4,9 +4,10 @@
 A ZX Spectrum emulator written from scratch in C#, with a deterministic hardware core
 and an Avalonia desktop interface. Original project code is licensed under MIT.
 
-**Status: foundation only.** The solution contains a desktop welcome window, a headless
-status command, ROM-input validation and its tests. CPU execution, video, sound, snapshots
-and tape loading are planned; this version cannot run games.
+**Status: first executable CPU slice.** The core implements a Z80 register file, timed logical
+memory transactions, NOP and 83 unprefixed LD encodings. A self-authored headless demo runs
+without firmware. Arithmetic, control flow, interrupts, prefixes and Spectrum devices are
+not implemented; this version cannot run games.
 
 ## Direction
 Start with a documented Spectrum 48K hardware profile and get snapshot-based games playable.
@@ -23,21 +24,25 @@ dotnet restore RockULA.slnx
 dotnet build RockULA.slnx -c Release --no-restore
 dotnet test RockULA.slnx -c Release --no-build
 dotnet run --project src/RockULA.Headless -- --about
+dotnet run --project src/RockULA.Headless -- --demo
 dotnet run --project src/RockULA.Desktop
 ```
 
 The last command opens the welcome shell. Linux needs Avalonia's native display dependencies;
 the dev container supports builds and headless tests, not a configured GUI session.
-No ROM or game file is needed for the current shell or tests.
+No ROM or game file is needed for the current shell, demo or tests.
+The demo executes six instructions and finishes at PC=000C, A=2A, B=03, HL=4000,
+R=06, RAM[4000]=RAM[4001]=2A and 51 T-states. This is synthetic flat memory,
+not an implemented Spectrum address map.
 
 ## Repository map
 | Path | Responsibility |
 | --- | --- |
-| `src/RockULA.Core/` | Platform-independent hardware model; currently ROM validation only |
+| `src/RockULA.Core/` | Initial Z80 load slice, timed bus and ROM validation |
 | `src/RockULA.Formats/` | Reserved project for bounded snapshot/tape parsers |
-| `src/RockULA.Headless/` | CLI and, later, deterministic execution/trace tooling |
+| `src/RockULA.Headless/` | CLI status and a bounded synthetic CPU demo |
 | `src/RockULA.Desktop/` | Avalonia desktop host; currently a welcome window |
-| `tests/` | Unit, format and future compatibility verification |
+| `tests/` | CPU/load/bus regressions and ROM validation; other suites are future work |
 | `docs/architecture/` | Hardware boundaries, timing, host and file contracts |
 | `docs/plans/` | Roadmap and executable milestone work orders |
 | `docs/decisions/` | Architecture decision records |
@@ -46,7 +51,8 @@ No ROM or game file is needed for the current shell or tests.
 | `.devcontainer/` | .NET development environment without host credentials or privileged mounts |
 
 Start with [AGENTS.md](AGENTS.md), [architecture](docs/architecture/overview.md),
-[roadmap](docs/plans/roadmap.md) and [the next work order](docs/plans/001-z80-foundation.md).
+[roadmap](docs/plans/roadmap.md), [opcode coverage](docs/architecture/z80-coverage.md) and
+[the current slice](docs/plans/001a-load-instructions.md).
 [Development](docs/development.md) explains commands and branching.
 [Testing](docs/testing.md) describes what each check can prove.
 
