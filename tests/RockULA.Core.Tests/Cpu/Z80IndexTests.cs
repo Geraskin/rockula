@@ -174,7 +174,7 @@ public sealed class Z80IndexTests
         Assert.Equal((ushort)0x5678, r.HL);
         Assert.Equal(12UL, cpu.Step());
         Assert.Equal((byte)0xFF, r.A);
-        Assert.Equal((byte)7, r.R);
+        Assert.Equal((byte)8, r.R);
     }
 
     [Fact]
@@ -450,6 +450,153 @@ public sealed class Z80IndexTests
             _ => 0
         };
         protected override void WriteMemory(ushort address, byte value) => Writes++;
+    }
+
+    [Theory]
+    [InlineData(0xDD, 0x26)]
+    [InlineData(0xDD, 0x2E)]
+    [InlineData(0xFD, 0x26)]
+    [InlineData(0xFD, 0x2E)]
+    public void ImmediateHalvesPreserveOtherHalfAndFlags(int prefix, int opcode)
+    {
+        for (int value = 0; value < 256; value++)
+        {
+            var bus = new RecordingBus();
+            bus.Memory[0] = (byte)prefix;
+            bus.Memory[1] = (byte)opcode;
+            bus.Memory[2] = (byte)value;
+            var r = new Z80Registers { IX = 0x1234, IY = 0x1234, HL = 0xABCD, F = (byte)value };
+            Assert.Equal(11UL, new Z80Cpu(bus, r).Step());
+            ushort expected = opcode == 0x26 ? (ushort)(value * 256 + 0x34) : (ushort)(0x1200 + value);
+            Assert.Equal(prefix == 0xDD ? expected : (ushort)0x1234, r.IX);
+            Assert.Equal(prefix == 0xFD ? expected : (ushort)0x1234, r.IY);
+            Assert.Equal((ushort)0xABCD, r.HL);
+            Assert.Equal((byte)value, r.F);
+        }
+    }
+
+    [Theory]
+    [InlineData(0xDD)]
+    [InlineData(0xFD)]
+    public void WordIncrementsCheckWholeRangeAndAddChecksCarryBoundaries(int prefix)
+    {
+        var bus = new RecordingBus();
+        bus.Memory[0] = (byte)prefix;
+        var cpu = new Z80Cpu(bus);
+        for (int value = 0; value < 65536; value++)
+        {
+            foreach (int opcode in new[] { 0x23, 0x2B })
+            {
+                cpu.Reset();
+                bus.Memory[1] = (byte)opcode;
+                Set((ushort)value);
+                cpu.Registers.F = (byte)(value % 256);
+                bus.Events.Clear();
+                Assert.Equal(10UL, cpu.Step());
+                Assert.Equal(unchecked((ushort)(value + (opcode == 0x23 ? 1 : -1))), Get());
+                Assert.Equal((byte)(value % 256), cpu.Registers.F);
+            }
+            foreach (int operand in new[] { 0, 1, 0x0FFF, 0x1000, 0x7FFF, 0x8000, 0xFFFF })
+            {
+                cpu.Reset();
+                bus.Memory[1] = 0x09;
+                Set((ushort)value);
+                cpu.Registers.BC = (ushort)operand;
+                cpu.Registers.F = (byte)(value % 256);
+                bus.Events.Clear();
+                int sum = value + operand;
+                int result = sum % 65536;
+                int f = (value & 0xC4) | ((result / 256) & 0x28);
+                if (value % 4096 + operand % 4096 > 4095) f |= 16;
+                if (sum > 65535) f |= 1;
+                Assert.Equal(15UL, cpu.Step());
+                Assert.Equal((ushort)result, Get());
+                Assert.Equal((byte)f, cpu.Registers.F);
+                Assert.Equal(unchecked((ushort)(value + 1)), cpu.Registers.WZ);
+            }
+        }
+        void Set(ushort value)
+        {
+            if (prefix == 0xDD) cpu.Registers.IX = value;
+            else cpu.Registers.IY = value;
+        }
+        ushort Get() => prefix == 0xDD ? cpu.Registers.IX : cpu.Registers.IY;
+    }
+
+    [Theory]
+    [InlineData(0xDD)]
+    [InlineData(0xFD)]
+    public void IndexedCbAllDisplacementsAddressAndRefreshWrap(int prefix)
+    {
+        for (int d = 0; d < 256; d++)
+        {
+            var bus = new RecordingBus();
+            ushort address = unchecked((ushort)(0xFF80 + (d < 128 ? d : d - 256)));
+            bus.Memory[0xFFFF] = (byte)prefix;
+            bus.Memory[0] = 0xCB;
+            bus.Memory[1] = (byte)d;
+            bus.Memory[2] = 0x40;
+            // Do not overwrite the prefix stream when the effective address overlaps it.
+            byte value = bus.Memory[address];
+            var r = new Z80Registers { PC = 0xFFFF, IX = 0xFF80, IY = 0xFF80, R = 0xFF, F = 1 };
+            Assert.Equal(20UL, new Z80Cpu(bus, r).Step());
+            Assert.Equal(address, r.WZ);
+            Assert.Equal((ushort)3, r.PC);
+            Assert.Equal((byte)0x81, r.R);
+            Assert.Equal((byte)(0x11 | ((address / 256) & 0x28) | (value % 2 == 0 ? 0x44 : 0)), r.F);
+        }
+    }
+
+    [Theory]
+    [InlineData(0xDD)]
+    [InlineData(0xFD)]
+    public void EdCancellationPreservesIndexAndRejectsEveryUnsupportedPayload(int prefix)
+    {
+        var supported = new HashSet<int> { 0x44, 0x45, 0x46, 0x4D, 0x56, 0x5E };
+        for (int payload = 0; payload < 256; payload++)
+        {
+            var bus = new RecordingBus();
+            bus.Memory[0] = (byte)prefix;
+            bus.Memory[1] = 0xED;
+            bus.Memory[2] = (byte)payload;
+            var r = new Z80Registers { IX = 0x1234, IY = 0x5678, A = 1, SP = 0x8000 };
+            var cpu = new Z80Cpu(bus, r);
+            if (supported.Contains(payload))
+            {
+                Assert.Equal(payload is 0x45 or 0x4D ? 18UL : 12UL, cpu.Step());
+            }
+            else
+            {
+                var error = Assert.Throws<UnsupportedOpcodeException>(() => cpu.Step());
+                Assert.Equal((byte?)0xED, error.Prefix);
+                Assert.Equal((byte)payload, error.Opcode);
+                Assert.Equal((ushort)0, error.Address);
+                Assert.Equal(12UL, bus.TStates);
+            }
+            Assert.Equal((ushort)0x1234, r.IX);
+            Assert.Equal((ushort)0x5678, r.IY);
+            Assert.Equal((byte)3, r.R);
+        }
+    }
+
+    [Fact]
+    public void SyntheticIndexProgramUsesBothIndexesAndOrdinaryCopyDestination()
+    {
+        var bus = new RecordingBus();
+        byte[] program = [0xDD, 0x21, 0x00, 0x40, 0xFD, 0x21, 0x01, 0x40,
+            0xDD, 0x36, 0, 0x80, 0xDD, 0xCB, 0, 0x00, 0xFD, 0x70, 0,
+            0xFD, 0x7E, 0, 0x76];
+        program.CopyTo(bus.Memory, 0);
+        var cpu = new Z80Cpu(bus);
+        for (int step = 0; step < 7; step++) cpu.Step();
+        Assert.True(cpu.IsHalted);
+        Assert.Equal((byte)1, cpu.Registers.A);
+        Assert.Equal((byte)1, cpu.Registers.B);
+        Assert.Equal((byte)1, bus.Memory[0x4000]);
+        Assert.Equal((byte)1, bus.Memory[0x4001]);
+        Assert.Equal((byte)13, cpu.Registers.R);
+        Assert.Equal((ushort)23, cpu.Registers.PC);
+        Assert.Equal(112UL, bus.TStates);
     }
 
     private static (byte A, byte F) ExpectedAlu(int operation, int a, int operand, int inputCarry)

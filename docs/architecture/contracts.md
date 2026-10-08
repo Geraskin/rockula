@@ -67,3 +67,6 @@ Compatibility results identify build, model/profile, ROM and input hashes, execu
 input schedule, enabled fast-load policy, expected outputs and actual outputs.
 Same initial complete state plus same events and budget must yield equal guest results across
 headless and desktop-host execution.
+
+Index prefix retirement, indexed memory sequencing and the explicit prefix-chain execution
+bound follow [ADR 0010](../decisions/0010-index-prefix-sequencing.md).

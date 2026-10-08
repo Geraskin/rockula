@@ -1,5 +1,5 @@
 # Implemented Z80 coverage
-Status: 248 standalone base encodings plus all 256 CB payloads, six ED commands and NMI/IM 1/2 responses; full M1/M2 are incomplete.
+Status: 248 standalone base encodings plus all 256 CB payloads, DD/FD and all 512 indexed CB payloads, six ED commands and NMI/IM 1/2 responses; full M1/M2 are incomplete.
 Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
 
 | Encoding | Meaning | Count | Nominal T-states |
@@ -40,8 +40,8 @@ ED is recognized as a prefix for six additional two-byte instructions:
 
 ED is not counted as a standalone base instruction. Other 250 ED payloads fault
 with original address, prefix and payload after two fetches (8 T). Unsupported
-aliases and ED NOPs are not silently accepted. Six other base bytes still fault
-after one fetch: SCF/CCF (37/3F), IN/OUT (DB/D3), DD/FD.
+aliases and ED NOPs are not silently accepted. Four other base bytes still fault
+after one fetch: SCF/CCF (37/3F), IN/OUT (DB/D3).
 
 CB is a prefix for **256 additional encodings**, all implemented:
 
@@ -61,7 +61,41 @@ operand; (HL) BIT X/Y use the previous WZ high byte. CB preserves WZ.
 [001h](../plans/001h-cb-bit-operations.md) documents sources and the older BIT
 reference discrepancy. [ADR 0009](../decisions/0009-cb-and-wz-state.md) defines
 WZ reset, writers, preservation and fault boundaries for the current instruction set.
-DDCB/FDCB, repeated/ignored index prefixes and Q remain unsupported.
+
+## Index prefixes
+DD/FD are recognized prefixes, not standalone base instructions. Of the 248 base
+encodings, 85 substitute IX/IY and 163 ignore the prefix (adding four T per prefix).
+The last DD/FD selects the index. ED cancels substitution; EX DE,HL and EXX use
+ordinary registers. H/L become index halves except when used with indexed memory.
+No HL/index swapping is performed.
+
+| Indexed operation | Nominal T-states, one index prefix |
+| --- | --- |
+| Register-half load, ALU, INC/DEC | 8 |
+| Register-half immediate | 11 |
+| Indexed memory LD/ALU; LD (index+d),n | 19 |
+| Indexed memory INC/DEC | 23 |
+| LD index,nn; POP index | 14 |
+| LD index,(nn); LD (nn),index | 20 |
+| INC/DEC index; LD SP,index | 10 |
+| ADD index,BC/DE/index/SP; PUSH index | 15 |
+| EX (SP),index | 23 |
+| JP (index) | 8 |
+| DDCB/FDCB BIT, all 128 aliases per page | 20 |
+| DDCB/FDCB rotates/shifts/RES/SET | 23 |
+
+All **256 DDCB and 256 FDCB payloads** are supported. Modifying operations copy
+computed results to the encoded ordinary B/C/D/E/H/L/A register unless target 6;
+ROM writes can be ignored without suppressing that copy. BIT aliases never write
+memory/registers and use the effective address high byte for X/Y. Displacements
+are signed and wrap at 16 bits; indexed effective addresses update WZ. The final
+indexed-CB payload is a memory read, not M1, so it does not increment R.
+Prefix chains retire atomically, including EI/HALT. A stream of 65,536 consecutive
+DD/FD bytes faults explicitly to bound Step; this is an emulator policy, not
+silicon behavior. Diagnostics identify the first instruction address and last
+index prefix (ED diagnostics retain ED). See [001i](../plans/001i-index-prefixes.md)
+and [ADR 0010](../decisions/0010-index-prefix-sequencing.md) for source, timing,
+logical internal address labels and partial-effect boundaries. Q remains absent.
 
 The register file includes main/alternate byte/pair views, IX/IY, PC/SP, I/R, IFFs and IM.
 DI/EI update IFFs and track inhibition through the following instruction. Interrupt

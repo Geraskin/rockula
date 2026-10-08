@@ -11,3 +11,4 @@ proposed and superseded choices; new evidence may revise them without hiding the
 - [0007: Interrupt boundary inputs](0007-interrupt-boundary-inputs.md)
 - [0008: ED interrupt control and IM2](0008-ed-interrupt-control.md)
 - [0009: CB operations and instruction-boundary WZ](0009-cb-and-wz-state.md)
+- [0010: Index prefix sequencing and bounded stepping](0010-index-prefix-sequencing.md)

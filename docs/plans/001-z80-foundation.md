@@ -54,3 +54,6 @@ Do not claim CPU completeness, game compatibility or cycle-accurate ULA behavior
 ## Not in this order
 Avalonia changes, real ROM boot, snapshot/tape loaders, ULA rendering, host audio, contention
 tables, 128K, browser packaging, generic dependency injection/device plugins.
+
+The current index-prefix slice is [001i](001i-index-prefixes.md); it extends the
+existing base and CB work without declaring M1/M2 complete.

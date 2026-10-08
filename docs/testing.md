@@ -69,5 +69,15 @@ All 256 payloads, memory read/idle/write order, prefix/refresh wrap, waits/live
 sampling, EI/NMI atomicity, faults and a synthetic CB program are covered.
 WZ checks cover existing load/arithmetic/control/return/interrupt writers,
 non-writer preservation and reset, history observed by BIT and partial failures.
-The old first-byte CB rejection was replaced by positive page coverage; DD/FD
-and the six other unsupported base-byte cases remain explicit negative tests.
+The old first-byte CB rejection was replaced by positive page coverage; the four other unsupported base-byte cases remain explicit negative tests.
+
+001i adds 393,216 indexed CB value/carry/flag vectors across 512 cases,
+6,291,456 indexed ALU operand-pair/carry vectors across 48 cases and 786,432
+indexed byte INC/DEC value/flag vectors across 12 cases. Two word sweeps add
+262,144 INC/DEC and 917,504 ADD carry-boundary vectors. Literal tables cover all
+85 affected and all 163 ignored base encodings for each prefix. Additional cases
+cover all displacements, index halves, stack/address/refresh wrap, WZ, ED
+cancellation, mixed/repeated prefixes, EI/HALT/NMI boundaries, waits/live reads,
+partial-cycle failures, ignored ROM writes, the prefix-only execution bound and
+a self-authored index program. The ignored-prefix comparison supplements literal
+expectations and existing base suites; it is not an external independent oracle.

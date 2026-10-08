@@ -80,3 +80,6 @@ to a verified firmware hash, and must fall back to physical pulse playback.
 
 Passing ZEX-style flag exercisers does not prove bus timing, and a screenshot alone does not
 prove the machine model. Each gate needs independent expected results.
+
+Index prefix retirement, indexed memory sequencing and the explicit prefix-chain execution
+bound follow [ADR 0010](../decisions/0010-index-prefix-sequencing.md).
