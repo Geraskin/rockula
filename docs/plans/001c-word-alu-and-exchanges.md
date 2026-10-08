@@ -1,5 +1,6 @@
 # Work order 001c: word arithmetic, decimal adjustment and exchanges
-Status: tests first; implementation/CI pending. Branch `feat/z80-foundation`, PR #6 to `main`.
+Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
+Branch `feat/z80-foundation`, PR #6 to `main`.
 Starting commit: `2fb334fcbad9b2525e869b96c38ec22ba2bdcfd4`.
 
 ## Scope
@@ -43,3 +44,25 @@ No new claim of electrical internal address accuracy, refresh or Spectrum conten
 Windows/Linux restore, Release build/test, both existing headless demos, Linux formatter.
 Update coverage, current work-order links and PR. Record actual red/green CI counts and runs.
 No full CPU, save-state, GUI, ROM boot or game compatibility claim.
+
+## Red evidence
+Test commit `1385e6eac92e710bdaae65836a1d3272d9f2943b`,
+[CI 37723771073](https://github.com/Geraskin/rockula/actions/runs/37723771073):
+Windows/Linux builds succeeded; 29 new tests failed on unsupported operations while all
+267 previous tests passed, zero skipped (296 total). No expectations were weakened.
+
+## Green evidence
+Implementation commit `c14e7d460b1e49b02ae59b5b23d7bcb97ec42abd`,
+[CI 37723924396](https://github.com/Geraskin/rockula/actions/runs/37723924396):
+- Restore and Release builds passed on Windows/Linux, zero warnings/errors.
+- All 296 tests passed on both platforms, zero failures/skips.
+- 524,288 word INC/DEC vectors; 1,441,792 ADD HL sweep vectors, plus 256 flag-preservation cases.
+- Each accumulator rotation, CPL and DAA checked all 65,536 A/F inputs.
+- ADC/SBC followed by DAA checked 40,000 valid decimal input/carry cases.
+- Both existing headless demos passed with unchanged 51 and 234 T-state results.
+- Linux formatting passed; local XML/JSON/YAML, relative links, explicit opcode set and coverage
+  totals checked: 245 unique base encodings, eleven still unsupported.
+
+No local .NET SDK is available; execution results are from GitHub Actions logs. No desktop UI
+change or interactive check was performed. Reference-backed nominal sequencing is not complete
+NMOS hidden-state or electrical-pin accuracy. External exercisers and games remain unverified.

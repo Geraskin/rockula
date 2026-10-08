@@ -1,5 +1,5 @@
 # Implemented Z80 coverage
-Status: loads, byte ALU, control flow and stack; full M1/M2 are incomplete.
+Status: 245 base encodings including word ALU, DAA, accumulator rotations and exchanges; full M1/M2 are incomplete.
 Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
 
 | Encoding | Meaning | Count | Nominal T-states |
@@ -19,10 +19,18 @@ Tests use literal encoding/state/timing expectations and fail explicitly for oth
 | C9; C0,C8,D0,D8,E0,E8,F0,F8 | RET / RET cc | 9 | 10; 5/11 |
 | C7,CF,D7,DF,E7,EF,F7,FF | RST | 8 | 11 |
 | C5,D5,E5,F5; C1,D1,E1,F1 | PUSH / POP BC,DE,HL,AF | 8 | 11 / 10 |
+| 03,13,23,33; 0B,1B,2B,3B | INC/DEC BC,DE,HL,SP | 8 | 6 |
+| 09,19,29,39 | ADD HL,BC/DE/HL/SP | 4 | 11 |
+| F9 | LD SP,HL | 1 | 6 |
+| 07,0F,17,1F | RLCA/RRCA/RLA/RRA | 4 | 4 |
+| 27,2F | DAA/CPL | 2 | 4 |
+| 08,EB,D9 | EX AF,AF'; EX DE,HL; EXX | 3 | 4 |
+| E3 | EX (SP),HL | 1 | 19 |
 
-Total: **222 base-byte encodings**.
-The remaining 34 base bytes throw UnsupportedOpcodeException after the initial fetch.
-This includes HALT (76), LD SP,HL (F9), 16-bit arithmetic, DAA, rotates, exchanges, ports, interrupt control and all four prefix bytes.
+Total: **245 base-byte encodings**.
+The remaining 11 base bytes throw UnsupportedOpcodeException after the initial fetch.
+They are SCF/CCF (37/3F), HALT (76), IN/OUT immediate (DB/D3), DI/EI (F3/FB),
+and CB/DD/ED/FD prefix bytes. SCF/CCF await Q/history semantics; prefix and interrupt work is incomplete.
 A rejected prefix reports that encountered byte and original PC; it does not decode its payload.
 
 The register file includes main/alternate byte/pair views, IX/IY, PC/SP, I/R, IFFs and IM.
@@ -34,7 +42,12 @@ This is not a complete save-state API: WZ, HALT, EI-delay and future device stat
 Ordered memory operations, nominal instruction totals, little-endian/wrapped transfers,
 PC/R behavior, arithmetic/logic flags, condition paths, stack order and wait-shifted sampling are tested.
 Byte ALU flags follow Zilog and the scoped Young/Jan v0.90 reference in [001b](../plans/001b-alu-control-flow.md).
-CP copies X/Y from its operand; arithmetic uses overflow, logic uses even parity; INC/DEC preserve C.
+CP copies X/Y from its operand; arithmetic uses overflow, logic uses even parity; byte INC/DEC preserve C.
+Word ADD HL preserves S/Z/PV, ignores input C, sets H/C and high-byte X/Y; word INC/DEC preserves all F.
+Accumulator rotations preserve S/Z/PV and copy result X/Y. DAA is checked for all A/F inputs
+against the scoped nibble tables and valid decimal arithmetic in [001c](../plans/001c-word-alu-and-exchanges.md).
+EX (SP),HL reads low/high then writes high/low; SP is unchanged at instruction boundaries.
+The netlist reference establishes nominal order only, not full NMOS internal state or pins.
 Current logical offsets are specified in [ADR 0004](../decisions/0004-initial-cpu-bus.md).
 Internal durations use logical address labels as documented in [ADR 0005](../decisions/0005-internal-cycle-scope.md).
 Electrical pin edges, internal address-pin accuracy, refresh, dynamic WAIT polling, wider NMOS quirks,

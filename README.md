@@ -5,10 +5,10 @@ A ZX Spectrum emulator written from scratch in C#, with a deterministic hardware
 and an Avalonia desktop interface. Original project code is licensed under MIT.
 
 **Status: executable CPU foundation, still incomplete.** The core implements registers,
-timed logical memory operations and 222 unprefixed encodings: loads, byte ALU, INC/DEC,
-branches, calls/returns and stack. Two self-authored headless demos run without firmware.
-16-bit arithmetic, DAA, rotates, exchanges, ports, HALT, interrupts, prefixes and Spectrum
-devices remain unimplemented; this version cannot run games.
+timed logical memory operations and 245 base encodings: loads, byte/word ALU, INC/DEC,
+branches, stack, DAA, accumulator rotations and exchanges. Two self-authored headless demos run without firmware.
+SCF/CCF, ports, HALT, interrupts, prefixes and Spectrum devices remain unimplemented;
+this version cannot run games.
 
 ## Direction
 Start with a documented Spectrum 48K hardware profile and get snapshot-based games playable.
@@ -43,7 +43,7 @@ Both demos have execution bounds and return failure if their expected result is 
 ## Repository map
 | Path | Responsibility |
 | --- | --- |
-| `src/RockULA.Core/` | Z80 loads, byte ALU, control flow and stack, timed bus and ROM validation |
+| `src/RockULA.Core/` | Z80 instruction slices, timed bus and ROM validation |
 | `src/RockULA.Formats/` | Reserved project for bounded snapshot/tape parsers |
 | `src/RockULA.Headless/` | CLI status and bounded synthetic CPU demos |
 | `src/RockULA.Desktop/` | Avalonia desktop host; currently a welcome window |
@@ -57,7 +57,7 @@ Both demos have execution bounds and return failure if their expected result is 
 
 Start with [AGENTS.md](AGENTS.md), [architecture](docs/architecture/overview.md),
 [roadmap](docs/plans/roadmap.md), [opcode coverage](docs/architecture/z80-coverage.md) and
-[the current slice](docs/plans/001b-alu-control-flow.md).
+[the current slice](docs/plans/001c-word-alu-and-exchanges.md).
 [Development](docs/development.md) explains commands and branching.
 [Testing](docs/testing.md) describes what each check can prove.
 

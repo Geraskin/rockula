@@ -1,5 +1,5 @@
 # Architecture
-Status: accepted design; implemented scope is the CPU load/byte ALU/control/stack slices listed in README and
+Status: accepted design; implemented scope is the declared CPU instruction slices listed in README and
 [opcode coverage](z80-coverage.md). Spectrum devices, formats and complete save states are future work.
 
 ## Product and scope
