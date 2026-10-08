@@ -22,6 +22,20 @@ public sealed partial class Z80Cpu
     /// <summary>EI inhibition through the following instruction; not an interrupt request API.</summary>
     public bool IsEiDelayActive { get; private set; }
 
+    public bool IsInterruptLineAsserted { get; private set; }
+
+    public bool IsNmiLineAsserted { get; private set; }
+
+    public bool IsNmiPending { get; private set; }
+
+    public void SetInterruptLine(bool asserted)
+    {
+    }
+
+    public void SetNmiLine(bool asserted)
+    {
+    }
+
     /// <summary>Runs one instruction or halted fetch and returns actual cycles, including bus waits.</summary>
     public ulong Step()
     {

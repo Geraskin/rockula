@@ -57,6 +57,8 @@ public abstract class Z80Bus : IZ80Bus
 
     protected abstract void WriteMemory(ushort address, byte value);
 
+    protected virtual byte AcknowledgeInterrupt(ushort address) => 0xFF;
+
     protected virtual int GetWaitStates(Z80BusCycle cycle) => 0;
 
     /// <summary>Advance devices over the interval before the transaction is sampled.</summary>

@@ -107,6 +107,22 @@ public sealed class Z80BusTests
         }, bus.Events.ToArray());
     }
 
+    [Fact]
+    public void UnwiredAcknowledgeReturnsHighDataWithoutAccessingMemory()
+    {
+        var bus = new NoMemoryBus();
+        Assert.Equal((byte)0xFF, bus.Execute(
+            new Z80BusCycle(Z80BusCycleKind.InterruptAcknowledge, 0x1234, 6, 5)));
+        Assert.Equal(6UL, bus.TStates);
+    }
+
+    private sealed class NoMemoryBus : Z80Bus
+    {
+        protected override byte ReadMemory(ushort address) => throw new InvalidOperationException("Unexpected read");
+
+        protected override void WriteMemory(ushort address, byte value) => throw new InvalidOperationException("Unexpected write");
+    }
+
     [Theory]
     [InlineData(0, 0, 0)]
     [InlineData(0, -1, 0)]

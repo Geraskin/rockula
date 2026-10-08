@@ -13,6 +13,10 @@ internal sealed class RecordingBus : Z80Bus
 
     public Func<Z80BusCycle, int>? WaitStates { get; set; }
 
+    public Func<ushort, byte>? InterruptAcknowledging { get; set; }
+
+    public int InterruptAcknowledgements { get; private set; }
+
     public Action<ulong>? Advancing { get; set; }
 
     protected override byte ReadMemory(ushort address) => Memory[address];
@@ -20,6 +24,12 @@ internal sealed class RecordingBus : Z80Bus
     protected override void WriteMemory(ushort address, byte value)
     {
         Memory[address] = value;
+    }
+
+    protected override byte AcknowledgeInterrupt(ushort address)
+    {
+        InterruptAcknowledgements++;
+        return InterruptAcknowledging?.Invoke(address) ?? 0xFF;
     }
 
     protected override int GetWaitStates(Z80BusCycle cycle) => WaitStates?.Invoke(cycle) ?? 0;

@@ -5,5 +5,6 @@ public enum Z80BusCycleKind
     OpcodeFetch,
     MemoryRead,
     MemoryWrite,
-    Internal
+    Internal,
+    InterruptAcknowledge
 }
