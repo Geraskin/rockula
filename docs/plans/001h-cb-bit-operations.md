@@ -1,5 +1,5 @@
 # Work order 001h: complete CB page and scoped WZ
-Status: implemented; Windows/Linux green verification pending.
+Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
 Branch feat/z80-foundation, PR #6 to main.
 
 ## Scope and sources
@@ -59,4 +59,22 @@ Windows/Linux builds passed with zero warnings/errors. Each platform reported
 WZ writers/reset produced the failures. Existing ordinary CB rejection was
 replaced by the exhaustive positive page matrix; other unsupported bytes remain tested.
 Implementation commit `1ba0e7a0d1d9b1d0abe38a5c1d77d603e3a3cc3a` follows those failures.
-Local SDK unavailable; green execution evidence is pending, not inferred from code review.
+Local SDK unavailable; execution evidence comes from inspected CI logs.
+
+## Green evidence
+Documentation/implementation head `f083470e723c00a69d94d702f0cabe093f8004dd`,
+[CI 37751975967](https://github.com/Geraskin/rockula/actions/runs/37751975967):
+- Windows/Linux restore and Release build passed with zero warnings/errors.
+- All 703 discovered tests passed on each platform; zero failures/skips.
+- 196,608 general CB vectors and 1,048,576 memory BIT WZ/operand/carry vectors passed.
+- WZ writers/preservation/reset/history/faults, all CB payloads, bus order, wrap,
+  waits/live sampling, EI/NMI atomicity and the 100-T synthetic CB program passed.
+- Both existing demos retained 51/234 T-states; Linux formatting passed.
+- Local Markdown links passed. No external corpus, local SDK or interactive UI run.
+This does not establish full CPU, indexed CB, Q, electrical timing, ROM boot or games.
+
+## Next integration path
+Implement DD/FD and indexed CB with signed displacement, H/L exceptions and ignored/
+repeated prefix rules. Then finish remaining ED/I/O and Q-dependent SCF/CCF behavior;
+attach the 48K memory/ULA/keyboard profile, obtain a user-supplied ROM BASIC boot,
+and add bounded 48K SNA loading and desktop input/video for the first playable checkpoint.
