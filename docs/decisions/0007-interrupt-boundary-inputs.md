@@ -1,5 +1,6 @@
 # ADR 0007: owner-supplied interrupt levels and NMI latch
 Status: accepted. Date: 2026-10-08.
+ED/IM2 scope is extended by [ADR 0008](0008-ed-interrupt-control.md).
 Supersedes ADR 0006's Reset-only HALT exit limit for the responses implemented here.
 
 ## Context

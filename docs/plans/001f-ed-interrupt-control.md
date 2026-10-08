@@ -1,5 +1,5 @@
 # Work order 001f: ED interrupt control and IM 2
-Status: implementation awaiting green CI.
+Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
 Branch feat/z80-foundation, PR #6 to main.
 
 ## Scope and sources
@@ -47,3 +47,19 @@ Windows/Linux builds passed with zero warnings/errors; 18 new tests failed,
 339 existing applicable tests passed, zero skipped, 357 total. The obsolete ED
 first-byte rejection and unsupported-IM2 case were replaced by stronger positive
 and all-payload negative coverage. No failing expectations were weakened.
+
+## Green evidence
+Implementation commit `c9d6c2174eaaac5bdd6795365de599239ebbc5b7`,
+[CI 37746571314](https://github.com/Geraskin/rockula/actions/runs/37746571314):
+- Windows/Linux restore and Release build passed with zero warnings/errors.
+- All 357 tests passed on each platform, zero failures/skips.
+- 5,120 ED flag/IFF cases inside five tests; all 251 unsupported ED payloads checked.
+- Prefix/stack/vector wrapping, waits/live sampling, stack overlap, partial faults,
+  NMI+RETN and IM2+HALT+EI+RETI sequences passed.
+- Both demos stayed at 51/234 T-states; Linux formatting passed.
+- XML/JSON, documentation links and literal coverage checked: 248 standalone
+  encodings plus five ED instructions. No external corpus or UI check was performed.
+
+No local .NET SDK was available; execution evidence is from inspected CI logs.
+This does not establish full ED support, IM0 acceptance, electrical daisy-chain or
+Spectrum/game compatibility. Undocumented aliases remain explicitly unsupported.
