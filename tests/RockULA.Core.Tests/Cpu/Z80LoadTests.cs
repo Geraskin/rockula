@@ -80,14 +80,27 @@ public sealed class Z80LoadTests
         var bus = new RecordingBus();
         var registers = new Z80Registers
         {
-            B = 0x11, C = 0x22, D = 0x33, E = 0x44, H = 0x80, L = 0x20, A = 0x77, F = 0xD7
+            B = 0x11,
+            C = 0x22,
+            D = 0x33,
+            E = 0x44,
+            H = 0x80,
+            L = 0x20,
+            A = 0x77,
+            F = 0xD7
         };
         bus.Memory[0] = (byte)opcode;
         bus.Memory[0x8020] = 0x66;
         var initial = new Dictionary<string, byte>
         {
-            ["B"] = 0x11, ["C"] = 0x22, ["D"] = 0x33, ["E"] = 0x44,
-            ["H"] = 0x80, ["L"] = 0x20, ["(HL)"] = 0x66, ["A"] = 0x77
+            ["B"] = 0x11,
+            ["C"] = 0x22,
+            ["D"] = 0x33,
+            ["E"] = 0x44,
+            ["H"] = 0x80,
+            ["L"] = 0x20,
+            ["(HL)"] = 0x66,
+            ["A"] = 0x77
         };
         var expected = new Dictionary<string, byte>(initial);
         expected[destination] = initial[source];

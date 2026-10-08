@@ -15,10 +15,22 @@ public sealed class Z80BoundaryTests
         bus.Memory[0xFFFF] = 0;
         var registers = new Z80Registers
         {
-            PC = 0xFFFF, R = (byte)initialR, AF = 0xA5FF, BC = 0x1234,
-            DE = 0x5678, HL = 0x9ABC, IX = 0x1357, IY = 0x2468,
-            AlternateAF = 0x1111, AlternateBC = 0x2222, AlternateDE = 0x3333, AlternateHL = 0x4444,
-            I = 0x80, Iff1 = true, Iff2 = true, InterruptMode = 2
+            PC = 0xFFFF,
+            R = (byte)initialR,
+            AF = 0xA5FF,
+            BC = 0x1234,
+            DE = 0x5678,
+            HL = 0x9ABC,
+            IX = 0x1357,
+            IY = 0x2468,
+            AlternateAF = 0x1111,
+            AlternateBC = 0x2222,
+            AlternateDE = 0x3333,
+            AlternateHL = 0x4444,
+            I = 0x80,
+            Iff1 = true,
+            Iff2 = true,
+            InterruptMode = 2
         };
         var cpu = new Z80Cpu(bus, registers);
 

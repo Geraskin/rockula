@@ -52,10 +52,23 @@ public sealed class Z80RegisterTests
     {
         var registers = new Z80Registers
         {
-            AF = 0xFFFF, BC = 0xFFFF, DE = 0xFFFF, HL = 0xFFFF,
-            AlternateAF = 0xFFFF, AlternateBC = 0xFFFF, AlternateDE = 0xFFFF, AlternateHL = 0xFFFF,
-            IX = 0xFFFF, IY = 0xFFFF, PC = 0xFFFF, SP = 0x1234,
-            I = 0xFF, R = 0xFF, Iff1 = true, Iff2 = true, InterruptMode = 2
+            AF = 0xFFFF,
+            BC = 0xFFFF,
+            DE = 0xFFFF,
+            HL = 0xFFFF,
+            AlternateAF = 0xFFFF,
+            AlternateBC = 0xFFFF,
+            AlternateDE = 0xFFFF,
+            AlternateHL = 0xFFFF,
+            IX = 0xFFFF,
+            IY = 0xFFFF,
+            PC = 0xFFFF,
+            SP = 0x1234,
+            I = 0xFF,
+            R = 0xFF,
+            Iff1 = true,
+            Iff2 = true,
+            InterruptMode = 2
         };
 
         registers.Reset();
