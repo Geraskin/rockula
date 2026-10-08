@@ -1,5 +1,5 @@
 # Work order 001e: NMI and IM 1 acceptance
-Status: tests first; implementation pending.
+Status: implementation awaiting green CI.
 Branch `feat/z80-foundation`, PR #6 to `main`.
 Starting commit: `00c199da4c2ba6beca677912c0be6454baab09c9`.
 
@@ -55,3 +55,10 @@ Windows/Linux restore, Release build/test, both demos; Linux formatting. Inspect
 failing CI before implementation and green logs before recording a pass. No local
 SDK is available. No full interrupt suite, daisy chain, RETI notification, state
 restore, prefixes, Spectrum device/pin timing, external oracle or game claim.
+
+## Red evidence
+Test commit `0a9db2c62def1843be6bc2d9287808599e32ab5e`,
+[CI 37726052839](https://github.com/Geraskin/rockula/actions/runs/37726052839):
+Linux build passed with zero warnings/errors; 30 new cases failed, 311 passed
+(all 310 previous cases plus the new DI-blocking case), zero skipped, 341 total.
+Actual failing states/timings and unsupported acknowledgement were inspected before code.

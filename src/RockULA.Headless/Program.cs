@@ -3,7 +3,7 @@ using RockULA.Headless;
 if (args.Length == 0 || (args.Length == 1 && args[0] == "--about"))
 {
     Console.WriteLine("RockULA! - Rock Your Spectrum.");
-    Console.WriteLine("Status: 248 Z80 base encodings including HALT and DI/EI delay state. Spectrum devices are not implemented.");
+    Console.WriteLine("Status: 248 Z80 base encodings with HALT, DI/EI and NMI/IM 1 responses. Spectrum devices are not implemented.");
     return 0;
 }
 

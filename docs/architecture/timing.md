@@ -58,7 +58,10 @@ boundary; it is not an infinite-loop detector.
 
 Implemented HALT and DI/EI boundary behavior is defined in
 [ADR 0006](../decisions/0006-halt-and-ei-boundaries.md). Each halted Step performs a
-bounded logical M1 fetch; interrupt acceptance/exit and electrical refresh are deferred.
+bounded logical M1 fetch. NMI/IM 1 acceptance and HALT exit are defined by
+[ADR 0007](../decisions/0007-interrupt-boundary-inputs.md): one response per Step,
+11/13 nominal T-states, separate acknowledgement and high/low stack writes.
+Other interrupt modes, physical sampling apertures and electrical refresh are deferred.
 
 ## Tape and audio
 Tape advances its pulse cursor against absolute T-states; EAR reads observe the current signal.

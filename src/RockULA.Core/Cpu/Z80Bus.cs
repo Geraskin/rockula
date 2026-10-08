@@ -10,7 +10,8 @@ public abstract class Z80Bus : IZ80Bus
         if (cycle.Kind != Z80BusCycleKind.OpcodeFetch
             && cycle.Kind != Z80BusCycleKind.MemoryRead
             && cycle.Kind != Z80BusCycleKind.MemoryWrite
-            && cycle.Kind != Z80BusCycleKind.Internal)
+            && cycle.Kind != Z80BusCycleKind.Internal
+            && cycle.Kind != Z80BusCycleKind.InterruptAcknowledge)
         {
             throw new ArgumentOutOfRangeException(nameof(cycle), "Unknown bus transaction kind.");
         }
@@ -39,6 +40,9 @@ public abstract class Z80Bus : IZ80Bus
             case Z80BusCycleKind.MemoryRead:
                 value = ReadMemory(cycle.Address);
                 break;
+            case Z80BusCycleKind.InterruptAcknowledge:
+                value = AcknowledgeInterrupt(cycle.Address);
+                break;
             case Z80BusCycleKind.MemoryWrite:
                 WriteMemory(cycle.Address, cycle.Data);
                 value = cycle.Data;
@@ -57,6 +61,7 @@ public abstract class Z80Bus : IZ80Bus
 
     protected abstract void WriteMemory(ushort address, byte value);
 
+    /// <summary>Sample device data independently of memory; unwired data defaults to FF.</summary>
     protected virtual byte AcknowledgeInterrupt(ushort address) => 0xFF;
 
     protected virtual int GetWaitStates(Z80BusCycle cycle) => 0;

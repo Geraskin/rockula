@@ -9,6 +9,8 @@ against seven carry-boundary operands, plus HL+HL). Rotations, CPL and DAA each 
 65,536 A/F inputs. DAA additionally follows ADC/SBC for 40,000 decimal integer cases.
 001d adds 2,048 DI/EI input-flag/IFF vectors, delay sequences, repeated HALT reads,
 wait/live sampling and reset/fault control-state tests.
+001e adds NMI/IM 1 IFF/flag sweeps, priority, edge/level handling, HALT exit, EI/DI
+acceptance sequences, acknowledgement sampling/waits and partial-response faults.
 CI builds on Windows/Linux, runs xUnit tests and both headless demos, and checks formatting
 on Linux. It does not launch the desktop UI or prove Spectrum/game compatibility.
 

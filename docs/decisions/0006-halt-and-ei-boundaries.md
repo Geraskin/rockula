@@ -1,5 +1,6 @@
 # ADR 0006: HALT and EI at instruction boundaries
 Status: accepted. Date: 2026-10-08.
+HALT exit/input scope is extended by [ADR 0007](0007-interrupt-boundary-inputs.md).
 
 ## Context
 The synchronous CPU needs bounded HALT execution and EI inhibition state before

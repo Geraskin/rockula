@@ -19,24 +19,31 @@ public sealed partial class Z80Cpu
     /// <summary>HALT latch; Step remains bounded and performs one ignored M1 read.</summary>
     public bool IsHalted { get; private set; }
 
-    /// <summary>EI inhibition through the following instruction; not an interrupt request API.</summary>
+    /// <summary>EI inhibition through the following successfully completed instruction.</summary>
     public bool IsEiDelayActive { get; private set; }
 
+    /// <summary>Owner-supplied active INT level.</summary>
     public bool IsInterruptLineAsserted { get; private set; }
 
+    /// <summary>Owner-supplied active NMI level, used to detect assertion edges.</summary>
     public bool IsNmiLineAsserted { get; private set; }
 
+    /// <summary>Latched assertion edge; multiple edges before service coalesce.</summary>
     public bool IsNmiPending { get; private set; }
 
-    public void SetInterruptLine(bool asserted)
-    {
-    }
+    public void SetInterruptLine(bool asserted) => IsInterruptLineAsserted = asserted;
 
     public void SetNmiLine(bool asserted)
     {
+        if (asserted && !IsNmiLineAsserted)
+        {
+            IsNmiPending = true;
+        }
+
+        IsNmiLineAsserted = asserted;
     }
 
-    /// <summary>Runs one instruction or halted fetch and returns actual cycles, including bus waits.</summary>
+    /// <summary>Runs one interrupt response, instruction or halted fetch and returns actual cycles, including bus waits.</summary>
     public ulong Step()
     {
         if (IsFaulted)
@@ -48,6 +55,11 @@ public sealed partial class Z80Cpu
         ushort address = Registers.PC;
         try
         {
+            if (TryAcceptInterrupt())
+            {
+                return checked(_bus.TStates - start);
+            }
+
             byte opcode = _bus.Execute(
                 new Z80BusCycle(Z80BusCycleKind.OpcodeFetch, address, 4, 3));
             if (!IsHalted)
@@ -55,7 +67,7 @@ public sealed partial class Z80Cpu
                 Registers.PC = Increment(address);
             }
 
-            Registers.R = (byte)((Registers.R & 0x80) | ((Registers.R + 1) & 0x7F));
+            IncrementRefresh();
             if (!IsHalted)
             {
                 Execute(opcode, address);
@@ -79,6 +91,9 @@ public sealed partial class Z80Cpu
         IsFaulted = false;
         IsHalted = false;
         IsEiDelayActive = false;
+        IsInterruptLineAsserted = false;
+        IsNmiLineAsserted = false;
+        IsNmiPending = false;
     }
 
     private void Execute(byte opcode, ushort address)

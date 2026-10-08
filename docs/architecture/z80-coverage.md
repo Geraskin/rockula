@@ -1,5 +1,5 @@
 # Implemented Z80 coverage
-Status: 248 base encodings including HALT and DI/EI boundary state; full M1/M2 are incomplete.
+Status: 248 base encodings including HALT/DI/EI and boundary NMI/IM 1 responses; full M1/M2 are incomplete.
 Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
 
 | Encoding | Meaning | Count | Nominal T-states |
@@ -37,11 +37,20 @@ A rejected prefix reports that encountered byte and original PC; it does not dec
 
 The register file includes main/alternate byte/pair views, IX/IY, PC/SP, I/R, IFFs and IM.
 DI/EI update IFFs and track inhibition through the following instruction. Interrupt
-request acceptance and IM execution are not implemented. R updates are verified for the unprefixed slice only.
+request acceptance implements NMI and IM 1 only; ED mode-selection instructions
+remain unsupported. Eligible IM 0/2/invalid modes fault explicitly before bus effects. R updates are verified for the unprefixed slice only.
 Faulted CPUs cannot step again until Reset. Reset leaves bus time and memory untouched.
 HALT and EI-delay are inspectable CPU control state, cleared by Reset. A halted Step
-performs one logical M1 at the fixed next PC, ignores data and updates R; only Reset
-currently exits HALT. See [ADR 0006](../decisions/0006-halt-and-ei-boundaries.md).
+performs one logical M1 at the fixed next PC, ignores data and updates R. Reset or
+an accepted NMI/IM 1 response exits HALT. See [ADR 0006](../decisions/0006-halt-and-ei-boundaries.md)
+and [ADR 0007](../decisions/0007-interrupt-boundary-inputs.md).
+SetInterruptLine supplies a level; SetNmiLine latches an assertion edge. NMI has
+priority, ignores IFF1/EI inhibition and preserves IFF2. IM 1 checks IFF1/EI delay
+and clears both IFFs. Each response pushes unchanged PC and increments R once:
+NMI vectors to 0066 in 11 T-states, IM 1 to 0038 in 13. IM 1 acknowledges a device
+byte separately from memory and ignores it. Signals arriving during a transaction
+apply at next Step entry, an explicitly scoped boundary model.
+RETN/RETI, IM 0/2, daisy chain and electrical interrupt sampling remain deferred.
 This is not a complete save-state API: WZ, Q and future device state are absent.
 
 ## Timing evidence and limits

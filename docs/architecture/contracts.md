@@ -1,7 +1,7 @@
 # State and host contracts
 Whole-machine contracts remain proposals. Existing Core APIs include RomImage, Z80Registers,
 Z80Cpu, IZ80Bus and Z80Bus for the declared CPU instruction slices; see [opcode coverage](z80-coverage.md).
-Complete CPU/device state capture, interrupt acceptance and machine restore are not yet implemented.
+Complete CPU/device state capture, remaining interrupt modes and machine restore are not yet implemented.
 
 ## Execution and ownership
 A machine has reset, instruction stepping, bounded running, input submission, inspection and
@@ -23,7 +23,9 @@ must be explicit and tested.
 
 Implemented boundary inspection includes Z80Cpu.IsHalted and IsEiDelayActive.
 [ADR 0006](../decisions/0006-halt-and-ei-boundaries.md) specifies reset, PC and delay
-retirement; full state capture/restore remains future work.
+retirement. [ADR 0007](../decisions/0007-interrupt-boundary-inputs.md) adds owner-supplied
+INT/NMI levels, a pending NMI edge latch and NMI/IM 1 service. Full state capture/restore
+remains future work; these input levels/latches must be included when it is implemented.
 
 ## Machine state
 Include model/profile/version, all RAM banks, paging latches when implemented, absolute/frame
