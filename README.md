@@ -7,9 +7,10 @@ and an Avalonia desktop interface. Original project code is licensed under MIT.
 **Status: executable CPU foundation, still incomplete.** The core implements registers,
 timed logical memory operations and 248 base encodings: loads, byte/word ALU, INC/DEC,
 branches, stack, DAA, accumulator rotations, exchanges, HALT and DI/EI delay state.
+All 256 CB encodings implement rotates/shifts and BIT/RES/SET, including SLL and WZ-dependent memory BIT flags.
 Six ED commands negate A, select modes and return from interrupts. NMI and IM 1/2 responses can exit HALT at logical instruction boundaries.
 Two self-authored headless demos run without firmware.
-SCF/CCF, ports, IM 0 acceptance, remaining ED commands and CB/DD/FD prefixes and Spectrum devices remain unimplemented;
+SCF/CCF, ports, IM 0 acceptance, remaining ED commands and DD/FD and indexed-CB prefixes and Spectrum devices remain unimplemented;
 this version cannot run games.
 
 ## Direction
@@ -59,7 +60,7 @@ Both demos have execution bounds and return failure if their expected result is 
 
 Start with [AGENTS.md](AGENTS.md), [architecture](docs/architecture/overview.md),
 [roadmap](docs/plans/roadmap.md), [opcode coverage](docs/architecture/z80-coverage.md) and
-[the current slice](docs/plans/001g-ed-neg.md).
+[the current slice](docs/plans/001h-cb-bit-operations.md).
 [Development](docs/development.md) explains commands and branching.
 [Testing](docs/testing.md) describes what each check can prove.
 

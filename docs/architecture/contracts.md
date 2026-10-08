@@ -27,6 +27,9 @@ retirement. [ADR 0007](../decisions/0007-interrupt-boundary-inputs.md) adds owne
 INT/NMI levels, a pending NMI edge latch and NMI/IM 1 service.
 [ADR 0008](../decisions/0008-ed-interrupt-control.md) adds IM2 and five ED commands. Full state capture/restore
 remains future work; these input levels/latches must be included when it is implemented.
+[ADR 0009](../decisions/0009-cb-and-wz-state.md) adds mutable Z80Registers.WZ and
+ordinary CB execution. WZ has deterministic reset zero and must be included in future
+internal snapshots; external formats missing WZ will need an explicit initialization policy.
 
 ## Machine state
 Include model/profile/version, all RAM banks, paging latches when implemented, absolute/frame

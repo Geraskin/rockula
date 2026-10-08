@@ -1,5 +1,5 @@
 # Implemented Z80 coverage
-Status: 248 standalone base encodings plus six ED commands and NMI/IM 1/2 responses; full M1/M2 are incomplete.
+Status: 248 standalone base encodings plus all 256 CB payloads, six ED commands and NMI/IM 1/2 responses; full M1/M2 are incomplete.
 Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
 
 | Encoding | Meaning | Count | Nominal T-states |
@@ -40,15 +40,35 @@ ED is recognized as a prefix for six additional two-byte instructions:
 
 ED is not counted as a standalone base instruction. Other 250 ED payloads fault
 with original address, prefix and payload after two fetches (8 T). Unsupported
-aliases and ED NOPs are not silently accepted. Seven other base bytes still fault
-after one fetch: SCF/CCF (37/3F), IN/OUT (DB/D3), CB/DD/FD.
+aliases and ED NOPs are not silently accepted. Six other base bytes still fault
+after one fetch: SCF/CCF (37/3F), IN/OUT (DB/D3), DD/FD.
+
+CB is a prefix for **256 additional encodings**, all implemented:
+
+| Payload | Meaning | Nominal T-states |
+| --- | --- | --- |
+| 00–3F | RLC/RRC/RL/RR/SLA/SRA/SLL/SRL | 8 register; 15 (HL) |
+| 40–7F | BIT 0–7 | 8 register; 12 (HL) |
+| 80–BF | RES 0–7 | 8 register; 15 (HL) |
+| C0–FF | SET 0–7 | 8 register; 15 (HL) |
+
+All eight targets are covered: B/C/D/E/H/L/(HL)/A. Ordinary CB fetches increment
+R twice. Memory commands read then idle one T; modifying commands write afterward.
+BIT never writes. Rotates/shifts use result S/Z/X/Y/parity and shifted-out C,
+clearing H/N. RES/SET preserve all F. BIT sets H, clears N, preserves C,
+sets PV with Z and sets S only for a set bit 7. Register BIT X/Y use the unmasked
+operand; (HL) BIT X/Y use the previous WZ high byte. CB preserves WZ.
+[001h](../plans/001h-cb-bit-operations.md) documents sources and the older BIT
+reference discrepancy. [ADR 0009](../decisions/0009-cb-and-wz-state.md) defines
+WZ reset, writers, preservation and fault boundaries for the current instruction set.
+DDCB/FDCB, repeated/ignored index prefixes and Q remain unsupported.
 
 The register file includes main/alternate byte/pair views, IX/IY, PC/SP, I/R, IFFs and IM.
 DI/EI update IFFs and track inhibition through the following instruction. Interrupt
 request acceptance implements NMI and IM 1/2. Eligible IM 0/invalid modes fault
 explicitly before bus effects. ED mode commands preserve all F and both IFFs.
 RETN/RETI pop PC, restore IFF1 from IFF2 and preserve F; RETI also emits a logical
-completion notification. Prefix/payload are atomic with respect to interrupt polling. R increments once per opcode fetch, including both ED bytes.
+completion notification. ED and CB prefix/payload sequences are atomic with respect to interrupt polling. R increments once per opcode fetch, including both ED bytes.
 Faulted CPUs cannot step again until Reset. Reset leaves bus time and memory untouched.
 HALT and EI-delay are inspectable CPU control state, cleared by Reset. A halted Step
 performs one logical M1 at the fixed next PC, ignores data and updates R. Reset or
@@ -63,7 +83,7 @@ apply at next Step entry, an explicitly scoped boundary model.
 IM2 uses the full acknowledged byte with I, pushes PC then reads the target low/high
 with wrap (19 T). See [ADR 0008](../decisions/0008-ed-interrupt-control.md).
 IM0, daisy-chain pin decoding and electrical interrupt sampling remain deferred.
-This is not a complete save-state API: WZ, Q and future device state are absent.
+This is not a complete save-state API: WZ is implemented at logical boundaries; Q and future device state are absent.
 
 ## Timing evidence and limits
 Ordered memory operations, nominal instruction totals, little-endian/wrapped transfers,

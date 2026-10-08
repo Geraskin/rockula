@@ -1,5 +1,5 @@
 # Work order 001h: complete CB page and scoped WZ
-Status: independent expectations prepared before decoder changes.
+Status: implemented; Windows/Linux green verification pending.
 Branch feat/z80-foundation, PR #6 to main.
 
 ## Scope and sources
@@ -50,3 +50,13 @@ Publish tests and state-property scaffold first; inspect red CI before implement
 Windows/Linux restore, Release build/test, both demos and Linux format; local SDK unavailable.
 Update README, agent links, coverage, testing, roadmap, contracts and PR using actual logs.
 No full CPU, Q, index page, IM0, contention, Spectrum boot or game compatibility claims.
+
+## Red evidence
+Test/state scaffold commit `99bfb9ae4c7e8527d41bd350a890d5259d5dfe22`,
+[CI 37751121545](https://github.com/Geraskin/rockula/actions/runs/37751121545):
+Windows/Linux builds passed with zero warnings/errors. Each platform reported
+337 expected failures, 366 passes, zero skips, 703 total. CB rejection and missing
+WZ writers/reset produced the failures. Existing ordinary CB rejection was
+replaced by the exhaustive positive page matrix; other unsupported bytes remain tested.
+Implementation commit `1ba0e7a0d1d9b1d0abe38a5c1d77d603e3a3cc3a` follows those failures.
+Local SDK unavailable; green execution evidence is pending, not inferred from code review.

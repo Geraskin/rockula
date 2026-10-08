@@ -62,3 +62,12 @@ events to improve a benchmark. Benchmarks are planned, not present in this found
 
 001g adds all 65,536 NEG AF inputs, fetch/refresh wrap, waits and payload failure.
 Current unsupported ED coverage rejects all 250 remaining payloads, including aliases.
+
+001h checks 196,608 ordinary CB encoding/operand/flag vectors across 256 cases,
+plus 1,048,576 BIT (HL) operand/WZ-high/carry vectors across eight cases.
+All 256 payloads, memory read/idle/write order, prefix/refresh wrap, waits/live
+sampling, EI/NMI atomicity, faults and a synthetic CB program are covered.
+WZ checks cover existing load/arithmetic/control/return/interrupt writers,
+non-writer preservation and reset, history observed by BIT and partial failures.
+The old first-byte CB rejection was replaced by positive page coverage; DD/FD
+and the six other unsupported base-byte cases remain explicit negative tests.
