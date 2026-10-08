@@ -61,7 +61,9 @@ Implemented HALT and DI/EI boundary behavior is defined in
 bounded logical M1 fetch. NMI/IM 1 acceptance and HALT exit are defined by
 [ADR 0007](../decisions/0007-interrupt-boundary-inputs.md): one response per Step,
 11/13 nominal T-states, separate acknowledgement and high/low stack writes.
-Other interrupt modes, physical sampling apertures and electrical refresh are deferred.
+[ADR 0008](../decisions/0008-ed-interrupt-control.md) adds IM2 (19 T), mode selection
+and RETN/RETI, with a zero-time RETI completion notification.
+IM0 acceptance, physical sampling apertures and electrical refresh are deferred.
 
 ## Tape and audio
 Tape advances its pulse cursor against absolute T-states; EAR reads observe the current signal.

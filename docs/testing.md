@@ -11,6 +11,8 @@ against seven carry-boundary operands, plus HL+HL). Rotations, CPL and DAA each 
 wait/live sampling and reset/fault control-state tests.
 001e adds NMI/IM 1 IFF/flag sweeps, priority, edge/level handling, HALT exit, EI/DI
 acceptance sequences, acknowledgement sampling/waits and partial-response faults.
+001f adds 5,120 ED flag/IFF vectors, all 251 unsupported ED payloads, IM2 vector
+order/wrap/overlap/waits/faults and synthetic interrupt-return programs.
 CI builds on Windows/Linux, runs xUnit tests and both headless demos, and checks formatting
 on Linux. It does not launch the desktop UI or prove Spectrum/game compatibility.
 

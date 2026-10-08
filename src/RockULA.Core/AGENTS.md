@@ -6,6 +6,6 @@ contention can occur within instructions. Untimed inspection is a separate path.
 Capture every internal state element that changes future execution, with explicit reset policy.
 Use spans/arrays with documented ownership. Avoid per-instruction allocations and global state.
 Our CPU/ULA are original work; independently test semantic and bus effects before claiming support.
-Core currently implements RomImage validation and 248 base Z80 encodings, HALT/DI/EI state and boundary NMI/IM 1 responses.
-Read docs/architecture/z80-coverage.md and ADRs 0004–0007 for actual support and timing limits.
+Core currently implements RomImage validation and 248 base Z80 encodings, HALT/DI/EI state and five ED interrupt-control commands and NMI/IM 1/2 responses.
+Read docs/architecture/z80-coverage.md and ADRs 0004–0008 for actual support and timing limits.
 No Spectrum memory map, ULA or complete CPU/state-restore contract is implemented.

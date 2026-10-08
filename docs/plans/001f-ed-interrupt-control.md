@@ -1,5 +1,5 @@
 # Work order 001f: ED interrupt control and IM 2
-Status: tests first; implementation pending.
+Status: implementation awaiting green CI.
 Branch feat/z80-foundation, PR #6 to main.
 
 ## Scope and sources
@@ -39,3 +39,11 @@ replaced by positive IM2 coverage; other unsupported modes still fail before eff
 Publish red tests before implementation. Windows/Linux restore, Release build/test,
 both demos and Linux formatting; inspect actual logs. Local SDK unavailable.
 Update coverage, contracts, README, agent current links and PR with actual evidence.
+
+## Red evidence
+Test commit `82eb1161813d56aa65a598595d94a4a17b3734cb`,
+[CI 37746277638](https://github.com/Geraskin/rockula/actions/runs/37746277638):
+Windows/Linux builds passed with zero warnings/errors; 18 new tests failed,
+339 existing applicable tests passed, zero skipped, 357 total. The obsolete ED
+first-byte rejection and unsupported-IM2 case were replaced by stronger positive
+and all-payload negative coverage. No failing expectations were weakened.

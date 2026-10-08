@@ -1,5 +1,5 @@
 # Work order 001: Z80 state, timed bus and first instruction slices
-Status: loads in [001a](001a-load-instructions.md), byte ALU/control/stack in [001b](001b-alu-control-flow.md), word ALU/DAA/rotations/exchanges in [001c](001c-word-alu-and-exchanges.md); HALT and DI/EI state in [001d](001d-halt-and-interrupt-enable.md); NMI/IM 1 responses in [001e](001e-nmi-and-im1.md); broader M1 is incomplete. Suggested branch: `feat/z80-foundation`.
+Status: loads in [001a](001a-load-instructions.md), byte ALU/control/stack in [001b](001b-alu-control-flow.md), word ALU/DAA/rotations/exchanges in [001c](001c-word-alu-and-exchanges.md); HALT and DI/EI state in [001d](001d-halt-and-interrupt-enable.md); NMI/IM 1 responses in [001e](001e-nmi-and-im1.md); ED interrupt control/IM2 in [001f](001f-ed-interrupt-control.md); broader M1 is incomplete. Suggested branch: `feat/z80-foundation`.
 Base/merge target: current `main`. Read AGENTS and architecture/timing before coding.
 
 ## Outcome

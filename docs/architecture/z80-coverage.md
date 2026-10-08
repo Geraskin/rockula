@@ -1,5 +1,5 @@
 # Implemented Z80 coverage
-Status: 248 base encodings including HALT/DI/EI and boundary NMI/IM 1 responses; full M1/M2 are incomplete.
+Status: 248 base encodings including HALT/DI/EI and five ED commands and NMI/IM 1/2 responses; full M1/M2 are incomplete.
 Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
 
 | Encoding | Meaning | Count | Nominal T-states |
@@ -30,19 +30,28 @@ Tests use literal encoding/state/timing expectations and fail explicitly for oth
 | F3,FB | DI/EI | 2 | 4 |
 
 Total: **248 base-byte encodings**.
-The remaining 8 base bytes throw UnsupportedOpcodeException after the initial fetch.
-They are SCF/CCF (37/3F), IN/OUT immediate (DB/D3),
-and CB/DD/ED/FD prefix bytes. SCF/CCF await Q/history semantics; prefix and interrupt work is incomplete.
-A rejected prefix reports that encountered byte and original PC; it does not decode its payload.
+ED is recognized as a prefix for five additional two-byte instructions:
+
+| Encoding | Meaning | Nominal T-states |
+| --- | --- | --- |
+| ED46, ED56, ED5E | IM 0, IM 1, IM 2 | 8 |
+| ED45, ED4D | RETN, RETI | 14 |
+
+ED is not counted as a standalone base instruction. Other 251 ED payloads fault
+with original address, prefix and payload after two fetches (8 T). Unsupported
+aliases and ED NOPs are not silently accepted. Seven other base bytes still fault
+after one fetch: SCF/CCF (37/3F), IN/OUT (DB/D3), CB/DD/FD.
 
 The register file includes main/alternate byte/pair views, IX/IY, PC/SP, I/R, IFFs and IM.
 DI/EI update IFFs and track inhibition through the following instruction. Interrupt
-request acceptance implements NMI and IM 1 only; ED mode-selection instructions
-remain unsupported. Eligible IM 0/2/invalid modes fault explicitly before bus effects. R updates are verified for the unprefixed slice only.
+request acceptance implements NMI and IM 1/2. Eligible IM 0/invalid modes fault
+explicitly before bus effects. ED mode commands preserve all F and both IFFs.
+RETN/RETI pop PC, restore IFF1 from IFF2 and preserve F; RETI also emits a logical
+completion notification. Prefix/payload are atomic with respect to interrupt polling. R updates are verified for the unprefixed slice only.
 Faulted CPUs cannot step again until Reset. Reset leaves bus time and memory untouched.
 HALT and EI-delay are inspectable CPU control state, cleared by Reset. A halted Step
 performs one logical M1 at the fixed next PC, ignores data and updates R. Reset or
-an accepted NMI/IM 1 response exits HALT. See [ADR 0006](../decisions/0006-halt-and-ei-boundaries.md)
+an accepted NMI/IM 1/2 response exits HALT. See [ADR 0006](../decisions/0006-halt-and-ei-boundaries.md)
 and [ADR 0007](../decisions/0007-interrupt-boundary-inputs.md).
 SetInterruptLine supplies a level; SetNmiLine latches an assertion edge. NMI has
 priority, ignores IFF1/EI inhibition and preserves IFF2. IM 1 checks IFF1/EI delay
@@ -50,7 +59,9 @@ and clears both IFFs. Each response pushes unchanged PC and increments R once:
 NMI vectors to 0066 in 11 T-states, IM 1 to 0038 in 13. IM 1 acknowledges a device
 byte separately from memory and ignores it. Signals arriving during a transaction
 apply at next Step entry, an explicitly scoped boundary model.
-RETN/RETI, IM 0/2, daisy chain and electrical interrupt sampling remain deferred.
+IM2 uses the full acknowledged byte with I, pushes PC then reads the target low/high
+with wrap (19 T). See [ADR 0008](../decisions/0008-ed-interrupt-control.md).
+IM0, daisy-chain pin decoding and electrical interrupt sampling remain deferred.
 This is not a complete save-state API: WZ, Q and future device state are absent.
 
 ## Timing evidence and limits

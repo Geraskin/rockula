@@ -24,7 +24,8 @@ must be explicit and tested.
 Implemented boundary inspection includes Z80Cpu.IsHalted and IsEiDelayActive.
 [ADR 0006](../decisions/0006-halt-and-ei-boundaries.md) specifies reset, PC and delay
 retirement. [ADR 0007](../decisions/0007-interrupt-boundary-inputs.md) adds owner-supplied
-INT/NMI levels, a pending NMI edge latch and NMI/IM 1 service. Full state capture/restore
+INT/NMI levels, a pending NMI edge latch and NMI/IM 1 service.
+[ADR 0008](../decisions/0008-ed-interrupt-control.md) adds IM2 and five ED commands. Full state capture/restore
 remains future work; these input levels/latches must be included when it is implemented.
 
 ## Machine state

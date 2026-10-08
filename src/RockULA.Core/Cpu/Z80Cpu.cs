@@ -143,6 +143,9 @@ public sealed partial class Z80Cpu
         {
             case 0x00:
                 return;
+            case 0xED:
+                ExecuteExtended(address);
+                return;
             case 0x76:
                 IsHalted = true;
                 return;

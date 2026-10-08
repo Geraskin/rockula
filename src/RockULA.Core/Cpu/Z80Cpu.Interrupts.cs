@@ -12,7 +12,7 @@ public sealed partial class Z80Cpu
                 return false;
             }
 
-            if (Registers.InterruptMode != 1)
+            if (Registers.InterruptMode is not (1 or 2))
             {
                 throw new NotSupportedException($"Interrupt response for IM {Registers.InterruptMode} is not implemented.");
             }
@@ -32,13 +32,15 @@ public sealed partial class Z80Cpu
         Registers.Iff1 = false;
         IsHalted = false;
         // Neither response decodes the sampled byte or increments PC.
-        _bus.Execute(nmi
+        byte vector = _bus.Execute(nmi
             ? new Z80BusCycle(Z80BusCycleKind.OpcodeFetch, interruptedPc, 4, 3)
             : new Z80BusCycle(Z80BusCycleKind.InterruptAcknowledge, interruptedPc, 6, 5));
         IncrementRefresh();
         Internal(interruptedPc, 1);
         Push(interruptedPc);
-        Registers.PC = nmi ? (ushort)0x0066 : (ushort)0x0038;
+        Registers.PC = nmi ? (ushort)0x0066
+            : Registers.InterruptMode == 2 ? ReadWord((ushort)((Registers.I << 8) | vector))
+            : (ushort)0x0038;
         // A response is not the instruction that retires an existing EI delay.
         return true;
     }
