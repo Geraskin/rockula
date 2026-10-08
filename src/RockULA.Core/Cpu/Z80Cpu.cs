@@ -1,6 +1,6 @@
 namespace RockULA.Core.Cpu;
 
-/// <summary>Instruction-boundary stepping for the explicitly supported base-opcode slice.</summary>
+/// <summary>Instruction-boundary stepping for the explicitly supported opcode pages.</summary>
 public sealed partial class Z80Cpu
 {
     private readonly IZ80Bus _bus;
@@ -143,6 +143,9 @@ public sealed partial class Z80Cpu
         {
             case 0x00:
                 return;
+            case 0xCB:
+                ExecuteBitOperations();
+                return;
             case 0xED:
                 ExecuteExtended(address);
                 return;
@@ -158,28 +161,37 @@ public sealed partial class Z80Cpu
                 Registers.Iff2 = true;
                 return;
             case 0x02:
-                WriteMemory(Registers.BC, Registers.A);
-                return;
             case 0x12:
-                WriteMemory(Registers.DE, Registers.A);
+                ushort destination = opcode == 0x02 ? Registers.BC : Registers.DE;
+                WriteMemory(destination, Registers.A);
+                Registers.WZ = (ushort)((Registers.A << 8) | (Increment(destination) & 0xFF));
                 return;
             case 0x0A:
-                Registers.A = ReadMemory(Registers.BC);
-                return;
             case 0x1A:
-                Registers.A = ReadMemory(Registers.DE);
+                ushort source = opcode == 0x0A ? Registers.BC : Registers.DE;
+                Registers.A = ReadMemory(source);
+                Registers.WZ = Increment(source);
                 return;
             case 0x22:
-                WriteWord(ReadNextWord(), Registers.HL);
-                return;
             case 0x2A:
-                Registers.HL = ReadWord(ReadNextWord());
+                ushort wordAddress = ReadNextWord();
+                if (opcode == 0x22) WriteWord(wordAddress, Registers.HL);
+                else Registers.HL = ReadWord(wordAddress);
+                Registers.WZ = Increment(wordAddress);
                 return;
             case 0x32:
-                WriteMemory(ReadNextWord(), Registers.A);
-                return;
             case 0x3A:
-                Registers.A = ReadMemory(ReadNextWord());
+                ushort byteAddress = ReadNextWord();
+                if (opcode == 0x32)
+                {
+                    WriteMemory(byteAddress, Registers.A);
+                    Registers.WZ = (ushort)((Registers.A << 8) | (Increment(byteAddress) & 0xFF));
+                }
+                else
+                {
+                    Registers.A = ReadMemory(byteAddress);
+                    Registers.WZ = Increment(byteAddress);
+                }
                 return;
             default:
                 throw new UnsupportedOpcodeException(address, opcode);

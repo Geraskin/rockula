@@ -26,6 +26,7 @@ public sealed partial class Z80Cpu
             Internal(instructionAddress, 4);
             Internal(instructionAddress, 3);
             Registers.HL = result;
+            Registers.WZ = Increment(before);
             Registers.F = flags;
             return true;
         }
@@ -134,5 +135,6 @@ public sealed partial class Z80Cpu
         WriteMemory(lowAddress, unchecked((byte)previous));
         Internal(lowAddress, 2);
         Registers.HL = (ushort)(low | (high << 8));
+        Registers.WZ = Registers.HL;
     }
 }

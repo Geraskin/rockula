@@ -117,7 +117,7 @@ public sealed class Z80Registers
     {
         AF = BC = DE = HL = 0;
         AlternateAF = AlternateBC = AlternateDE = AlternateHL = 0;
-        IX = IY = PC = 0;
+        IX = IY = PC = WZ = 0;
         SP = 0xFFFF;
         I = R = InterruptMode = 0;
         Iff1 = Iff2 = false;

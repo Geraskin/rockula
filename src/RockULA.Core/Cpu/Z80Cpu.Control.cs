@@ -7,6 +7,7 @@ public sealed partial class Z80Cpu
         if ((opcode & 0xC7) == 0xC2)
         {
             ushort target = ReadNextWord();
+            Registers.WZ = target;
             if (Condition((opcode >> 3) & 7)) Registers.PC = target;
             return true;
         }
@@ -14,6 +15,7 @@ public sealed partial class Z80Cpu
         if ((opcode & 0xC7) == 0xC4)
         {
             ushort target = ReadNextWord();
+            Registers.WZ = target;
             if (Condition((opcode >> 3) & 7)) Call(target);
             return true;
         }
@@ -21,7 +23,11 @@ public sealed partial class Z80Cpu
         if ((opcode & 0xC7) == 0xC0)
         {
             Internal(instructionAddress, 1);
-            if (Condition((opcode >> 3) & 7)) Registers.PC = Pop();
+            if (Condition((opcode >> 3) & 7))
+            {
+                Registers.PC = Pop();
+                Registers.WZ = Registers.PC;
+            }
             return true;
         }
 
@@ -30,6 +36,7 @@ public sealed partial class Z80Cpu
             Internal(instructionAddress, 1);
             Push(Registers.PC);
             Registers.PC = (ushort)(opcode & 0x38);
+            Registers.WZ = Registers.PC;
             return true;
         }
 
@@ -79,6 +86,7 @@ public sealed partial class Z80Cpu
             {
                 Internal(operandAddress, 5);
                 Registers.PC = unchecked((ushort)(Registers.PC + displacement));
+                Registers.WZ = Registers.PC;
             }
             return true;
         }
@@ -87,6 +95,7 @@ public sealed partial class Z80Cpu
         {
             case 0xC3:
                 Registers.PC = ReadNextWord();
+                Registers.WZ = Registers.PC;
                 return true;
             case 0xE9:
                 Registers.PC = Registers.HL;
@@ -96,6 +105,7 @@ public sealed partial class Z80Cpu
                 return true;
             case 0xC9:
                 Registers.PC = Pop();
+                Registers.WZ = Registers.PC;
                 return true;
             default:
                 return false;
@@ -116,6 +126,7 @@ public sealed partial class Z80Cpu
 
     private void Call(ushort target)
     {
+        Registers.WZ = target;
         Internal(unchecked((ushort)(Registers.PC - 1)), 1);
         Push(Registers.PC);
         Registers.PC = target;

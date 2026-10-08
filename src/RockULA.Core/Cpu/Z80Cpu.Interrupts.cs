@@ -41,6 +41,7 @@ public sealed partial class Z80Cpu
         Registers.PC = nmi ? (ushort)0x0066
             : Registers.InterruptMode == 2 ? ReadWord((ushort)((Registers.I << 8) | vector))
             : (ushort)0x0038;
+        Registers.WZ = Registers.PC;
         // A response is not the instruction that retires an existing EI delay.
         return true;
     }

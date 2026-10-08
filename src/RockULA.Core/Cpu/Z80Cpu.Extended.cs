@@ -30,6 +30,7 @@ public sealed partial class Z80Cpu
             case 0x45:
             case 0x4D:
                 Registers.PC = Pop();
+                Registers.WZ = Registers.PC;
                 Registers.Iff1 = Registers.Iff2;
                 if (opcode == 0x4D) _bus.NotifyReti();
                 return;
