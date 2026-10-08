@@ -16,6 +16,10 @@ public sealed partial class Z80Cpu
 
     public bool IsFaulted { get; private set; }
 
+    public bool IsHalted { get; private set; }
+
+    public bool IsEiDelayActive { get; private set; }
+
     /// <summary>Runs one supported instruction and returns actual cycles, including bus waits.</summary>
     public ulong Step()
     {
