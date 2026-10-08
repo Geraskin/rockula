@@ -1,5 +1,5 @@
 # Implemented Z80 coverage
-Status: 248 base encodings including HALT/DI/EI and five ED commands and NMI/IM 1/2 responses; full M1/M2 are incomplete.
+Status: 248 standalone base encodings plus five ED commands and NMI/IM 1/2 responses; full M1/M2 are incomplete.
 Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
 
 | Encoding | Meaning | Count | Nominal T-states |
