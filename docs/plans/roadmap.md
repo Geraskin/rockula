@@ -4,8 +4,8 @@ Updated: 2026-10-08. Status is about implemented evidence, not intended scope.
 | Milestone | Status | Deliverable | Exit gate |
 | --- | --- | --- | --- |
 | M0 Foundation | Build/test verified; interactive UI check pending | Solution, shell, CLI, ROM validation, docs, agent workflow, CI | Build/tests plus honest validation record |
-| M1 Z80 foundation | Not started | State, bus, ALU, unprefixed instruction slices | Independent semantic and nominal bus tests |
-| M2 Complete CPU | Not started | CB/ED/DD/FD/indexed-CB, interrupts, undocumented NMOS behavior | Coverage matrix and external oracle/exerciser reports |
+| M1 Z80 foundation | 248 base encodings, 256 CB payloads, WZ, 28 ED encodings and NMI/IM 1/2 responses in PR #6; M1 incomplete | State, bus, ALU, unprefixed instruction slices | Independent semantic and nominal bus tests |
+| M2 Complete CPU | CB, DD/FD and indexed-CB implemented; ED data operations implemented; blocks/I/O and Q next, CPU incomplete | CB/ED/DD/FD/indexed-CB, remaining interrupts, undocumented NMOS behavior | Coverage matrix and external oracle/exerciser reports |
 | M3 48K machine | Not started | Memory, keyboard/ports, basic ULA, interrupts, run loop | Deterministic synthetic machine programs |
 | M4 First playable | Not started | SNA, Z80 v1, firmware selection, desktop input/video | Curated user-supplied snapshot cases and responsive host |
 | M5 Sound and tape | Not started | Beeper/audio pacing, TAP pulse playback | Signal tests, sustained audio and real tape loads |

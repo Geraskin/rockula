@@ -1,5 +1,8 @@
 # Timing and bus contract
-Accepted design. No CPU or ULA execution is implemented in the bootstrap.
+Accepted design. The CPU slices implement nominal memory-transaction ordering and sequenced internal durations.
+ULA execution and Spectrum contention are not implemented. [ADR 0004](../decisions/0004-initial-cpu-bus.md)
+defines logical transfers; [ADR 0005](../decisions/0005-internal-cycle-scope.md) defines
+internal logical address labels. Neither establishes electrical address/refresh accuracy.
 
 ## One clock
 Maintain an unsigned 64-bit absolute T-state count for a machine and a derived frame phase.
@@ -53,6 +56,15 @@ Test IFF1/IFF2, EI's delayed acceptance, DI, HALT fetch behavior, R updates, IM 
 RETN/RETI against a stated NMOS model. HALT continues hardware time until an interrupt or budget
 boundary; it is not an infinite-loop detector.
 
+Implemented HALT and DI/EI boundary behavior is defined in
+[ADR 0006](../decisions/0006-halt-and-ei-boundaries.md). Each halted Step performs a
+bounded logical M1 fetch. NMI/IM 1 acceptance and HALT exit are defined by
+[ADR 0007](../decisions/0007-interrupt-boundary-inputs.md): one response per Step,
+11/13 nominal T-states, separate acknowledgement and high/low stack writes.
+[ADR 0008](../decisions/0008-ed-interrupt-control.md) adds IM2 (19 T), mode selection
+and RETN/RETI, with a zero-time RETI completion notification.
+IM0 acceptance, physical sampling apertures and electrical refresh are deferred.
+
 ## Tape and audio
 Tape advances its pulse cursor against absolute T-states; EAR reads observe the current signal.
 The beeper records output transitions with timestamps. PCM generation uses a deterministic
@@ -68,3 +80,9 @@ to a verified firmware hash, and must fall back to physical pulse playback.
 
 Passing ZEX-style flag exercisers does not prove bus timing, and a screenshot alone does not
 prove the machine model. Each gate needs independent expected results.
+
+Index prefix retirement, indexed memory sequencing and the explicit prefix-chain execution
+bound follow [ADR 0010](../decisions/0010-index-prefix-sequencing.md).
+
+ED word/I/R/nibble operation sequencing and the LD A,I/R interrupt limitation
+follow [ADR 0011](../decisions/0011-ed-data-boundaries.md).

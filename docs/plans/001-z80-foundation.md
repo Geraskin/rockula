@@ -1,5 +1,5 @@
 # Work order 001: Z80 state, timed bus and first instruction slices
-Status: ready to implement after M0 build validation. Suggested branch: `feat/z80-foundation`.
+Status: loads in [001a](001a-load-instructions.md), byte ALU/control/stack in [001b](001b-alu-control-flow.md), word ALU/DAA/rotations/exchanges in [001c](001c-word-alu-and-exchanges.md); HALT and DI/EI state in [001d](001d-halt-and-interrupt-enable.md); NMI/IM 1 responses in [001e](001e-nmi-and-im1.md); ED interrupt control/IM2 in [001f](001f-ed-interrupt-control.md); NEG in [001g](001g-ed-neg.md); complete CB and scoped WZ in [001h](001h-cb-bit-operations.md); broader M1 is incomplete. Suggested branch: `feat/z80-foundation`.
 Base/merge target: current `main`. Read AGENTS and architecture/timing before coding.
 
 ## Outcome
@@ -10,7 +10,7 @@ unsupported-opcode error for anything not implemented yet.
 ## Sources and decisions
 Read Zilog UM0080's register, instruction-fetch/memory/I/O timing, flags and instruction sections.
 Choose NMOS behavior explicitly. The manual is insufficient for undocumented flags, WZ and
-prefix quirks; keep those deferred with references until M2.
+prefix quirks; 001b uses a scoped X/Y reference while WZ and deeper prefix quirks remain deferred until M2.
 Decide phase convention and visibility sampling points in a short ADR before designing the bus.
 Use independent expected results, not another port of our own ALU.
 
@@ -54,3 +54,9 @@ Do not claim CPU completeness, game compatibility or cycle-accurate ULA behavior
 ## Not in this order
 Avalonia changes, real ROM boot, snapshot/tape loaders, ULA rendering, host audio, contention
 tables, 128K, browser packaging, generic dependency injection/device plugins.
+
+The current index-prefix slice is [001i](001i-index-prefixes.md); it extends the
+existing base and CB work without declaring M1/M2 complete.
+
+[001j](001j-ed-data-operations.md) extends ED support to word arithmetic and
+transfers, I/R transfers and nibble rotations. Ports/blocks remain pending.

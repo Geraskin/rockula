@@ -1,7 +1,20 @@
 # Verification strategy
-The bootstrap tests validate ROM size and copy ownership. They do not execute Z80 instructions.
-CI builds on Windows/Linux, runs xUnit tests, checks formatting on Linux and runs headless status.
-CI does not launch the desktop UI or prove compatibility.
+Tests cover ROM validation, registers/reset, all 248 supported base encodings, exhaustive
+byte ALU inputs, all flag values for conditional flow, stack/PC wrap, memory/idle traces,
+waits, explicit unsupported bytes, partial-transfer faults and self-authored guest programs.
+The ALU pair tests execute 1,048,576 vectors inside eight xUnit cases; INC/DEC executes
+8,192 value/carry vectors inside sixteen cases. These are not separate discovered tests.
+001c adds 524,288 word INC/DEC vectors and a 1,441,792-vector ADD HL sweep (all HL values
+against seven carry-boundary operands, plus HL+HL). Rotations, CPL and DAA each cover all
+65,536 A/F inputs. DAA additionally follows ADC/SBC for 40,000 decimal integer cases.
+001d adds 2,048 DI/EI input-flag/IFF vectors, delay sequences, repeated HALT reads,
+wait/live sampling and reset/fault control-state tests.
+001e adds NMI/IM 1 IFF/flag sweeps, priority, edge/level handling, HALT exit, EI/DI
+acceptance sequences, acknowledgement sampling/waits and partial-response faults.
+001f adds 5,120 ED flag/IFF vectors, all 251 unsupported ED payloads, IM2 vector
+order/wrap/overlap/waits/faults and synthetic interrupt-return programs.
+CI builds on Windows/Linux, runs xUnit tests and both headless demos, and checks formatting
+on Linux. It does not launch the desktop UI or prove Spectrum/game compatibility.
 
 ## Test layers
 | Layer | Evidence | Required limits |
@@ -46,3 +59,46 @@ a round trip.
 Benchmark in Release with trace disabled and fixed input/budget; report hardware/runtime/commit.
 Measure CPU-only and complete-machine throughput separately. Do not remove accuracy or sampling
 events to improve a benchmark. Benchmarks are planned, not present in this foundation.
+
+001g adds all 65,536 NEG AF inputs, fetch/refresh wrap, waits and payload failure.
+At 001g, unsupported ED coverage rejected 250 remaining payloads, including aliases.
+
+001h checks 196,608 ordinary CB encoding/operand/flag vectors across 256 cases,
+plus 1,048,576 BIT (HL) operand/WZ-high/carry vectors across eight cases.
+All 256 payloads, memory read/idle/write order, prefix/refresh wrap, waits/live
+sampling, EI/NMI atomicity, faults and a synthetic CB program are covered.
+WZ checks cover existing load/arithmetic/control/return/interrupt writers,
+non-writer preservation and reset, history observed by BIT and partial failures.
+The old first-byte CB rejection was replaced by positive page coverage; the four other unsupported base-byte cases remain explicit negative tests.
+
+001i adds 393,216 indexed CB value/carry/flag vectors across 512 cases,
+6,291,456 indexed ALU operand-pair/carry vectors across 48 cases and 786,432
+indexed byte INC/DEC value/flag vectors across 12 cases. Two word sweeps add
+262,144 INC/DEC and 917,504 ADD carry-boundary vectors. Literal tables cover all
+85 affected and all 163 ignored base encodings for each prefix. Additional cases
+cover all displacements, index halves, stack/address/refresh wrap, WZ, ED
+cancellation, mixed/repeated prefixes, EI/HALT/NMI boundaries, waits/live reads,
+partial-cycle failures, ignored ROM writes, the prefix-only execution bound and
+a self-authored index program. The ignored-prefix comparison supplements literal
+expectations and existing base suites; it is not an external independent oracle.
+
+Indexed-slice evidence: [CI 37754791932](https://github.com/Geraskin/rockula/actions/runs/37754791932),
+1,382 tests passed on each of Windows/Linux, zero failures/skips/warnings/errors,
+both demos and Linux format passed. [001i](plans/001i-index-prefixes.md) records
+red/green commits and remaining verification limits.
+
+001j covers eight ED ADC/SBC encodings with 5,769,216 independently calculated
+word operand/carry/flag vectors (all HL values, seven boundary operands, HL
+self-operand and incoming flag sweeps). I/R checks execute 524,288 value/flag/IFF2
+vectors; nibble rotations execute 262,656 A/memory/carry/flag vectors with literal
+bus traces. Eight word-transfer cases check all 256 F values and wrapped accesses.
+Wait/live reads, ignored ROM writes, prefix cancellation, boundary interrupts,
+partial-cycle failures and a 147-T synthetic data program supplement existing
+suites. Explicit unsupported tests now reject all 228 remaining ED payloads.
+The LD A,I/R interrupt anomaly, electrical sequencing and external exercisers
+remain unverified; [001j](plans/001j-ed-data-operations.md) records the limits.
+
+ED data-slice evidence: [CI 37765521189](https://github.com/Geraskin/rockula/actions/runs/37765521189),
+1,418 tests passed on each Windows/Linux platform, zero failures/skips/warnings/errors,
+both demos and Linux format passed. [001j](plans/001j-ed-data-operations.md)
+records test-first and verified commits.

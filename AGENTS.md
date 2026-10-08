@@ -74,7 +74,8 @@ Never weaken tests, skip a failing suite or loosen warnings to manufacture a gre
 | State, input/output and host ownership | `docs/architecture/contracts.md` |
 | Snapshot/tape behavior and validation | `docs/architecture/formats.md` |
 | Milestones, status and release gates | `docs/plans/roadmap.md` |
-| Next executable work order | `docs/plans/001-z80-foundation.md` |
+| Current CPU slice and broader work order | `docs/plans/001j-ed-data-operations.md`, `docs/plans/001-z80-foundation.md` |
+| Implemented opcode coverage and limits | `docs/architecture/z80-coverage.md` |
 | Test layers and compatibility evidence | `docs/testing.md` |
 | License/provenance rules | `docs/licensing.md` |
 | Engineering decisions | `docs/decisions/` |
