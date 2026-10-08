@@ -97,3 +97,8 @@ partial-cycle failures and a 147-T synthetic data program supplement existing
 suites. Explicit unsupported tests now reject all 228 remaining ED payloads.
 The LD A,I/R interrupt anomaly, electrical sequencing and external exercisers
 remain unverified; [001j](plans/001j-ed-data-operations.md) records the limits.
+
+ED data-slice evidence: [CI 37765521189](https://github.com/Geraskin/rockula/actions/runs/37765521189),
+1,418 tests passed on each Windows/Linux platform, zero failures/skips/warnings/errors,
+both demos and Linux format passed. [001j](plans/001j-ed-data-operations.md)
+records test-first and verified commits.

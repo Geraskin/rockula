@@ -1,5 +1,5 @@
 # Work order 001j: ED data operations
-Status: independent expectations before implementation. Branch feat/z80-foundation, PR #6 to main.
+Status: implemented and verified in Windows/Linux CI. Branch feat/z80-foundation, PR #6 to main.
 
 ## Goal and sources
 Add 22 ED encodings: ADC/SBC HL,BC/DE/HL/SP (8), LD (nn),BC/DE/HL/SP
@@ -37,3 +37,21 @@ Run restore/Release build/all tests/both demos on Windows/Linux and Linux format
 Local SDK unavailable; inspect actual CI logs. Record counts and evidence below.
 Ports, block instructions, aliases/NOPs, SCF/CCF/Q, IM0, physical interrupt sampling,
 complete state restore, Spectrum devices/ROM boot/UI/games remain outside this slice.
+
+## Verification evidence
+Test-first commit d3d5a56e84dfb56954c70c1882bf2829b23547d8:
+[CI 37765108154](https://github.com/Geraskin/rockula/actions/runs/37765108154)
+restored/built on Windows/Linux with zero warnings/errors. Each reported 38
+expected failures, 1,380 passes, zero skips and 1,418 total; logs show explicit
+rejection of the new ED payloads, not compile failures.
+The implementation run passed new data cases but exposed two older prefix-test
+expectations: LD R,A overwrites R with A=1 instead of retaining three M1 increments.
+The expected value was corrected for that literal opcode, without changing production.
+
+Verified head 6f0372fdfe2d394862205556bfb8da16eed2f23a:
+[CI 37765521189](https://github.com/Geraskin/rockula/actions/runs/37765521189).
+Windows/Linux restore and Release builds passed, zero warnings/errors. Both ran
+all 1,418 tests, zero failures/skips, and both demos at independent 51/234-T
+expected states. Linux format passed. Actual logs were inspected; local Markdown
+links and project XML/SDK JSON were valid. No local SDK, external exerciser,
+pin-accurate oracle, interactive UI, Spectrum ROM or game was available/run.
