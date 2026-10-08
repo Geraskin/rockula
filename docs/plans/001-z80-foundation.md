@@ -57,3 +57,6 @@ tables, 128K, browser packaging, generic dependency injection/device plugins.
 
 The current index-prefix slice is [001i](001i-index-prefixes.md); it extends the
 existing base and CB work without declaring M1/M2 complete.
+
+[001j](001j-ed-data-operations.md) extends ED support to word arithmetic and
+transfers, I/R transfers and nibble rotations. Ports/blocks remain pending.

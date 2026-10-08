@@ -12,3 +12,4 @@ proposed and superseded choices; new evidence may revise them without hiding the
 - [0008: ED interrupt control and IM2](0008-ed-interrupt-control.md)
 - [0009: CB operations and instruction-boundary WZ](0009-cb-and-wz-state.md)
 - [0010: Index prefix sequencing and bounded stepping](0010-index-prefix-sequencing.md)
+- [0011: ED data operation boundaries](0011-ed-data-boundaries.md)

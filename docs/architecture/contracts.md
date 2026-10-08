@@ -70,3 +70,6 @@ headless and desktop-host execution.
 
 Index prefix retirement, indexed memory sequencing and the explicit prefix-chain execution
 bound follow [ADR 0010](../decisions/0010-index-prefix-sequencing.md).
+
+ED word/I/R/nibble operation sequencing and the LD A,I/R interrupt limitation
+follow [ADR 0011](../decisions/0011-ed-data-boundaries.md).

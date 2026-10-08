@@ -8,6 +8,7 @@ public sealed partial class Z80Cpu
         byte opcode = _bus.Execute(new Z80BusCycle(Z80BusCycleKind.OpcodeFetch, payloadAddress, 4, 3));
         Registers.PC = Increment(payloadAddress);
         IncrementRefresh();
+        if (TryExecuteExtendedData(opcode, instructionAddress)) return;
         switch (opcode)
         {
             case 0x44:

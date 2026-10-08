@@ -9,7 +9,8 @@ timed logical memory operations and 248 base encodings: loads, byte/word ALU, IN
 branches, stack, DAA, accumulator rotations, exchanges, HALT and DI/EI delay state.
 All 256 CB encodings implement rotates/shifts and BIT/RES/SET, including SLL and WZ-dependent memory BIT flags.
 DD/FD implement IX/IY, register halves and indexed memory; all 512 DDCB/FDCB payloads are supported.
-Six ED commands negate A, select modes and return from interrupts. NMI and IM 1/2 responses can exit HALT at logical instruction boundaries.
+28 ED encodings implement word ADC/SBC and memory transfers, I/R transfers, RRD/RLD,
+NEG, mode selection and interrupt returns. NMI and IM 1/2 responses can exit HALT at logical instruction boundaries.
 Two self-authored headless demos run without firmware.
 SCF/CCF, ports, IM 0 acceptance, remaining ED commands and Spectrum devices remain unimplemented;
 this version cannot run games.
@@ -61,7 +62,7 @@ Both demos have execution bounds and return failure if their expected result is 
 
 Start with [AGENTS.md](AGENTS.md), [architecture](docs/architecture/overview.md),
 [roadmap](docs/plans/roadmap.md), [opcode coverage](docs/architecture/z80-coverage.md) and
-[the current slice](docs/plans/001i-index-prefixes.md).
+[the current slice](docs/plans/001j-ed-data-operations.md).
 [Development](docs/development.md) explains commands and branching.
 [Testing](docs/testing.md) describes what each check can prove.
 

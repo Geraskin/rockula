@@ -61,7 +61,7 @@ Measure CPU-only and complete-machine throughput separately. Do not remove accur
 events to improve a benchmark. Benchmarks are planned, not present in this foundation.
 
 001g adds all 65,536 NEG AF inputs, fetch/refresh wrap, waits and payload failure.
-Current unsupported ED coverage rejects all 250 remaining payloads, including aliases.
+At 001g, unsupported ED coverage rejected 250 remaining payloads, including aliases.
 
 001h checks 196,608 ordinary CB encoding/operand/flag vectors across 256 cases,
 plus 1,048,576 BIT (HL) operand/WZ-high/carry vectors across eight cases.
@@ -82,7 +82,18 @@ partial-cycle failures, ignored ROM writes, the prefix-only execution bound and
 a self-authored index program. The ignored-prefix comparison supplements literal
 expectations and existing base suites; it is not an external independent oracle.
 
-Current indexed-slice evidence: [CI 37754791932](https://github.com/Geraskin/rockula/actions/runs/37754791932),
+Indexed-slice evidence: [CI 37754791932](https://github.com/Geraskin/rockula/actions/runs/37754791932),
 1,382 tests passed on each of Windows/Linux, zero failures/skips/warnings/errors,
 both demos and Linux format passed. [001i](plans/001i-index-prefixes.md) records
 red/green commits and remaining verification limits.
+
+001j covers eight ED ADC/SBC encodings with 5,769,216 independently calculated
+word operand/carry/flag vectors (all HL values, seven boundary operands, HL
+self-operand and incoming flag sweeps). I/R checks execute 524,288 value/flag/IFF2
+vectors; nibble rotations execute 262,656 A/memory/carry/flag vectors with literal
+bus traces. Eight word-transfer cases check all 256 F values and wrapped accesses.
+Wait/live reads, ignored ROM writes, prefix cancellation, boundary interrupts,
+partial-cycle failures and a 147-T synthetic data program supplement existing
+suites. Explicit unsupported tests now reject all 228 remaining ED payloads.
+The LD A,I/R interrupt anomaly, electrical sequencing and external exercisers
+remain unverified; [001j](plans/001j-ed-data-operations.md) records the limits.

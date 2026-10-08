@@ -1,5 +1,5 @@
 # Implemented Z80 coverage
-Status: 248 standalone base encodings plus all 256 CB payloads, DD/FD and all 512 indexed CB payloads, six ED commands and NMI/IM 1/2 responses; full M1/M2 are incomplete.
+Status: 248 standalone base encodings plus all 256 CB payloads, DD/FD and all 512 indexed CB payloads, 28 ED encodings and NMI/IM 1/2 responses; full M1/M2 are incomplete.
 Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
 
 | Encoding | Meaning | Count | Nominal T-states |
@@ -30,15 +30,33 @@ Tests use literal encoding/state/timing expectations and fail explicitly for oth
 | F3,FB | DI/EI | 2 | 4 |
 
 Total: **248 base-byte encodings**.
-ED is recognized as a prefix for six additional two-byte instructions:
+ED is recognized as a prefix for 28 additional two-byte encodings:
 
 | Encoding | Meaning | Nominal T-states |
 | --- | --- | --- |
 | ED44 | NEG | 8 |
 | ED46, ED56, ED5E | IM 0, IM 1, IM 2 | 8 |
 | ED45, ED4D | RETN, RETI | 14 |
+| ED42,52,62,72; ED4A,5A,6A,7A | SBC/ADC HL,BC/DE/HL/SP | 15 |
+| ED43,53,63,73; ED4B,5B,6B,7B | LD (nn),BC/DE/HL/SP and reverse | 20 |
+| ED47,4F; ED57,5F | LD I/R,A; LD A,I/R | 9 |
+| ED67,6F | RRD/RLD | 18 |
 
-ED is not counted as a standalone base instruction. Other 250 ED payloads fault
+Word ADC/SBC replace all F, using full-word S/Z, arithmetic overflow, bit-11
+carry/borrow and high-byte X/Y; WZ=old HL+1. ED word loads use wrapped
+little-endian transfers, preserve F and set WZ=nn+1. ED63/6B are explicitly
+supported word transfers. I/R writes preserve F; LD R,A replaces all R after
+the fetch increments, while LD A,R observes incremented R. LD A,I/R preserve C,
+clear H/N, copy result S/Z/X/Y and use IFF2 for PV (not parity). WZ is preserved.
+The interrupt-during-LD A,I/R parity anomaly is outside our Step-entry interrupt
+model; an assertion during the instruction does not retroactively change PV.
+RRD/RLD read (HL), idle four T then write; A's high nibble and C survive and
+other flags use resulting A and parity. WZ=HL+1. An ignored ROM write still
+commits calculated A. [001j](../plans/001j-ed-data-operations.md) and
+[ADR 0011](../decisions/0011-ed-data-boundaries.md) define sources and logical
+commit/fault boundaries. Ports, blocks and remaining ED aliases/NOPs are deferred.
+
+ED is not counted as a standalone base instruction. Other 228 ED payloads fault
 with original address, prefix and payload after two fetches (8 T). Unsupported
 aliases and ED NOPs are not silently accepted. Four other base bytes still fault
 after one fetch: SCF/CCF (37/3F), IN/OUT (DB/D3).
