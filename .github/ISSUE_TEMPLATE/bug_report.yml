@@ -1,0 +1,29 @@
+name: Bug report
+description: Report a reproducible build, emulator or host problem
+title: "[Bug] "
+body:
+  - type: input
+    id: build
+    attributes:
+      label: Commit or release
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and model
+      description: OS, .NET version, machine/profile, format and relevant asset hashes
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction and expected behavior
+      description: Steps, observed result, expected result and first divergent trace if available
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or evidence
+      description: Do not upload proprietary ROMs, game images or private local paths

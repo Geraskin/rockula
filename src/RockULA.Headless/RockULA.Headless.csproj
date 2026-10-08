@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../RockULA.Core/RockULA.Core.csproj" />
+    <ProjectReference Include="../RockULA.Formats/RockULA.Formats.csproj" />
+  </ItemGroup>
+</Project>

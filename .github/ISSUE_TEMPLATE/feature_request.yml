@@ -1,0 +1,16 @@
+name: Feature request
+description: Propose a bounded emulator capability
+title: "[Feature] "
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired behavior
+      description: Concrete use case, target profile/platform/format and current limitation
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: References and acceptance
+      description: Relevant specification and how the feature could be verified

@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RockULA.Core/RockULA.Core.csproj" />
+    <Project Path="src/RockULA.Formats/RockULA.Formats.csproj" />
+    <Project Path="src/RockULA.Headless/RockULA.Headless.csproj" />
+    <Project Path="src/RockULA.Desktop/RockULA.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RockULA.Core.Tests/RockULA.Core.Tests.csproj" />
+  </Folder>
+</Solution>

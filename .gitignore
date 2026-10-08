@@ -1,0 +1,34 @@
+# .NET and IDE outputs
+**/bin/
+**/obj/
+.vs/
+.idea/
+*.user
+*.suo
+TestResults/
+artifacts/
+coverage/
+*.nupkg
+
+# Local firmware, games, external corpora and recordings
+local-data/
+*.rom
+*.tap
+*.tzx
+*.sna
+*.z80
+*.trd
+*.scl
+*.dsk
+*.wav
+
+# Local secrets and settings
+.env
+.env.*
+!.env.example
+*.pfx
+*.key
+
+# OS files
+.DS_Store
+Thumbs.db

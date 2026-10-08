@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../RockULA.Core/RockULA.Core.csproj" />
+  </ItemGroup>
+</Project>
