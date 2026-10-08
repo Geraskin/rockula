@@ -16,11 +16,13 @@ public sealed partial class Z80Cpu
 
     public bool IsFaulted { get; private set; }
 
+    /// <summary>HALT latch; Step remains bounded and performs one ignored M1 read.</summary>
     public bool IsHalted { get; private set; }
 
+    /// <summary>EI inhibition through the following instruction; not an interrupt request API.</summary>
     public bool IsEiDelayActive { get; private set; }
 
-    /// <summary>Runs one supported instruction and returns actual cycles, including bus waits.</summary>
+    /// <summary>Runs one instruction or halted fetch and returns actual cycles, including bus waits.</summary>
     public ulong Step()
     {
         if (IsFaulted)
@@ -34,9 +36,18 @@ public sealed partial class Z80Cpu
         {
             byte opcode = _bus.Execute(
                 new Z80BusCycle(Z80BusCycleKind.OpcodeFetch, address, 4, 3));
-            Registers.PC = Increment(address);
+            if (!IsHalted)
+            {
+                Registers.PC = Increment(address);
+            }
+
             Registers.R = (byte)((Registers.R & 0x80) | ((Registers.R + 1) & 0x7F));
-            Execute(opcode, address);
+            if (!IsHalted)
+            {
+                Execute(opcode, address);
+                // Retire only after successful execution. Repeated EI renews inhibition.
+                IsEiDelayActive = opcode == 0xFB;
+            }
             return checked(_bus.TStates - start);
         }
         catch
@@ -52,6 +63,8 @@ public sealed partial class Z80Cpu
     {
         Registers.Reset();
         IsFaulted = false;
+        IsHalted = false;
+        IsEiDelayActive = false;
     }
 
     private void Execute(byte opcode, ushort address)
@@ -100,6 +113,17 @@ public sealed partial class Z80Cpu
         switch (opcode)
         {
             case 0x00:
+                return;
+            case 0x76:
+                IsHalted = true;
+                return;
+            case 0xF3:
+                Registers.Iff1 = false;
+                Registers.Iff2 = false;
+                return;
+            case 0xFB:
+                Registers.Iff1 = true;
+                Registers.Iff2 = true;
                 return;
             case 0x02:
                 WriteMemory(Registers.BC, Registers.A);

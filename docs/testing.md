@@ -1,5 +1,5 @@
 # Verification strategy
-Tests cover ROM validation, registers/reset, all 245 supported base encodings, exhaustive
+Tests cover ROM validation, registers/reset, all 248 supported base encodings, exhaustive
 byte ALU inputs, all flag values for conditional flow, stack/PC wrap, memory/idle traces,
 waits, explicit unsupported bytes, partial-transfer faults and self-authored guest programs.
 The ALU pair tests execute 1,048,576 vectors inside eight xUnit cases; INC/DEC executes
@@ -7,6 +7,8 @@ The ALU pair tests execute 1,048,576 vectors inside eight xUnit cases; INC/DEC e
 001c adds 524,288 word INC/DEC vectors and a 1,441,792-vector ADD HL sweep (all HL values
 against seven carry-boundary operands, plus HL+HL). Rotations, CPL and DAA each cover all
 65,536 A/F inputs. DAA additionally follows ADC/SBC for 40,000 decimal integer cases.
+001d adds 2,048 DI/EI input-flag/IFF vectors, delay sequences, repeated HALT reads,
+wait/live sampling and reset/fault control-state tests.
 CI builds on Windows/Linux, runs xUnit tests and both headless demos, and checks formatting
 on Linux. It does not launch the desktop UI or prove Spectrum/game compatibility.
 

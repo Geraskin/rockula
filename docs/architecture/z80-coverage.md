@@ -1,5 +1,5 @@
 # Implemented Z80 coverage
-Status: 245 base encodings including word ALU, DAA, accumulator rotations and exchanges; full M1/M2 are incomplete.
+Status: 248 base encodings including HALT and DI/EI boundary state; full M1/M2 are incomplete.
 Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
 
 | Encoding | Meaning | Count | Nominal T-states |
@@ -26,17 +26,23 @@ Tests use literal encoding/state/timing expectations and fail explicitly for oth
 | 27,2F | DAA/CPL | 2 | 4 |
 | 08,EB,D9 | EX AF,AF'; EX DE,HL; EXX | 3 | 4 |
 | E3 | EX (SP),HL | 1 | 19 |
+| 76 | HALT | 1 | 4, then 4 per halted step |
+| F3,FB | DI/EI | 2 | 4 |
 
-Total: **245 base-byte encodings**.
-The remaining 11 base bytes throw UnsupportedOpcodeException after the initial fetch.
-They are SCF/CCF (37/3F), HALT (76), IN/OUT immediate (DB/D3), DI/EI (F3/FB),
+Total: **248 base-byte encodings**.
+The remaining 8 base bytes throw UnsupportedOpcodeException after the initial fetch.
+They are SCF/CCF (37/3F), IN/OUT immediate (DB/D3),
 and CB/DD/ED/FD prefix bytes. SCF/CCF await Q/history semantics; prefix and interrupt work is incomplete.
 A rejected prefix reports that encountered byte and original PC; it does not decode its payload.
 
 The register file includes main/alternate byte/pair views, IX/IY, PC/SP, I/R, IFFs and IM.
-IFF/IM storage is not interrupt emulation. R updates are verified for the unprefixed slice only.
+DI/EI update IFFs and track inhibition through the following instruction. Interrupt
+request acceptance and IM execution are not implemented. R updates are verified for the unprefixed slice only.
 Faulted CPUs cannot step again until Reset. Reset leaves bus time and memory untouched.
-This is not a complete save-state API: WZ, HALT, EI-delay and future device state are absent.
+HALT and EI-delay are inspectable CPU control state, cleared by Reset. A halted Step
+performs one logical M1 at the fixed next PC, ignores data and updates R; only Reset
+currently exits HALT. See [ADR 0006](../decisions/0006-halt-and-ei-boundaries.md).
+This is not a complete save-state API: WZ, Q and future device state are absent.
 
 ## Timing evidence and limits
 Ordered memory operations, nominal instruction totals, little-endian/wrapped transfers,

@@ -5,7 +5,7 @@ document was read, every fact is verified, or its contents may be redistributed.
 ## Read during bootstrap
 | Source | Used for | Limit |
 | --- | --- | --- |
-| [Zilog Z80 UM0080](https://www.zilog.com/docs/z80/um0080.pdf) | Register/instruction/bus timing source and CPU work-order scope | 001a reads register/refresh and loads; 001b reads byte ALU/control/stack; 001c reads word ALU, DAA, rotations and exchanges; pin-level timing remains unverified |
+| [Zilog Z80 UM0080](https://www.zilog.com/docs/z80/um0080.pdf) | Register/instruction/bus timing source and CPU work-order scope | 001a reads register/refresh and loads; 001b reads byte ALU/control/stack; 001c reads word ALU, DAA, rotations and exchanges; 001d reads HALT and DI/EI boundary semantics; pin-level timing remains unverified |
 | [Young / Jan, Undocumented Z80 v0.90](https://datasheets.chipdb.org/Zilog/Z80/z80-documented-0.90.pdf) | Scoped NMOS byte ALU, word X/Y and DAA nibble/flag tables (§2.2, §4.6–4.7, §8.4–8.7) | No source/vector import or local silicon measurement; broader quirks remain deferred |
 | [Weissflog netlist timing study](https://floooh.github.io/2021/12/06/z80-instruction-timing.html) | EX (SP),HL memory order and internal durations | 2021-12-06 trace; netlist differs from original NMOS in some details; no code imported or pin-level claim |
 | [48K technical reference](https://worldofspectrum.org/faq/reference/48kreference.htm) | Hardware map and 48K timing reference | Community hardware reference; select/verify issue-specific phase details in M3/M6 |

@@ -56,6 +56,10 @@ Test IFF1/IFF2, EI's delayed acceptance, DI, HALT fetch behavior, R updates, IM 
 RETN/RETI against a stated NMOS model. HALT continues hardware time until an interrupt or budget
 boundary; it is not an infinite-loop detector.
 
+Implemented HALT and DI/EI boundary behavior is defined in
+[ADR 0006](../decisions/0006-halt-and-ei-boundaries.md). Each halted Step performs a
+bounded logical M1 fetch; interrupt acceptance/exit and electrical refresh are deferred.
+
 ## Tape and audio
 Tape advances its pulse cursor against absolute T-states; EAR reads observe the current signal.
 The beeper records output transitions with timestamps. PCM generation uses a deterministic

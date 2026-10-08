@@ -1,5 +1,5 @@
 # Work order 001d: HALT and interrupt enable state
-Status: tests first; implementation pending.
+Status: implementation awaiting green CI.
 Branch `feat/z80-foundation`, PR #6 to `main`.
 Starting commit: `52d554f4a01d9c79560a29ee5210757615a9c49e`.
 
@@ -37,3 +37,9 @@ Linux dotnet format --verify-no-changes. No local SDK is available; use CI and
 inspect actual test logs before recording evidence. Publish and inspect failing
 expectations before implementing. No silicon, refresh-pin, external exerciser,
 Spectrum device, interactive UI or game compatibility claim.
+
+## Red evidence
+Test commit `49494f7e70901a4cf627947992118a1117700510`,
+[CI 37724796870](https://github.com/Geraskin/rockula/actions/runs/37724796870):
+build succeeded; 14 new cases failed on unsupported instructions, 296 previous cases
+passed, zero skipped, 310 total (Linux log inspected before implementation).

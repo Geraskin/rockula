@@ -5,9 +5,9 @@ A ZX Spectrum emulator written from scratch in C#, with a deterministic hardware
 and an Avalonia desktop interface. Original project code is licensed under MIT.
 
 **Status: executable CPU foundation, still incomplete.** The core implements registers,
-timed logical memory operations and 245 base encodings: loads, byte/word ALU, INC/DEC,
-branches, stack, DAA, accumulator rotations and exchanges. Two self-authored headless demos run without firmware.
-SCF/CCF, ports, HALT, interrupts, prefixes and Spectrum devices remain unimplemented;
+timed logical memory operations and 248 base encodings: loads, byte/word ALU, INC/DEC,
+branches, stack, DAA, accumulator rotations, exchanges, HALT and DI/EI delay state. Two self-authored headless demos run without firmware.
+SCF/CCF, ports, interrupt acceptance, prefixes and Spectrum devices remain unimplemented;
 this version cannot run games.
 
 ## Direction
@@ -57,7 +57,7 @@ Both demos have execution bounds and return failure if their expected result is 
 
 Start with [AGENTS.md](AGENTS.md), [architecture](docs/architecture/overview.md),
 [roadmap](docs/plans/roadmap.md), [opcode coverage](docs/architecture/z80-coverage.md) and
-[the current slice](docs/plans/001c-word-alu-and-exchanges.md).
+[the current slice](docs/plans/001d-halt-and-interrupt-enable.md).
 [Development](docs/development.md) explains commands and branching.
 [Testing](docs/testing.md) describes what each check can prove.
 
