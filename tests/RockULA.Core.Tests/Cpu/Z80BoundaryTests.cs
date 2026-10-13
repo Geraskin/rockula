@@ -52,34 +52,6 @@ public sealed class Z80BoundaryTests
         }, bus.Events.ToArray());
     }
 
-    [Theory]
-    [InlineData(0x37)]
-    [InlineData(0x3F)]
-    public void UnsupportedInstructionsAndPrefixesFaultAtTheirOriginalAddress(int opcode)
-    {
-        var bus = new RecordingBus();
-        bus.Memory[0x1234] = (byte)opcode;
-        bus.Memory[0x1235] = 0;
-        var registers = new Z80Registers { PC = 0x1234, F = 0xFF };
-        var cpu = new Z80Cpu(bus, registers);
-
-        var error = Assert.Throws<UnsupportedOpcodeException>(() => cpu.Step());
-
-        Assert.Equal((ushort)0x1234, error.Address);
-        Assert.Equal((byte)opcode, error.Opcode);
-        Assert.Contains("0x1234", error.Message);
-        Assert.True(cpu.IsFaulted);
-        Assert.Equal((ushort)0x1235, registers.PC);
-        Assert.Equal((byte)1, registers.R);
-        Assert.Equal((byte)0xFF, registers.F);
-        Assert.Throws<InvalidOperationException>(() => cpu.Step());
-        Assert.Equal(4UL, bus.TStates);
-        Assert.Equal(new CycleEvent[]
-        {
-            new(Z80BusCycleKind.OpcodeFetch, 0x1234, 0, 3, 4, (byte)opcode)
-        }, bus.Events.ToArray());
-    }
-
     [Fact]
     public void EveryBaseEncodingOutsideTheDeclaredSliceFailsExplicitly()
     {
@@ -105,35 +77,27 @@ public sealed class Z80BoundaryTests
             0xDC, 0xE4, 0xEC, 0xF4, 0xFC, 0xC9, 0xC0, 0xC8, 0xD0, 0xD8, 0xE0, 0xE8,
             0xF0, 0xF8, 0xC7, 0xCF, 0xD7, 0xDF, 0xE7, 0xEF, 0xF7, 0xFF, 0xC5, 0xD5,
             0xE5, 0xF5, 0xC1, 0xD1, 0xE1, 0xF1,
-            0x03, 0x13, 0x23, 0x33, 0x0B, 0x1B, 0x2B, 0x3B, 0x09, 0x19, 0x29, 0x39, 0xF9, 0x07, 0x0F, 0x17, 0x1F, 0x27, 0x2F, 0x08, 0xEB, 0xD9, 0xE3, 0x76, 0xF3, 0xFB, 0xD3, 0xDB
+            0x03, 0x13, 0x23, 0x33, 0x0B, 0x1B, 0x2B, 0x3B, 0x09, 0x19, 0x29, 0x39, 0xF9, 0x07, 0x0F, 0x17, 0x1F, 0x27, 0x2F, 0x08, 0xEB, 0xD9, 0xE3, 0x76, 0xF3, 0xFB, 0xD3, 0xDB, 0x37, 0x3F
         ];
 
-        for (int opcode = 0; opcode <= 0xFF; opcode++)
-        {
-            if ((opcode is 0xCB or 0xDD or 0xED or 0xFD) || supported.Contains((byte)opcode))
-            {
-                continue;
-            }
+        Assert.Equal(252, supported.Count);
+        Assert.Equal(new byte[] { 0xCB, 0xDD, 0xED, 0xFD },
+            Enumerable.Range(0, 256).Select(value => (byte)value).Where(value => !supported.Contains(value)));
 
-            var bus = new RecordingBus();
-            bus.Memory[0] = (byte)opcode;
-            var cpu = new Z80Cpu(bus);
-            Assert.Throws<UnsupportedOpcodeException>(() => cpu.Step());
-            Assert.True(cpu.IsFaulted);
-            Assert.Equal(4UL, bus.TStates);
-        }
     }
 
     [Fact]
     public void ExplicitResetClearsCpuFaultAndRegistersWithoutRewindingTheBus()
     {
         var bus = new RecordingBus();
-        bus.Memory[0] = 0x37;
+        bus.Memory[0] = 0x06;
+        bus.WaitStates = c => c.Kind == Z80BusCycleKind.MemoryRead ? throw new IOException("test fault") : 0;
         bus.Memory[0x8000] = 0x42;
         var registers = new Z80Registers { AF = 0xFFFF, SP = 0x1234 };
         var cpu = new Z80Cpu(bus, registers);
-        Assert.Throws<UnsupportedOpcodeException>(() => cpu.Step());
+        Assert.Throws<IOException>(() => cpu.Step());
         bus.Memory[0] = 0;
+        bus.WaitStates = null;
 
         cpu.Reset();
 

@@ -161,10 +161,11 @@ public sealed class Z80InterruptEnableTests
     {
         var bus = new RecordingBus();
         bus.Memory[0] = 0xFB;
-        bus.Memory[1] = 0x37;
+        bus.Memory[1] = 0x06;
+        bus.WaitStates = c => c.Kind == Z80BusCycleKind.MemoryRead ? throw new IOException("test fault") : 0;
         var cpu = new Z80Cpu(bus);
         cpu.Step();
-        Assert.Throws<UnsupportedOpcodeException>(() => cpu.Step());
+        Assert.Throws<IOException>(() => cpu.Step());
         Assert.True(cpu.IsFaulted);
         Assert.True(cpu.IsEiDelayActive);
         Assert.True(cpu.Registers.Iff1);

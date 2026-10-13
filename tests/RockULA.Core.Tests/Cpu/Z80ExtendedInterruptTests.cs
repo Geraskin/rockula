@@ -90,30 +90,6 @@ public sealed class Z80ExtendedInterruptTests
     }
 
     [Fact]
-    public void AllOtherEdPayloadsFaultAfterBothFetchesWithOriginalAddressAndBytes()
-    {
-        for (int opcode = 0; opcode < 256; opcode++)
-        {
-            if (new HashSet<int> { 0x44, 0x46, 0x56, 0x5E, 0x45, 0x4D, 0x42, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x72, 0x7A, 0x43, 0x4B, 0x53, 0x5B, 0x63, 0x6B, 0x73, 0x7B, 0x47, 0x4F, 0x57, 0x5F, 0x67, 0x6F, 0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78, 0x41, 0x49, 0x51, 0x59, 0x61, 0x69, 0x71, 0x79, 0xA0, 0xA8, 0xB0, 0xB8, 0xA1, 0xA9, 0xB1, 0xB9, 0xA2, 0xAA, 0xB2, 0xBA, 0xA3, 0xAB, 0xB3, 0xBB }.Contains(opcode)) continue;
-            var bus = new RecordingBus();
-            bus.Memory[0xFFFF] = 0xED;
-            bus.Memory[0] = (byte)opcode;
-            var registers = new Z80Registers { PC = 0xFFFF, F = 0xFF };
-            var cpu = new Z80Cpu(bus, registers);
-            var error = Assert.Throws<UnsupportedOpcodeException>(() => cpu.Step());
-            Assert.Equal((ushort)0xFFFF, error.Address);
-            Assert.Equal((byte)0xED, error.Prefix);
-            Assert.Equal((byte)opcode, error.Opcode);
-            Assert.Equal((ushort)1, registers.PC);
-            Assert.Equal((byte)2, registers.R);
-            Assert.Equal((byte)0xFF, registers.F);
-            Assert.Equal(8UL, bus.TStates);
-            Assert.Equal(2, bus.Events.Count);
-            Assert.True(cpu.IsFaulted);
-        }
-    }
-
-    [Fact]
     public void NmiArrivingDuringEdPrefixWaitsForTheWholeInstruction()
     {
         var bus = new RecordingBus();

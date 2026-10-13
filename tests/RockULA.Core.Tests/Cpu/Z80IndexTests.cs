@@ -197,26 +197,6 @@ public sealed class Z80IndexTests
         Assert.Equal((byte)5, bus.Memory[0x7FFE]);
     }
 
-    [Theory]
-    [InlineData(0xDD, 0x37)]
-    [InlineData(0xFD, 0x3F)]
-    public void UnsupportedTerminalReportsFirstAddressAndLastPrefix(int prefix, int opcode)
-    {
-        var bus = new RecordingBus();
-        bus.Memory[0xFFFF] = 0xFD;
-        bus.Memory[0] = (byte)prefix;
-        bus.Memory[1] = (byte)opcode;
-        var r = new Z80Registers { PC = 0xFFFF, R = 0xFF };
-        var cpu = new Z80Cpu(bus, r);
-        var error = Assert.Throws<UnsupportedOpcodeException>(() => cpu.Step());
-        Assert.Equal((ushort)0xFFFF, error.Address);
-        Assert.Equal((byte?)prefix, error.Prefix);
-        Assert.Equal((byte)opcode, error.Opcode);
-        Assert.Equal((ushort)2, r.PC);
-        Assert.Equal((byte)0x82, r.R);
-        Assert.True(cpu.IsFaulted);
-    }
-
     [Fact]
     public void PrefixOnlyMemoryFaultsAtExplicitBound()
     {
@@ -336,7 +316,7 @@ public sealed class Z80IndexTests
     public void IgnoredPrefixPreservesOrdinaryRegisterSemantics(int prefix)
     {
         // Literal unprefixed table is independently maintained in boundary tests.
-        var unsupported = new HashSet<int> { 0x37, 0x3F, 0xCB, 0xDD, 0xED, 0xFD };
+        var unsupported = new HashSet<int> { 0xCB, 0xDD, 0xED, 0xFD };
         var affected = new HashSet<int> { 0x09, 0x19, 0x21, 0x22, 0x23, 0x29, 0x2A, 0x2B, 0x39, 0xE1, 0xE3, 0xE5, 0xE9, 0xF9,
             0x24, 0x25, 0x26, 0x2C, 0x2D, 0x2E, 0x34, 0x35, 0x36 };
         foreach (object[] row in Loads()) affected.Add((int)row[1]);
@@ -367,7 +347,7 @@ public sealed class Z80IndexTests
             Assert.Equal((ushort)0xFEDC, b.IY);
             Assert.Equal(plain.Memory, indexed.Memory.Select((v, i) => i == 0xFF ? (byte)0 : v).ToArray());
         }
-        Assert.Equal(165, count);
+        Assert.Equal(167, count);
         static Z80Registers Initial(ushort pc) => new() { PC = pc, AF = 0x1234, BC = 0x2233, DE = 0x4455, HL = 0x6677, SP = 0x8000, IX = 0x9876, IY = 0xFEDC, WZ = 0xABCD };
     }
 
@@ -550,7 +530,6 @@ public sealed class Z80IndexTests
     [InlineData(0xFD)]
     public void EdCancellationPreservesIndexAndRejectsEveryUnsupportedPayload(int prefix)
     {
-        var supported = new HashSet<int> { 0x44, 0x45, 0x46, 0x4D, 0x56, 0x5E, 0x42, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x72, 0x7A, 0x43, 0x4B, 0x53, 0x5B, 0x63, 0x6B, 0x73, 0x7B, 0x47, 0x4F, 0x57, 0x5F, 0x67, 0x6F, 0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78, 0x41, 0x49, 0x51, 0x59, 0x61, 0x69, 0x71, 0x79, 0xA0, 0xA8, 0xB0, 0xB8, 0xA1, 0xA9, 0xB1, 0xB9, 0xA2, 0xAA, 0xB2, 0xBA, 0xA3, 0xAB, 0xB3, 0xBB };
         for (int payload = 0; payload < 256; payload++)
         {
             var bus = new RecordingBus();
@@ -559,7 +538,7 @@ public sealed class Z80IndexTests
             bus.Memory[2] = (byte)payload;
             var r = new Z80Registers { IX = 0x1234, IY = 0x5678, A = 1, SP = 0x8000 };
             var cpu = new Z80Cpu(bus, r);
-            if (supported.Contains(payload))
+            if (true)
             {
                 ulong expected = payload is 0x45 or 0x4D ? 18UL
                     : payload is 0x42 or 0x4A or 0x52 or 0x5A or 0x62 or 0x6A or 0x72 or 0x7A ? 19UL
@@ -568,16 +547,8 @@ public sealed class Z80IndexTests
                     : payload is 0x67 or 0x6F ? 22UL
                     : payload is 0x40 or 0x48 or 0x50 or 0x58 or 0x60 or 0x68 or 0x70 or 0x78 or 0x41 or 0x49 or 0x51 or 0x59 or 0x61 or 0x69 or 0x71 or 0x79 ? 16UL
                     : payload is 0xA0 or 0xA8 or 0xA1 or 0xA9 or 0xA2 or 0xAA or 0xA3 or 0xAB ? 20UL
-                    : payload is 0xB0 or 0xB8 or 0xB1 or 0xB9 or 0xB2 or 0xBA or 0xB3 or 0xBB ? 25UL : 12UL;
+                    : payload is 0xB0 or 0xB8 or 0xB1 or 0xB9 or 0xB2 or 0xBA or 0xB3 or 0xBB ? 25UL : payload is 0x55 or 0x5D or 0x65 or 0x6D or 0x75 or 0x7D ? 18UL : 12UL;
                 Assert.Equal(expected, cpu.Step());
-            }
-            else
-            {
-                var error = Assert.Throws<UnsupportedOpcodeException>(() => cpu.Step());
-                Assert.Equal((byte?)0xED, error.Prefix);
-                Assert.Equal((byte)payload, error.Opcode);
-                Assert.Equal((ushort)0, error.Address);
-                Assert.Equal(12UL, bus.TStates);
             }
             Assert.Equal((ushort)0x1234, r.IX);
             Assert.Equal((ushort)0x5678, r.IY);

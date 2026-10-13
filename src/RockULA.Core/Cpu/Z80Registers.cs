@@ -21,6 +21,8 @@ public sealed class Z80Registers
     public byte AlternateL { get; set; }
     public byte I { get; set; }
     public byte R { get; set; }
+    /// <summary>Logical Zilog flag-history latch; see ADR 0013.</summary>
+    public byte Q { get; set; }
 
     public ushort AF
     {

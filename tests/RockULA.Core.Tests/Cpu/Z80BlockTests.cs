@@ -221,8 +221,8 @@ public sealed class Z80BlockTests
         var cpu = new Z80Cpu(bus, r);
         Assert.Equal(21UL, cpu.Step());
         Assert.Equal((byte)0, bus.Memory[0x2801]);
-        var error = Assert.Throws<UnsupportedOpcodeException>(() => cpu.Step());
-        Assert.Equal((byte)0, error.Opcode);
+        Assert.Equal(8UL, cpu.Step());
+        Assert.Equal((ushort)0x2802, r.PC);
         Assert.Equal((ushort)1, r.BC);
         Assert.Equal((byte)4, r.R);
     }

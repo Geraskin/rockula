@@ -10,6 +10,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <ProjectReference Include="../../src/RockULA.Core/RockULA.Core.csproj" />
+    <ProjectReference Include="../../src/RockULA.Formats/RockULA.Formats.csproj" />
     <Using Include="Xunit" />
   </ItemGroup>
 </Project>
