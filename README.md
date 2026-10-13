@@ -17,7 +17,10 @@ Kempston or Sinclair number-key rows and can rebind keyboard joystick aliases.
 
 This is a prototype: no tape, 128K, contention, raster border
 or floating bus. Real firmware boot and game compatibility still require testing
-with user-supplied files on the target desktop. External CPU exercisers remain pending.
+with user-supplied files on the target desktop. External oracles are explicitly-invoked headless
+commands, not CI gates: a 48K diagnostic ROM run that passes its RAM and interrupt checks, and
+the Fuse single-instruction CPU corpus, which found and closed one real flag defect and still
+reports the open HALT PC convention.
 
 ## Direction
 Start with a documented Spectrum 48K hardware profile and get snapshot-based games playable.

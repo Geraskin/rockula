@@ -40,7 +40,7 @@ values. Test arithmetic exhaustively where useful. Check memory side effects, fl
 model-specific undocumented ones), register/R state, nominal cycles and bus ordering.
 A register-only oracle is insufficient for contention. ZEX-style success is useful but incomplete.
 Never restate the production rule as the expected value: a test that reimplements the same formula
-passes even when both are wrong. The SCF/CCF X/Y defect (fixed in b4e7c72) survived a 65,536-vector
+passes even when both are wrong. The SCF/CCF X/Y defect (fixed in 45e190a) survived a 65,536-vector
 sweep for exactly that reason and was found only by the external Fuse corpus. Anchor at least one
 case per rule to an independently produced value, as `Z80CompletionTests` now does for 37/3F.
 
@@ -81,7 +81,7 @@ Assets are not committed; keep them in ignored `local-data/`.
 | --- | --- | --- | --- | --- |
 | `zx-diagnostics-v0.37-48k.rom` | [brendanalford/zx-diagnostics](https://github.com/brendanalford/zx-diagnostics) release v0.37, `testrom.bin` (2026-10-13) | LGPL-3.0 | `e38354b6b8f393a65a2512cb622c6f255a4d015e9022244a873f0c6c2b0cf464` | 48K RAM, ULA, keyboard, sound, video and Z80 functional PASS/FAIL |
 | `opense-3.1.2.rom` | [knaxly-dev/zed-open-roms](https://github.com/knaxly-dev/zed-open-roms) `opense-3.1.2.rom`; upstream OpenSE BASIC, Andrew S. Owen, 2012 (2026-10-13) | GPL-2.0 | `45790ed8d7baac284b41fe1e35bcdd0c24e754c191e6fdcbaff4df2d1e44270d` | redistributable 48K firmware for the ROM-boot path |
-| `tests.in` + `tests.expected` | [Fuse Z80 test corpus](https://github.com/tom-seddon/fuse-emulator-code/tree/master/fuse/z80/tests), mirrored in [floooh/chips-test](https://github.com/floooh/chips-test) under `tests/fuse/` (2026-10-13) | GPL-2.0 (Fuse) | `fec4e44dfa4fa889f976aa546a774d48c2a7366ab12312d449f79e85e68d77d7` / `207dc604db5d2a0a49ebd40e1bcb985a919e7a6e3dea1a52884ee05f9a1bf005` | single-instruction CPU corpus: registers, T-states and memory |
+| `tests.in` + `tests.expected` | [floooh/chips-test](https://github.com/floooh/chips-test) `tests/fuse/`, the Fuse Z80 test corpus (2026-10-13); the historical `tom-seddon/fuse-emulator-code` path no longer resolves | GPL-2.0 (Fuse emulator; the mirrored data files carry no separate licence text) | `fec4e44dfa4fa889f976aa546a774d48c2a7366ab12312d449f79e85e68d77d7` / `207dc604db5d2a0a49ebd40e1bcb985a919e7a6e3dea1a52884ee05f9a1bf005` | single-instruction CPU corpus: registers, T-states and memory |
 
 Observed on Linux, .NET SDK 10.0.401, 2026-10-13 (`feat/oracle-diagnostics`):
 
@@ -102,7 +102,9 @@ Observed on Linux, .NET SDK 10.0.401, 2026-10-13 (`feat/oracle-diagnostics`):
   `Z80Cpu.Misc.cs` and the corpus values are an independent anchor test. The remaining failure is
   the HALT PC convention (`76`), tracked in [001o](plans/001o-external-oracle.md) pending
   hardware-level evidence. The eight `knownXyDivergence` entries are the `BIT n,(HL)` cases the
-  reference integration blacklists as "FUSE handles those wrong". Contention events (MC/PC) and
+  reference integration blacklists as "FUSE handles those wrong". Those eight still compare every
+  other register, memory byte, T-state and HALT/IFF/IM state; only AF bits 3/5 are excused, and a
+  case that mismatches anywhere else is counted as a real failure. Contention events (MC/PC) and
   bus read/write events are not compared: this machine has no contention model. The runner exits
   non-zero while the HALT divergence is open.
 - `--oracle-smoke` runs the same report path on a self-authored dummy ROM (no external asset) and

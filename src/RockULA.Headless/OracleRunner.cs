@@ -75,6 +75,7 @@ internal static class OracleRunner
             return 2;
         }
 
+        string source = romPath;
         try
         {
             var rom = RomImage.FromSpectrum48(ReadBounded(romPath, RomImage.Spectrum48Size));
@@ -94,10 +95,17 @@ internal static class OracleRunner
 
             for (int frame = 0; frame < frames; frame++) machine.RunFrame();
 
-            Console.WriteLine(Describe(machine, out uint[] pixels));
+            string report = Describe(machine, out uint[] pixels);
             if (pngPath is not null)
             {
+                // Written before the report line so a failed write cannot be preceded by a result.
+                source = pngPath;
                 PngImage.Write(pngPath, pixels, Spectrum48Video.Width, Spectrum48Video.Height);
+            }
+
+            Console.WriteLine(report);
+            if (pngPath is not null)
+            {
                 Console.WriteLine($"wrote {pngPath}");
             }
 
@@ -105,7 +113,7 @@ internal static class OracleRunner
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
-            Console.Error.WriteLine($"{romPath}: {exception.Message}");
+            Console.Error.WriteLine($"{source}: {exception.Message}");
             return 1;
         }
     }

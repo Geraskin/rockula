@@ -64,9 +64,10 @@ CHAN-OPEN and `rst 0x10`), so it needs the copyrighted Sinclair ROM plus a tape 
 have, and the .NET packaging of the same vectors (MrKWatkins.EmulatorTestSuites) is GPL-3.0
 against this MIT repository. Neither can be adopted without the owner's licensing and asset
 decision. A first CPU corpus is wired instead through `--oracle-fuse`, which reads the GPL-2.0
-Fuse Z80 corpus with our own MIT reader; it currently reports three open divergences (SCF/CCF
-undocumented X/Y and the HALT PC convention) plus eight separately counted `BIT n,(HL)` X/Y
-cases the reference integration blacklists. Those are tracked in
+Fuse Z80 corpus with our own MIT reader. It first reported three divergences; `37_1` SCF and
+`3f` CCF were a real defect, now fixed against the corpus's independently produced values, so it
+reports the open HALT PC convention (ADR 0006) plus eight separately counted `BIT n,(HL)` X/Y
+cases the reference integration itself blacklists. Those are tracked in
 [work order 001o](../plans/001o-external-oracle.md) and must be resolved against the cited
 sources, not by loosening the comparison.
 

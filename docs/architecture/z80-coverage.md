@@ -1,7 +1,9 @@
 # Implemented Z80 coverage
 Status: all 252 standalone base encodings, all CB/indexed-CB payloads and all
-256 ED payloads decode. NMI/IM 1/2 and IM0 RST are implemented. External oracle,
-full IM0 instruction execution and physical sampling remain pending.
+256 ED payloads decode. NMI/IM 1/2 and IM0 RST are implemented. An external 48K
+machine oracle and the Fuse single-instruction CPU corpus are wired
+([001o](../plans/001o-external-oracle.md)); full IM0 instruction execution, complete corpus
+coverage and physical sampling remain pending.
 
 
 | Encoding | Meaning | Count | Nominal T-states |
