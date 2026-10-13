@@ -117,3 +117,8 @@ iterations through bounded Steps; a synthetic copy/search/output program takes
 Explicit unsupported checks now reject 196 ED payloads and the two SCF/CCF base
 bytes. Ignored index-prefix coverage grows to 165 encodings per prefix.
 [001k](plans/001k-ports-and-blocks.md) records sources, corrections and CI evidence.
+
+Port/block-slice evidence: [CI 38331001314](https://github.com/Geraskin/rockula/actions/runs/38331001314),
+all 1,486 tests passed on both Windows/Linux, zero failures/skips/warnings/errors,
+both demos and Linux format passed. [001k](plans/001k-ports-and-blocks.md) records
+test-first, port-only and verified commits and source discrepancies.

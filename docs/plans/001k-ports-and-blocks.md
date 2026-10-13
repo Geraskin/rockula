@@ -1,5 +1,5 @@
 # Work order 001k: Ports and block instructions
-Status: independent expectations before implementation. Branch feat/z80-foundation, PR #6 to main.
+Status: implemented; Windows/Linux CI verified. Branch feat/z80-foundation, PR #6 to main.
 
 ## Scope and sources
 Add immediate IN/OUT (base DB/D3), all 16 ED register-port encodings including
@@ -53,3 +53,29 @@ synthetic programs. Windows/Linux restore/build/tests/demos and Linux format.
 Local SDK absent; record actual CI evidence. No Spectrum devices, contention,
 physical WAIT/IORQ/refresh, external exercisers, Q, IM0 acceptance, full state
 restore, ROM boot, UI or game compatibility claim.
+
+## Verification evidence
+Test-first eab22ad6f514a381397a20f0b2cd6a80053d77b2:
+[CI 38330319202](https://github.com/Geraskin/rockula/actions/runs/38330319202)
+built on Windows/Linux with zero warnings/errors; each reported 71 expected
+failures, 1,410 passes, zero skips and 1,481 total. Logs show unsupported CPU
+commands and the deliberately unrouted compile-only port scaffold.
+Port-only 253015699f83fbd2959cab0954a026ddf41c7061:
+[CI 38330444500](https://github.com/Geraskin/rockula/actions/runs/38330444500)
+passed every port case on both platforms; 45 remaining failures were confined
+to block tests and their prefixed coverage, 1,436 passes, zero skips, 1,481 total.
+Block implementation passed flag/address/bus suites but exposed one synthetic
+program total mistake: three iterations cost 21+21+16=58, not 56. Added a
+literal duration assertion for each of its 17 steps; total is 234 T. No
+production timing constant was changed to fix that expectation.
+
+Verified head 2d2f2ebeefef67e372664f45f995a40eff7e0b67:
+[CI 38331001314](https://github.com/Geraskin/rockula/actions/runs/38331001314).
+Windows/Linux restored and built Release with zero warnings/errors, passed all
+1,486 tests with zero failures/skips and both demos with independent 51/234-T
+expected states. Linux format passed. Actual logs were inspected. Local Markdown
+links and project XML/SDK JSON were valid. No local .NET SDK was available.
+New suites include full zero-count runs (65,536/256 bounded iterations), all
+PC-high X/Y values, ignored ROM writes and an output hook that retains a write
+before failing. External exercisers/pin traces, interactive UI, machine firmware,
+ROM boot and games remain unverified and are not claimed.
