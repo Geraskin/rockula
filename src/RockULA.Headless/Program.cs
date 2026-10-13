@@ -20,7 +20,7 @@ if (args.Length is 3 or 5 && args[0] is "--sna" or "--snapshot")
     return SnapshotRunner.Run(args[1], args[2], frames);
 }
 
-if (args.Length >= 3 && args[0] == "--oracle-rom") return OracleRunner.Run(args);
+if (args.Length >= 2 && args[0] == "--oracle-rom") return OracleRunner.Run(args);
 if (args.Length == 1 && args[0] == "--oracle-smoke") return OracleRunner.Smoke();
 
 if (args.Length == 3 && args[0] == "--oracle-fuse") return FuseTestSuite.Run(args[1], args[2]);
