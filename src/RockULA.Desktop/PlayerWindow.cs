@@ -11,13 +11,14 @@ using RockULA.Core;
 using RockULA.Core.Input;
 using RockULA.Desktop.Devices;
 using RockULA.Desktop.Playback;
+using RockULA.Desktop.Preferences;
 using RockULA.Formats;
 
 namespace RockULA.Desktop;
 
 public sealed class PlayerWindow : Window
 {
-    private readonly TextBlock _status = new() { Text = "Load a 16 KiB 48K ROM, then open a 48K SNA.", TextWrapping = TextWrapping.Wrap };
+    private readonly TextBlock _status = new() { Text = "Load a 16 KiB 48K ROM, then open a 48K SNA/Z80 snapshot.", TextWrapping = TextWrapping.Wrap };
     private readonly TextBlock _deviceStatus = new() { TextWrapping = TextWrapping.Wrap };
     private readonly Image _screen = new() { Stretch = Stretch.Uniform, Focusable = true };
     private readonly WriteableBitmap _bitmap = new(new PixelSize(320, 240), new Vector(96, 96), PixelFormat.Bgra8888, AlphaFormat.Opaque);
@@ -27,6 +28,15 @@ public sealed class PlayerWindow : Window
     private readonly SdlDevices _devices = new();
     private readonly PlayerSession _session;
     private readonly bool _smoke;
+    private readonly PreferencesStore? _preferencesStore;
+    private readonly DispatcherTimer _saveTimer = new() { Interval = TimeSpan.FromMilliseconds(500) };
+    private readonly Slider _volume;
+    private readonly CheckBox _mute;
+    private PlayerPreferences _preferences = new();
+    private bool _restoring;
+    private bool _preferencesDirty;
+    private int _preferenceRevision;
+    private string? _preferencesWarning;
     private RomImage? _rom;
     private JoystickMapping _mapping = new();
     private KeyboardJoystickKeys _keyboard = new();
@@ -47,6 +57,7 @@ public sealed class PlayerWindow : Window
     public PlayerWindow(bool smoke = false)
     {
         _smoke = smoke;
+        _preferencesStore = smoke ? null : new PreferencesStore(PreferencesStore.DefaultPath);
         _session = new PlayerSession(_devices);
         Title = "RockULA! — Rock Your Spectrum.";
         Width = 980; Height = 820; MinWidth = 640; MinHeight = 560;
@@ -61,7 +72,7 @@ public sealed class PlayerWindow : Window
             return button;
         }
         Add("Load ROM", () => LoadAsync(true));
-        Add("Open 48K SNA", () => LoadAsync(false));
+        Add("Open snapshot", () => LoadAsync(false));
         Add("Run / Pause", async () =>
         {
             ReleaseInput();
@@ -72,6 +83,8 @@ public sealed class PlayerWindow : Window
         Add("Controls / USB", ConfigureControls);
         var volume = new Slider { Minimum = 0, Maximum = 100, Value = 50, Width = 100, Margin = new Thickness(8) };
         var mute = new CheckBox { Content = "Mute", Margin = new Thickness(8), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
+        _volume = volume;
+        _mute = mute;
         volume.ValueChanged += async (_, _) => { if (!_closing) await ChangeVolume((int)volume.Value, mute.IsChecked == true); };
         mute.IsCheckedChanged += async (_, _) => { if (!_closing) await ChangeVolume((int)volume.Value, mute.IsChecked == true); };
         toolbar.Children.Add(new TextBlock { Text = "Volume", VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center });
@@ -93,28 +106,93 @@ public sealed class PlayerWindow : Window
             if (_closing) return;
             _closing = true;
             _timer.Stop();
+            _saveTimer.Stop();
             ReleaseInput();
             await _session.CloseAsync();
+            await SavePreferences();
             _devices.Dispose();
             _allowClose = true;
             Close();
         };
         Closed += (_, _) => _bitmap.Dispose();
         _timer.Tick += (_, _) => Tick();
+        _saveTimer.Tick += async (_, _) => { _saveTimer.Stop(); await SavePreferences(); };
         Opened += async (_, _) =>
         {
             _timer.Start();
-            if (!_smoke) return;
+            if (!_smoke) { await Perform(RestorePreferences); return; }
             await Perform(async () =>
             {
                 _rom = RomImage.FromSpectrum48(new byte[16384]);
-                await _session.LoadAsync(_rom, DeviceSmoke.Snapshot());
+                await _session.LoadAsync(_rom, DeviceSmoke.Z80Snapshot());
                 await _session.SetRunningAsync(true);
             });
         };
     }
+    private void PreferencesChanged()
+    {
+        if (_preferencesStore == null || _restoring || _closing) return;
+        _preferencesDirty = true;
+        _preferenceRevision++;
+        _saveTimer.Stop();
+        _saveTimer.Start();
+    }
+    private async Task SavePreferences()
+    {
+        if (_preferencesStore == null || !_preferencesDirty) return;
+        int revision = _preferenceRevision;
+        string? warning = await _preferencesStore.SaveAsync(_preferences);
+        if (warning == null && revision == _preferenceRevision) _preferencesDirty = false;
+        _preferencesWarning = warning;
+    }
+    private async Task RestorePreferences()
+    {
+        if (_preferencesStore == null) return;
+        var saved = await _preferencesStore.LoadAsync();
+        if (_closing) return;
+        _preferences = saved.Value;
+        _preferencesWarning = saved.Warning;
+        _mapping = _preferences.Mapping;
+        _keyboard = _preferences.Keyboard;
+        _mode = _preferences.Mode;
+        _restoring = true;
+        _volume.Value = _preferences.Volume;
+        _mute.IsChecked = _preferences.Muted;
+        _restoring = false;
+        await _session.SetVolumeAsync(_preferences.Volume, _preferences.Muted);
+        try
+        {
+            var device = _preferences.FindJoystick(_devices.Enumerate());
+            if (device != null) { _devices.Select(device.InstanceId); _selectedInstance = device.InstanceId; }
+            else if (_preferences.JoystickGuid.Length != 0)
+                _preferencesWarning = (_preferencesWarning == null ? "" : _preferencesWarning + " · ") + "Saved USB joystick absent or ambiguous; select in Controls.";
+        }
+        catch (Exception ex) { _preferencesWarning = "Saved USB joystick unavailable: " + ex.Message; }
+        if (_preferences.RomPath == null) return;
+        try
+        {
+            await using var input = new FileStream(_preferences.RomPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous);
+            byte[] bytes = new byte[16385];
+            int count = 0;
+            while (count < bytes.Length)
+            {
+                int read = await input.ReadAsync(bytes.AsMemory(count));
+                if (read == 0) break;
+                count += read;
+            }
+            if (_closing) return;
+            var rom = RomImage.FromSpectrum48(bytes.AsSpan(0, count));
+            await _session.LoadAsync(rom);
+            _rom = rom;
+            _notice = "Saved ROM loaded; paused. Open a snapshot or press Run.";
+        }
+        catch (Exception ex) { if (!_closing) _notice = "Saved ROM unavailable; choose Load ROM. " + ex.Message; }
+    }
     private async Task ChangeVolume(int volume, bool muted)
     {
+        if (_restoring) return;
+        _preferences = _preferences with { Volume = volume, Muted = muted };
+        PreferencesChanged();
         try { await _session.SetVolumeAsync(volume, muted); }
         catch (Exception ex) { if (!_closing) _notice = ex.Message; }
     }
@@ -139,7 +217,7 @@ public sealed class PlayerWindow : Window
     private void Tick()
     {
         var reading = _devices.Poll(_mapping);
-        _deviceStatus.Text = _devices.Status + " · " + reading.Status;
+        _deviceStatus.Text = _devices.Status + " · " + reading.Status + (_preferencesWarning == null ? "" : " · " + _preferencesWarning);
         var frame = _session.Latest;
         if (frame.Running && !_busy && IsActive)
         {
@@ -188,24 +266,41 @@ public sealed class PlayerWindow : Window
         _keyboard = controls.Keyboard;
         _mode = controls.Mode;
         _selectedInstance = controls.SelectedInstance;
+        var selected = _devices.Enumerate().FirstOrDefault(x => x.InstanceId == _selectedInstance);
+        _preferences = _preferences with
+        {
+            Mapping = _mapping,
+            Keyboard = _keyboard,
+            Mode = _mode,
+            JoystickGuid = selected?.Guid ?? "",
+            JoystickName = selected?.Name ?? ""
+        };
+        PreferencesChanged();
         ReleaseInput();
         if (resume) await _session.SetRunningAsync(true);
         _screen.Focus();
     }
     private async Task LoadAsync(bool firmware)
     {
-        if (!firmware && _rom == null) throw new InvalidOperationException("Load a 48K ROM first; SNA has no firmware.");
+        if (!firmware && _rom == null) throw new InvalidOperationException("Load a 48K ROM first; snapshots have no firmware.");
         ReleaseInput();
         await _session.SetRunningAsync(false);
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var picker = new FilePickerOpenOptions
         {
-            Title = firmware ? "48K firmware (16384 bytes)" : "48K SNA snapshot (49179 bytes)",
+            Title = firmware ? "48K firmware (16384 bytes)" : "48K SNA/Z80 snapshot",
             AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType(firmware ? "Firmware" : "48K SNA") { Patterns = firmware ? ["*.rom", "*.bin"] : ["*.sna"] }]
-        });
+            FileTypeFilter = [new FilePickerFileType(firmware ? "Firmware" : "48K snapshot") { Patterns = firmware ? ["*.rom", "*.bin"] : ["*.sna", "*.z80"] }]
+        };
+        string? folder = firmware ? Path.GetDirectoryName(_preferences.RomPath) : _preferences.SnapshotDirectory;
+        if (!string.IsNullOrEmpty(folder) && Directory.Exists(folder))
+        {
+            var uri = new UriBuilder { Scheme = Uri.UriSchemeFile, Host = "", Path = Path.GetFullPath(folder) }.Uri;
+            picker.SuggestedStartLocation = await StorageProvider.TryGetFolderFromPathAsync(uri);
+        }
+        var files = await StorageProvider.OpenFilePickerAsync(picker);
         if (_closing || files.Count == 0) return;
         await using var input = await files[0].OpenReadAsync();
-        int maximum = firmware ? 16384 : Sna48Snapshot.FileSize;
+        int maximum = firmware ? 16384 : SpectrumSnapshotReader.MaximumFileSize;
         byte[] bytes = new byte[maximum + 1];
         int count = 0;
         while (count <= maximum)
@@ -221,12 +316,20 @@ public sealed class PlayerWindow : Window
             var selected = RomImage.FromSpectrum48(bytes.AsSpan(0, count));
             await _session.LoadAsync(selected);
             _rom = selected;
-            _notice = "ROM loaded. Open a 48K SNA, or press Run to boot.";
+            _preferences = _preferences with { RomPath = files[0].TryGetLocalPath() };
+            PreferencesChanged();
+            _notice = "ROM loaded. Open a 48K snapshot, or press Run to boot.";
         }
         else
         {
-            var snapshot = Sna48Snapshot.Parse(bytes.AsSpan(0, count));
+            var snapshot = SpectrumSnapshotReader.Parse(Path.GetExtension(files[0].Name), bytes.AsSpan(0, count));
             await _session.LoadAsync(_rom!, snapshot);
+            string? local = files[0].TryGetLocalPath();
+            if (local != null)
+            {
+                _preferences = _preferences with { SnapshotDirectory = Path.GetDirectoryName(local) };
+                PreferencesChanged();
+            }
             await _session.SetRunningAsync(true);
             _screen.Focus();
         }

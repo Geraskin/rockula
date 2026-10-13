@@ -59,6 +59,16 @@ internal static class DeviceSmoke
     }
     private static void Set(int result) { if (result != 0) throw new InvalidOperationException(SdlNative.Error); }
     private static uint GetAudioForSmoke(SdlDevices devices) => devices.AudioDeviceForSmoke;
+    internal static ISpectrum48Snapshot Z80Snapshot()
+    {
+        var source = Snapshot();
+        byte[] bytes = new byte[49182];
+        bytes[7] = 0x80;
+        bytes[9] = 0x90;
+        bytes[29] = 1;
+        source.Ram.CopyTo(bytes.AsSpan(30));
+        return SpectrumSnapshotReader.Parse(".z80", bytes);
+    }
     internal static Sna48Snapshot Snapshot()
     {
         byte[] sna = new byte[Sna48Snapshot.FileSize];

@@ -1,6 +1,6 @@
 using System.Reflection;
-using System.Text;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace RockULA.Desktop.Devices;
 

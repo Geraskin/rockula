@@ -17,11 +17,15 @@ public sealed class PreferencesTests
             Assert.Equal(50, missing.Value.Volume); Assert.Null(missing.Warning); Assert.True(missing.CanSave);
             var expected = new PlayerPreferences
             {
-                RomPath = "C:/ゲーム/48.rom", SnapshotDirectory = "C:/ゲーム",
-                Volume = 73, Muted = true, Mode = SpectrumJoystickMode.Sinclair12345,
+                RomPath = "C:/ゲーム/48.rom",
+                SnapshotDirectory = "C:/ゲーム",
+                Volume = 73,
+                Muted = true,
+                Mode = SpectrumJoystickMode.Sinclair12345,
                 Mapping = new(XAxis: 2, YAxis: -1, FireButton: 7, DeadZone: 4000, InvertX: true, LeftButton: 65),
                 Keyboard = new(Fire: Avalonia.Input.Key.F),
-                JoystickGuid = "00112233445566778899aabbccddeeff", JoystickName = "USB joystick"
+                JoystickGuid = "00112233445566778899aabbccddeeff",
+                JoystickName = "USB joystick"
             };
             Assert.Null(await store.SaveAsync(expected));
             Assert.Equal(expected, (await store.LoadAsync()).Value);

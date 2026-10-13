@@ -75,7 +75,11 @@ public sealed class Z80SnapshotTests
     }
 
     [Theory]
-    [InlineData(0)] [InlineData(29)] [InlineData(49181)] [InlineData(49183)] [InlineData(200001)]
+    [InlineData(0)]
+    [InlineData(29)]
+    [InlineData(49181)]
+    [InlineData(49183)]
+    [InlineData(200001)]
     public void InvalidRawSizesReject(int length)
     {
         byte[] data = new byte[length]; if (length >= 8) data[6] = 1;
@@ -83,7 +87,13 @@ public sealed class Z80SnapshotTests
     }
 
     [Theory]
-    [InlineData(0)] [InlineData(1)] [InlineData(4)] [InlineData(22)] [InlineData(24)] [InlineData(53)] [InlineData(56)]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(4)]
+    [InlineData(22)]
+    [InlineData(24)]
+    [InlineData(53)]
+    [InlineData(56)]
     public void UnsupportedExtendedLengthsReject(int length)
     {
         byte[] data = new byte[100]; data[30] = (byte)length;
@@ -91,7 +101,12 @@ public sealed class Z80SnapshotTests
     }
 
     [Theory]
-    [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)] [InlineData(5)]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(5)]
     public void MalformedV1RleRejectsZeroCountOverflowShortRunMissingMarkerAndSuffix(int fault)
     {
         byte[] header = Raw()[..30]; header[12] = 0x20;
@@ -106,7 +121,11 @@ public sealed class Z80SnapshotTests
     }
 
     [Theory]
-    [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
     public void ExtendedPageCoverageAndLengthsAreStrict(int fault)
     {
         byte[] data = Extended(23);
@@ -119,8 +138,13 @@ public sealed class Z80SnapshotTests
     }
 
     [Theory]
-    [InlineData(34, 4)] [InlineData(34, 1)] [InlineData(37, 128)] [InlineData(37, 4)]
-    [InlineData(36, 255)] [InlineData(59, 255)] [InlineData(60, 255)]
+    [InlineData(34, 4)]
+    [InlineData(34, 1)]
+    [InlineData(37, 128)]
+    [InlineData(37, 4)]
+    [InlineData(36, 255)]
+    [InlineData(59, 255)]
+    [InlineData(60, 255)]
     public void UnsupportedHardwareOrPagedExtensionsReject(int offset, byte value)
     {
         byte[] data = Extended(54); data[offset] = value;

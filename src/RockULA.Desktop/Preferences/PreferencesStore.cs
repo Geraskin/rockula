@@ -89,6 +89,7 @@ public sealed class PreferencesStore
         if (value.Version != 1 || value.Volume is < 0 or > 100 || !Enum.IsDefined(value.Mode)
             || value.Mapping == null || value.Keyboard == null) throw new ArgumentException("Invalid settings schema, volume or controls.");
         if (value.RomPath?.Length > 4096 || value.SnapshotDirectory?.Length > 4096
+            || value.RomPath?.Contains('\0') == true || value.SnapshotDirectory?.Contains('\0') == true
             || value.JoystickName == null || value.JoystickName.Length > 256 || value.JoystickGuid == null
             || (value.JoystickGuid.Length != 0 && (value.JoystickGuid.Length != 32 || !value.JoystickGuid.All(Uri.IsHexDigit))))
             throw new ArgumentException("Invalid saved path or joystick identity.");
