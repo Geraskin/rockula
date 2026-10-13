@@ -1,9 +1,9 @@
-using RockULA.Core.Input;
+using System.Collections.Concurrent;
 using RockULA.Core;
+using RockULA.Core.Input;
 using RockULA.Desktop.Devices;
 using RockULA.Desktop.Playback;
 using RockULA.Formats;
-using System.Collections.Concurrent;
 
 namespace RockULA.Desktop.Tests;
 
@@ -116,6 +116,29 @@ public sealed class PlaybackTests
     }
 
     [Fact]
+    public async Task RealGuestBeeperProducesPcmAndMuteClearsOldOutputWithoutResettingGuestTime()
+    {
+        byte[] rom = new byte[16384];
+        new byte[] { 0x3E, 0x10, 0xD3, 0xFE, 0xEE, 0x10, 0x18, 0xFA }.CopyTo(rom, 0);
+        var audio = new FakeAudio();
+        var session = new PlayerSession(audio);
+        try
+        {
+            await session.LoadAsync(RomImage.FromSpectrum48(rom));
+            await session.SetRunningAsync(true);
+            await Until(() => audio.Pcm.Any(x => x.Any(sample => sample != 0)));
+            ulong beforeMute = session.Latest.TStates;
+            await session.SetVolumeAsync(50, true);
+            await Until(() => !audio.Pcm.IsEmpty);
+            Assert.All(audio.Pcm, block => Assert.All(block, sample => Assert.Equal((short)0, sample)));
+            Assert.True(session.Latest.TStates >= beforeMute);
+            await session.SetVolumeAsync(100, false);
+            await Until(() => audio.Pcm.Any(x => x.Any(sample => sample != 0)));
+        }
+        finally { await session.CloseAsync(); }
+    }
+
+    [Fact]
     public async Task OutputFailureFallsBackToSilentPacingWithoutStoppingCpu()
     {
         var audio = new FakeAudio { FailEnqueue = true };
@@ -140,6 +163,7 @@ public sealed class PlaybackTests
     {
         private int _queued;
         public bool FailEnqueue { get; init; }
+        public ConcurrentQueue<short[]> Pcm { get; } = new();
         public ConcurrentQueue<int> WriterThreads { get; } = new();
         public bool Available => true;
         public int QueuedSamples => Volatile.Read(ref _queued);
@@ -147,12 +171,14 @@ public sealed class PlaybackTests
         {
             WriterThreads.Enqueue(Environment.CurrentManagedThreadId);
             if (FailEnqueue) throw new IOException("Synthetic audio output failure");
+            Pcm.Enqueue(samples.AsSpan(0, count).ToArray());
             Interlocked.Add(ref _queued, count);
         }
         public void Reset(bool playing)
         {
             WriterThreads.Enqueue(Environment.CurrentManagedThreadId);
             Interlocked.Exchange(ref _queued, 0);
+            Pcm.Clear();
         }
     }
 }

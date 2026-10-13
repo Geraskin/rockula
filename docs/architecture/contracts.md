@@ -79,7 +79,7 @@ ED word/I/R/nibble operation sequencing and the LD A,I/R interrupt limitation
 follow [ADR 0011](../decisions/0011-ed-data-boundaries.md).
 
 Port hooks and per-iteration block retirement/fault state follow
-[ADR 0012](../decisions/0012-port-and-block-boundaries.md). Hosts own port decoding.
+[ADR 0012](../decisions/0012-port-and-block-boundaries.md). Machine buses own port decoding; the CPU has no Spectrum device rules.
 
 ## Implemented playback contract (001m)
 PlayerSession owns CPU/RAM/sampler mutation on one background thread. A bounded

@@ -75,7 +75,7 @@ dotnet run --project src/RockULA.Headless -- --sna local-data/48.rom local-data/
 
 Start with [AGENTS.md](AGENTS.md), [architecture](docs/architecture/overview.md),
 [roadmap](docs/plans/roadmap.md), [opcode coverage](docs/architecture/z80-coverage.md) and
-[the current slice](docs/plans/001l-first-snapshot-player.md).
+[the current slice](docs/plans/001m-audio-and-usb-joystick.md).
 [Development](docs/development.md) explains commands and branching.
 [Testing](docs/testing.md) describes what each check can prove.
 
