@@ -39,6 +39,10 @@ Cover every implemented opcode family, taken/untaken conditions, prefix combinat
 values. Test arithmetic exhaustively where useful. Check memory side effects, flags (including
 model-specific undocumented ones), register/R state, nominal cycles and bus ordering.
 A register-only oracle is insufficient for contention. ZEX-style success is useful but incomplete.
+Never restate the production rule as the expected value: a test that reimplements the same formula
+passes even when both are wrong. The SCF/CCF X/Y defect (fixed in b4e7c72) survived a 65,536-vector
+sweep for exactly that reason and was found only by the external Fuse corpus. Anchor at least one
+case per rule to an independently produced value, as `Z80CompletionTests` now does for 37/3F.
 
 Compare traces at the first divergent event. When an oracle disagrees, verify its CPU model and
 source; do not assume any existing emulator is exact in every detail.
