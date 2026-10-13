@@ -72,8 +72,8 @@ public sealed class PlayerWindow : Window
         Add("Controls / USB", ConfigureControls);
         var volume = new Slider { Minimum = 0, Maximum = 100, Value = 50, Width = 100, Margin = new Thickness(8) };
         var mute = new CheckBox { Content = "Mute", Margin = new Thickness(8), VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center };
-        volume.ValueChanged += async (_, _) => { if (!_closing) await _session.SetVolumeAsync((int)volume.Value, mute.IsChecked == true); };
-        mute.IsCheckedChanged += async (_, _) => { if (!_closing) await _session.SetVolumeAsync((int)volume.Value, mute.IsChecked == true); };
+        volume.ValueChanged += async (_, _) => { if (!_closing) await ChangeVolume((int)volume.Value, mute.IsChecked == true); };
+        mute.IsCheckedChanged += async (_, _) => { if (!_closing) await ChangeVolume((int)volume.Value, mute.IsChecked == true); };
         toolbar.Children.Add(new TextBlock { Text = "Volume", VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center });
         toolbar.Children.Add(volume); toolbar.Children.Add(mute);
         var footer = new StackPanel { Margin = new Thickness(12), Spacing = 6 };
@@ -112,6 +112,11 @@ public sealed class PlayerWindow : Window
                 await _session.SetRunningAsync(true);
             });
         };
+    }
+    private async Task ChangeVolume(int volume, bool muted)
+    {
+        try { await _session.SetVolumeAsync(volume, muted); }
+        catch (Exception ex) { if (!_closing) _notice = ex.Message; }
     }
     private async Task Perform(Func<Task> action)
     {

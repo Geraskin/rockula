@@ -11,7 +11,7 @@ internal static class SdlNative
     private static IntPtr Resolve(string name, Assembly assembly, DllImportSearchPath? search)
     {
         if (name != Library) return IntPtr.Zero;
-        string[] names = OperatingSystem.IsWindows() ? ["SDL2.dll"] : OperatingSystem.IsMacOS() ? ["libSDL2.dylib"] : ["libSDL2.so", "libSDL2-2.0.so.0"];
+        string[] names = OperatingSystem.IsWindows() ? ["SDL2.dll"] : OperatingSystem.IsMacOS() ? ["libSDL2.dylib"] : ["libSDL2.so", "libSDL2-2.0.so", "libSDL2-2.0.so.0"];
         string rid = (OperatingSystem.IsWindows() ? "win" : OperatingSystem.IsMacOS() ? "osx" : "linux") + "-" + RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant();
         foreach (string file in names)
         {

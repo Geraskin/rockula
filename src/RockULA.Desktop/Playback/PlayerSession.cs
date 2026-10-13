@@ -202,6 +202,22 @@ public sealed class PlayerSession
                 }
             }
         }
+        catch (Exception ex)
+        {
+            _running = false;
+            _stopping = true;
+            try { ResetDelivery(false); } catch (Exception) { }
+            Volatile.Write(ref _latest, new(new uint[320 * 240], 0, 0, 0, false, "Owner stopped: " + ex.Message, ++_version));
+            lock (_commandLock)
+            {
+                _closeRequested = 1;
+                while (_commands.TryDequeue(out var command))
+                {
+                    command.Completion.TrySetException(ex);
+                    _slots.Release();
+                }
+            }
+        }
         finally
         {
             _closed.TrySetResult();
