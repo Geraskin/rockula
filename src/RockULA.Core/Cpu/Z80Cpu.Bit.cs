@@ -18,13 +18,13 @@ public sealed partial class Z80Cpu
             target == 6 ? (byte)(Registers.WZ >> 8) : value);
         if (group == 1)
         {
-            Registers.F = flags;
+            SetFlags(flags);
             return;
         }
 
         WriteRegister(target, result);
         // A failed write can retain memory effects, but does not commit these flags.
-        if (group == 0) Registers.F = flags;
+        if (group == 0) SetFlags(flags);
     }
 
     private static (byte Result, byte Flags) CalculateBitOperation(byte opcode, byte value, byte incomingFlags, byte xy)

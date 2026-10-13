@@ -125,7 +125,7 @@ public sealed partial class Z80Cpu
                 WriteMemory(effective, result);
             }
             else WriteIndexRegister(target, index, result);
-            Registers.F = flags;
+            SetFlags(flags);
             return;
         }
         if (TryExecuteMisc(opcode, instructionAddress, index)) return;
@@ -174,6 +174,6 @@ public sealed partial class Z80Cpu
             int target = opcode & 7;
             if (target != 6) WriteRegister(target, result);
         }
-        Registers.F = flags;
+        if ((opcode >> 6) is 0 or 1) SetFlags(flags);
     }
 }

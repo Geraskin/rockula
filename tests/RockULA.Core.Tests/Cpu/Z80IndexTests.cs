@@ -528,7 +528,7 @@ public sealed class Z80IndexTests
     [Theory]
     [InlineData(0xDD)]
     [InlineData(0xFD)]
-    public void EdCancellationPreservesIndexAndRejectsEveryUnsupportedPayload(int prefix)
+    public void EdCancellationPreservesIndexForAllPayloads(int prefix)
     {
         for (int payload = 0; payload < 256; payload++)
         {
@@ -538,7 +538,6 @@ public sealed class Z80IndexTests
             bus.Memory[2] = (byte)payload;
             var r = new Z80Registers { IX = 0x1234, IY = 0x5678, A = 1, SP = 0x8000 };
             var cpu = new Z80Cpu(bus, r);
-            if (true)
             {
                 ulong expected = payload is 0x45 or 0x4D ? 18UL
                     : payload is 0x42 or 0x4A or 0x52 or 0x5A or 0x62 or 0x6A or 0x72 or 0x7A ? 19UL

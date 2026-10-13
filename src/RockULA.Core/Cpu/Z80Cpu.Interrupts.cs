@@ -12,7 +12,7 @@ public sealed partial class Z80Cpu
                 return false;
             }
 
-            if (Registers.InterruptMode is not (1 or 2))
+            if (Registers.InterruptMode > 2)
             {
                 throw new NotSupportedException($"Interrupt response for IM {Registers.InterruptMode} is not implemented.");
             }
@@ -36,9 +36,12 @@ public sealed partial class Z80Cpu
             ? new Z80BusCycle(Z80BusCycleKind.OpcodeFetch, interruptedPc, 4, 3)
             : new Z80BusCycle(Z80BusCycleKind.InterruptAcknowledge, interruptedPc, 6, 5));
         IncrementRefresh();
+        if (!nmi && Registers.InterruptMode == 0 && (vector & 0xC7) != 0xC7)
+            throw new NotSupportedException("IM0 currently accepts acknowledged RST opcodes only.");
         Internal(interruptedPc, 1);
         Push(interruptedPc);
         Registers.PC = nmi ? (ushort)0x0066
+            : Registers.InterruptMode == 0 ? (ushort)(vector & 0x38)
             : Registers.InterruptMode == 2 ? ReadWord((ushort)((Registers.I << 8) | vector))
             : (ushort)0x0038;
         Registers.WZ = Registers.PC;

@@ -22,7 +22,7 @@ public sealed partial class Z80Cpu
             Internal(instructionAddress, 4);
             Internal(instructionAddress, 3);
             Registers.HL = result;
-            Registers.F = flags;
+            SetFlags(flags);
             Registers.WZ = Increment(before);
             return true;
         }
@@ -50,7 +50,7 @@ public sealed partial class Z80Cpu
                     break;
                 default:
                     Registers.A = opcode == 0x57 ? Registers.I : Registers.R;
-                    Registers.F = (byte)(ResultFlags(Registers.A) | (Registers.Iff2 ? 4 : 0) | (Registers.F & 1));
+                    SetFlags((byte)(ResultFlags(Registers.A) | (Registers.Iff2 ? 4 : 0) | (Registers.F & 1)));
                     break;
             }
             return true;
@@ -69,7 +69,7 @@ public sealed partial class Z80Cpu
             WriteMemory(address, memory);
             // Even a ROM that ignores this write commits the computed accumulator.
             Registers.A = accumulator;
-            Registers.F = flags;
+            SetFlags(flags);
             Registers.WZ = Increment(address);
             return true;
         }

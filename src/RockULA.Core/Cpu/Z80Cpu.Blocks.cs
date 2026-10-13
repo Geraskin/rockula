@@ -37,14 +37,14 @@ public sealed partial class Z80Cpu
             }
             Registers.HL = nextHl;
             Registers.BC = count;
-            Registers.F = flags;
+            SetFlags(flags);
             if (repeating && count != 0 && (operation == 0 || accumulator != value))
             {
                 Internal(operation == 0 ? destination : source, 5);
                 ushort repeatedPc = unchecked((ushort)(Registers.PC - 2));
                 Registers.PC = repeatedPc;
                 Registers.WZ = Increment(repeatedPc);
-                Registers.F = (byte)((flags & ~0x28) | ((repeatedPc >> 8) & 0x28));
+                SetFlags((byte)((flags & ~0x28) | ((repeatedPc >> 8) & 0x28)));
             }
             return true;
         }
@@ -75,7 +75,7 @@ public sealed partial class Z80Cpu
         byte ioFlags = (byte)(ResultFlags(afterB) | ((data & 0x80) >> 6)
             | (sumIo > 0xFF ? 0x11 : 0) | ParityFlag((byte)((sumIo & 7) ^ afterB)));
         Registers.HL = nextHl;
-        Registers.F = ioFlags;
+        SetFlags(ioFlags);
         Registers.WZ = unchecked((ushort)(port + direction));
         if (repeating && afterB != 0)
         {
@@ -92,7 +92,7 @@ public sealed partial class Z80Cpu
                 ioFlags = (byte)((ioFlags & ~0x10) | (half ? 0x10 : 0));
             }
             // Banks' intermediate-iteration correction; B is already decremented.
-            Registers.F = (byte)(ioFlags ^ ParityFlag((byte)(parityOperand & 7)) ^ 4);
+            SetFlags((byte)(ioFlags ^ ParityFlag((byte)(parityOperand & 7)) ^ 4));
         }
         return true;
     }

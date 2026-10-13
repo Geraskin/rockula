@@ -36,7 +36,7 @@ public sealed partial class Z80Cpu
         {
             byte value = ReadPort(port);
             if (register != 6) WriteRegister(register, value);
-            Registers.F = (byte)(ResultFlags(value) | ParityFlag(value) | (Registers.F & 1));
+            SetFlags((byte)(ResultFlags(value) | ParityFlag(value) | (Registers.F & 1)));
         }
         else WritePort(port, register == 6 ? (byte)0 : ReadRegister(register));
         Registers.WZ = Increment(port);

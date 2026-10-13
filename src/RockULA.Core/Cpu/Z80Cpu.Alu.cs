@@ -28,7 +28,7 @@ public sealed partial class Z80Cpu
             if (decrement) flags |= 0x02;
             if (register == 6) Internal(Registers.HL, 1);
             WriteRegister(register, result);
-            Registers.F = flags;
+            SetFlags(flags);
             return true;
         }
 
@@ -80,7 +80,7 @@ public sealed partial class Z80Cpu
             }
         }
 
-        Registers.F = flags;
+        SetFlags(flags);
     }
 
     private static byte ResultFlags(byte result) => (byte)((result & 0xA8) | (result == 0 ? 0x40 : 0));

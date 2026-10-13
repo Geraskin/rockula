@@ -4,6 +4,7 @@ namespace RockULA.Core.Cpu;
 public sealed partial class Z80Cpu
 {
     private readonly IZ80Bus _bus;
+    private bool _flagsWritten;
 
     public Z80Cpu(IZ80Bus bus, Z80Registers? registers = null)
     {
@@ -57,6 +58,7 @@ public sealed partial class Z80Cpu
         {
             if (TryAcceptInterrupt())
             {
+                Registers.Q = 0;
                 return checked(_bus.TStates - start);
             }
 
@@ -70,11 +72,14 @@ public sealed partial class Z80Cpu
             IncrementRefresh();
             if (!IsHalted)
             {
+                _flagsWritten = false;
                 byte terminal = opcode is 0xDD or 0xFD ? ExecuteIndex(opcode, address) : opcode;
                 if (opcode is not (0xDD or 0xFD)) Execute(opcode, address);
                 // Retire only after successful execution. Repeated EI renews inhibition.
                 IsEiDelayActive = terminal == 0xFB;
+                Registers.Q = _flagsWritten ? Registers.F : (byte)0;
             }
+            if (IsHalted) Registers.Q = 0;
             return checked(_bus.TStates - start);
         }
         catch
@@ -95,6 +100,12 @@ public sealed partial class Z80Cpu
         IsInterruptLineAsserted = false;
         IsNmiLineAsserted = false;
         IsNmiPending = false;
+    }
+
+    private void SetFlags(byte flags)
+    {
+        Registers.F = flags;
+        _flagsWritten = true;
     }
 
     private void Execute(byte opcode, ushort address, byte? indexPrefix = null)

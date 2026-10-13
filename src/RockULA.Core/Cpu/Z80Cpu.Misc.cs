@@ -27,7 +27,7 @@ public sealed partial class Z80Cpu
             Internal(instructionAddress, 3);
             WriteHl(index, result);
             Registers.WZ = Increment(before);
-            Registers.F = flags;
+            SetFlags(flags);
             return true;
         }
 
@@ -39,12 +39,19 @@ public sealed partial class Z80Cpu
             case 0x1F:
                 RotateAccumulator(opcode);
                 return true;
+            case 0x37:
+            case 0x3F:
+                int xy = ((Registers.Q ^ Registers.F) | Registers.A) & 0x28;
+                int carry = Registers.F & 1;
+                SetFlags((byte)((Registers.F & 0xC4) | xy
+                    | (opcode == 0x37 ? 1 : carry == 0 ? 1 : 0x10)));
+                return true;
             case 0x27:
                 DecimalAdjust();
                 return true;
             case 0x2F:
                 Registers.A = unchecked((byte)~Registers.A);
-                Registers.F = (byte)((Registers.F & 0xC5) | (Registers.A & 0x28) | 0x12);
+                SetFlags((byte)((Registers.F & 0xC5) | (Registers.A & 0x28) | 0x12));
                 return true;
             case 0x08:
                 (Registers.AF, Registers.AlternateAF) = (Registers.AlternateAF, Registers.AF);
@@ -98,7 +105,7 @@ public sealed partial class Z80Cpu
         int incoming = (opcode & 0x10) != 0 ? Registers.F & 1 : carry;
         byte result = unchecked((byte)(right ? (before >> 1) | (incoming << 7) : (before << 1) | incoming));
         Registers.A = result;
-        Registers.F = (byte)((Registers.F & 0xC4) | (result & 0x28) | carry);
+        SetFlags((byte)((Registers.F & 0xC4) | (result & 0x28) | carry));
     }
 
     private void DecimalAdjust()
@@ -112,7 +119,7 @@ public sealed partial class Z80Cpu
         byte flags = (byte)(ResultFlags(result) | ParityFlag(result) | (Registers.F & 2) | (carry ? 1 : 0));
         if (((before ^ result) & 0x10) != 0) flags |= 0x10;
         Registers.A = result;
-        Registers.F = flags;
+        SetFlags(flags);
     }
 
     private static byte ParityFlag(byte value)
