@@ -41,7 +41,9 @@ before accepting it. Do not relicense incompatible upstream work under MIT.
 
 External test-vector data, ZEX binaries and oracle executables also need provenance review.
 Keep restricted or unreviewed assets outside Git. Commit manifests and reproducible acquisition
-instructions only after their terms and source have been checked.
+instructions only after their terms and source have been checked. The oracle ROM, replacement
+firmware and CPU corpus currently used, with their licences, SHA-256 values and scope, are
+recorded in [testing](testing.md#external-oracle-suite); none of them is committed.
 
 SDL2 is used only for host audio and game joystick input, not emulator execution.
 The pinned license notice is preserved in [third-party notices](../THIRD_PARTY_NOTICES.md).

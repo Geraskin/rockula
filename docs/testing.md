@@ -25,6 +25,7 @@ on Linux. It does not launch the desktop UI or prove Spectrum/game compatibility
 | Formats | Synthetic SNA/Z80/TAP fixtures and negative cases | Bounded decode; atomic failed-load behavior |
 | Raster/audio | Exact pixel transitions and deterministic PCM hashes | Profile, phase and sample rate identified |
 | External CPU | Pinned single-step corpus, reference traces, exercisers | Source/license/hash recorded; no silent omissions |
+| External machine | Third-party diagnostic ROM PASS report through `--oracle-rom` | Asset source/license/SHA-256 recorded; explicit invocation, never a fabricated CI pass |
 | Compatibility | User-supplied images with scripted input and expected behavior | Build/profile/ROM/asset hash and accuracy policy |
 | Host | Actual input/video/audio, pause/load/reset/close | Real interactive check on claimed platform |
 
@@ -38,6 +39,10 @@ Cover every implemented opcode family, taken/untaken conditions, prefix combinat
 values. Test arithmetic exhaustively where useful. Check memory side effects, flags (including
 model-specific undocumented ones), register/R state, nominal cycles and bus ordering.
 A register-only oracle is insufficient for contention. ZEX-style success is useful but incomplete.
+Never restate the production rule as the expected value: a test that reimplements the same formula
+passes even when both are wrong. The SCF/CCF X/Y defect (fixed in 45e190a) survived a 65,536-vector
+sweep for exactly that reason and was found only by the external Fuse corpus. Anchor at least one
+case per rule to an independently produced value, as `Z80CompletionTests` now does for 37/3F.
 
 Compare traces at the first divergent event. When an oracle disagrees, verify its CPU model and
 source; do not assume any existing emulator is exact in every detail.
@@ -48,6 +53,72 @@ Store downloaded corpora/user files under ignored `local-data/`. A committed man
 name, source URL/revision, license/redistribution basis, SHA-256, expected scope and acquisition
 instructions, not embedded copyrighted content. No automatic game/firmware download in CI.
 A new corpus runner must enforce size/budget bounds and summarize tested/skipped/failed counts.
+
+## External oracle suite
+Every expected value in the local suite is produced by the implementation under test, so it
+cannot expose a shared misunderstanding between the code and its own tests. The headless host
+therefore exposes an explicitly-invoked suite that boots one user-supplied ROM on the real 48K
+machine:
+
+```sh
+dotnet run --project src/RockULA.Headless -c Release -- \
+  --oracle-rom local-data/zx-diagnostics-v0.37-48k.rom --settle 1500 --keys 1 --frames 4000 \
+  --png local-data/oracle-zxdiag.png
+```
+
+It settles for `--settle` frames (default 100), applies an optional comma-separated `--keys`
+script (digits `0`-`9`, `enter`, `space`, `h`/`p`/`r`/`i`/`n`/`t`) holding each key for 8
+frames and then releasing it, runs `--frames` further frames, renders the 320x240 framebuffer
+and prints `frames`, `T`, `PC`, `border` and `FramebufferSHA256`. A missing or oversized ROM
+returns exit 1 and an unknown key token returns exit 2, both with a message on stderr; an
+unavailable input is never reported as a pass. The hash is deterministic for identical inputs
+but depends on the total frame count, because the renderer flashes attributes; it is produced
+by the implementation under test, so it pins a regression and is not accuracy evidence.
+
+Assets are not committed; keep them in ignored `local-data/`.
+
+| Asset | Source (retrieved) | License | SHA-256 | Scope |
+| --- | --- | --- | --- | --- |
+| `zx-diagnostics-v0.37-48k.rom` | [brendanalford/zx-diagnostics](https://github.com/brendanalford/zx-diagnostics) release v0.37, `testrom.bin` (2026-10-13) | LGPL-3.0 | `e38354b6b8f393a65a2512cb622c6f255a4d015e9022244a873f0c6c2b0cf464` | 48K RAM, ULA, keyboard, sound, video and Z80 functional PASS/FAIL |
+| `opense-3.1.2.rom` | [knaxly-dev/zed-open-roms](https://github.com/knaxly-dev/zed-open-roms) `opense-3.1.2.rom`; upstream OpenSE BASIC, Andrew S. Owen, 2012 (2026-10-13) | GPL-2.0 | `45790ed8d7baac284b41fe1e35bcdd0c24e754c191e6fdcbaff4df2d1e44270d` | redistributable 48K firmware for the ROM-boot path |
+| `tests.in` + `tests.expected` | [floooh/chips-test](https://github.com/floooh/chips-test) `tests/fuse/`, the Fuse Z80 test corpus (2026-10-13); the historical `tom-seddon/fuse-emulator-code` path no longer resolves | GPL-2.0 (Fuse emulator; the mirrored data files carry no separate licence text) | `fec4e44dfa4fa889f976aa546a774d48c2a7366ab12312d449f79e85e68d77d7` / `207dc604db5d2a0a49ebd40e1bcb985a919e7a6e3dea1a52884ee05f9a1bf005` | single-instruction CPU corpus: registers, T-states and memory |
+
+Observed on Linux, .NET SDK 10.0.401, 2026-10-13 (`feat/oracle-diagnostics`):
+
+- `--oracle-rom local-data/zx-diagnostics-v0.37-48k.rom --settle 1500 --keys 1 --frames 4000`
+  printed `frames=5510 T=385082880 PC=0943 border=7 FramebufferSHA256=AD984EDADD28FD09C4E351DC72D78A48278FDE50E3201D1C9CE92FA143863723`. The
+  scripted key selected 48K and the screen reported `Lower 16K RAM tests`, `Upper RAM
+  Walk/Inversion/March/Random` and `Testing interrupts` all `PASS`, then
+  `### Testing Completed ###`. Without a key the ROM completes after its own 20-second fallback
+  (`No selection made, assuming 48K mode.`) with the same PASS results.
+- `--oracle-rom local-data/opense-3.1.2.rom --frames 2000` printed `frames=2100 T=146764801
+  PC=10A6 border=0 FramebufferSHA256=69DCE375951CBF8D529B96451429AE62CB40F8D46E963F7A86EDA78B6C347D09`
+  with the ROM's own banner `© 1981 Nine Tiles Networks Ltd`; two runs produced the same hash.
+- A missing ROM path returned exit 1 and `--keys zzz` returned exit 2.
+- `--oracle-fuse local-data/tests.in local-data/tests.expected` runs the Fuse single-instruction
+  corpus on a flat 64 KiB bus and reported `tests=1335 passed=1326 failed=1 knownXyDivergence=8
+  skipped=0`. Two of the original failures (`37_1` SCF, `3f` CCF) exposed a real defect: X/Y were
+  derived from the incoming F instead of the flags the instruction produces; the fix is in
+  `Z80Cpu.Misc.cs` and the corpus values are an independent anchor test. The remaining failure is
+  the HALT PC convention (`76`), tracked in [001o](plans/001o-external-oracle.md) pending
+  hardware-level evidence. The eight `knownXyDivergence` entries are the `BIT n,(HL)` cases the
+  reference integration blacklists as "FUSE handles those wrong". Those eight still compare every
+  other register, memory byte, T-state and HALT/IFF/IM state; only AF bits 3/5 are excused, and a
+  case that mismatches anywhere else is counted as a real failure. Contention events (MC/PC) and
+  bus read/write events are not compared: this machine has no contention model. The runner exits
+  non-zero while the HALT divergence is open.
+- `--oracle-smoke` runs the same report path on a self-authored dummy ROM (no external asset) and
+  prints `frames=60 T=4193280 PC=FF00 border=0 FramebufferSHA256=4D856B7A9008759AFF68A0D1CDE95B895FB952761719549F339D00D6EDA9F543`;
+  CI runs it so the command cannot rot. It is a tool-path check, not firmware and not accuracy
+  evidence.
+- Manual check on OpenSE BASIC: a self-authored guest program calling the ROM's print entry
+  (`CALL 0x0010` -> `JP 0x15F2`) printed a character and scrolled the screen, and one 6 KiB scroll
+  cost about two frames, matching real hardware. The ROM also reports `ERR_NR` OK after an ENTER.
+  These are session observations with a host-side guest program, not a committed suite.
+
+ULA contention, floating bus, exact raster timing and AY are outside both oracles and remain
+unverified. The diagnostic ROM's `/M1 bad?` line reports its absent diagnostic board, not this
+machine.
 
 ## Determinism and state
 Same firmware/profile/state, events and T-state budget must produce the same register/RAM/frame/

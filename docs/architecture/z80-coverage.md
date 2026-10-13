@@ -1,7 +1,9 @@
 # Implemented Z80 coverage
 Status: all 252 standalone base encodings, all CB/indexed-CB payloads and all
-256 ED payloads decode. NMI/IM 1/2 and IM0 RST are implemented. External oracle,
-full IM0 instruction execution and physical sampling remain pending.
+256 ED payloads decode. NMI/IM 1/2 and IM0 RST are implemented. An external 48K
+machine oracle and the Fuse single-instruction CPU corpus are wired
+([001o](../plans/001o-external-oracle.md)); full IM0 instruction execution, complete corpus
+coverage and physical sampling remain pending.
 
 
 | Encoding | Meaning | Count | Nominal T-states |
@@ -70,7 +72,9 @@ ED is a prefix, not a standalone base instruction. 78 payloads are semantic
 encodings (including NEG/IM/RETN aliases); the other 178 are hardware two-fetch
 NOPs. Only ED4D notifies RETI completion; RETN aliases restore IFF1 without it.
 SCF/CCF (37/3F) execute in 4 T (8 T with an ignored index prefix).
-Their X/Y flags use `((Q xor F) or A) & 28`. Q becomes F after an actual
+Their X/Y flags use `((Q xor F') or A) & 28`, where F' is the flags this
+instruction produces (carry, H and N already applied), not the incoming F; see the
+Fuse Z80 corpus tests 37_1 and 3f. Q becomes F after an actual
 flag-generating operation, even if F is unchanged; otherwise Q becomes zero.
 POP AF/EX AF and RES/SET are non-generators. Q retires after successful whole
 instructions; reset/import clears it, while faults retain prior Q. See

@@ -24,14 +24,32 @@ public sealed class Z80CompletionTests
                 r.Q = priorGenerator ? (byte)f : (byte)0;
                 r.WZ = 0x1234;
                 bus.Events.Clear();
-                int xy = (a | (priorGenerator ? 0 : f)) & 0x28;
-                int flags = (f & 0xC4) | xy | (opcode == 0x37 ? 1 : f % 2 == 0 ? 1 : 16);
+                int q = priorGenerator ? f : 0;
+                int result = (f & 0xC4) | (opcode == 0x37 ? 1 : f % 2 == 0 ? 1 : 16);
+                int xy = ((q ^ result) | a) & 0x28;
+                int flags = result | xy;
                 Assert.Equal(4UL, cpu.Step());
                 Assert.Equal((byte)flags, r.F);
                 Assert.Equal((byte)flags, r.Q);
                 Assert.Equal((byte)a, r.A);
                 Assert.Equal((ushort)0x1234, r.WZ);
             }
+    }
+
+    [Theory]
+    [InlineData(0x37, 0x00, 0xFF, 0xC5)] // Fuse Z80 corpus test 37_1 (SCF)
+    [InlineData(0x3F, 0x00, 0x5B, 0x50)] // Fuse Z80 corpus test 3f (CCF)
+    public void CarryInstructionsMatchIndependentCorpusValues(int opcode, byte a, byte f, byte expected)
+    {
+        var bus = new RecordingBus();
+        bus.Memory[0] = (byte)opcode;
+        var cpu = new Z80Cpu(bus);
+        var r = cpu.Registers;
+        r.A = a;
+        r.F = f;
+        r.Q = 0;
+        cpu.Step();
+        Assert.Equal(expected, r.F);
     }
 
     [Theory]

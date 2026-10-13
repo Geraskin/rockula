@@ -5,7 +5,9 @@ Q is a mutable byte in the register file, initialized to zero. Explicit CPU flag
 commits mark an ALU flag generator; value comparison is insufficient. Whole
 instruction retirement copies F to Q for generators or clears Q for non-generators.
 Prefix fetches never retire Q. POP AF/EX AF and bit RES/SET clear Q even though
-AF can change. SCF/CCF consume prior Q; completed HALT fetch/interrupt clears it.
+AF can change. SCF/CCF consume prior Q against the flags those instructions produce
+rather than the incoming F (Fuse Z80 corpus tests 37_1 and 3f); completed HALT
+fetch/interrupt clears it.
 A fault preserves pre-instruction Q with any already committed F/bus effects.
 
 Undefined ED opcodes become two-fetch NOPs, as hardware specifies; this is a

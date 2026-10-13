@@ -41,10 +41,12 @@ public sealed partial class Z80Cpu
                 return true;
             case 0x37:
             case 0x3F:
-                int xy = ((Registers.Q ^ Registers.F) | Registers.A) & 0x28;
+                // X/Y come from the flags this instruction produces, not from the incoming F.
+                // Independent evidence: Fuse Z80 corpus tests 37_1 (SCF) and 3f (CCF).
                 int carry = Registers.F & 1;
-                SetFlags((byte)((Registers.F & 0xC4) | xy
-                    | (opcode == 0x37 ? 1 : carry == 0 ? 1 : 0x10)));
+                int result = (Registers.F & 0xC4) | (opcode == 0x37 ? 1 : carry == 0 ? 1 : 0x10);
+                int xy = ((Registers.Q ^ result) | Registers.A) & 0x28;
+                SetFlags((byte)(result | xy));
                 return true;
             case 0x27:
                 DecimalAdjust();
