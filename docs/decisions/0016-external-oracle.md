@@ -63,7 +63,12 @@ raxoft/z80test ships only as `.tap` and hard-codes the stock 48K ROM entry point
 CHAN-OPEN and `rst 0x10`), so it needs the copyrighted Sinclair ROM plus a tape reader we do not
 have, and the .NET packaging of the same vectors (MrKWatkins.EmulatorTestSuites) is GPL-3.0
 against this MIT repository. Neither can be adopted without the owner's licensing and asset
-decision.
+decision. A first CPU corpus is wired instead through `--oracle-fuse`, which reads the GPL-2.0
+Fuse Z80 corpus with our own MIT reader; it currently reports three open divergences (SCF/CCF
+undocumented X/Y and the HALT PC convention) plus eight separately counted `BIT n,(HL)` X/Y
+cases the reference integration blacklists. Those are tracked in
+[work order 001o](../plans/001o-external-oracle.md) and must be resolved against the cited
+sources, not by loosening the comparison.
 
 ## Verification
 - `--oracle-rom local-data/zx-diagnostics-v0.37-48k.rom --settle 1500 --keys 1 --frames 4000`

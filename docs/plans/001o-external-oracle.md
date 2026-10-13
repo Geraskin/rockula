@@ -67,24 +67,27 @@ Committed ROM or corpus assets; automated parsing of the diagnostic ROM's screen
 contention, floating-bus or sound tests; a tape reader; a bundled reference emulator. The only
 CI integration is the asset-free `--oracle-smoke` tool-path check.
 
-## CPU-level oracle: pending an owner decision
-The next M2 gate is a CPU exerciser with independently measured expected values. Two candidate
-paths were investigated and neither can be adopted unilaterally:
+## CPU-level oracle
+**raxoft/z80test** (MIT, Patrik Rak, v1.2a) was rejected as a runner target: it ships only as
+`.tap` plus assembly sources and its `print.asm` hard-codes stock 48K ROM entry points
+(`ld a,2; jp 0x1601` CHAN-OPEN and `rst 0x10`), so it needs the copyrighted Sinclair ROM, which
+this repository must not bundle or download, and Formats has no tape reader (M5).
+**MrKWatkins.EmulatorTestSuites** packages the same families behind C# harnesses but is GPL-3.0
+against this MIT repository, so it stays an owner licensing decision and is not referenced.
 
-- **raxoft/z80test** (MIT, Patrik Rak, v1.2a). Ships only as `.tap` plus assembly sources; there
-  is no raw or snapshot build. Its `print.asm` hard-codes stock 48K ROM entry points
-  (`ld a,2; jp 0x1601` CHAN-OPEN and `rst 0x10`), so it needs the copyrighted Sinclair ROM,
-  which this repository must not bundle or download, and Formats has no tape reader (M5). Not
-  runnable here.
-- **MrKWatkins.EmulatorTestSuites** packages the Raxoft, Fuse, ZEXALL, DAA, interrupt and
-  single-step vectors behind C# harness base classes, which would drop into our xUnit suite.
-  It is **GPL-3.0** while this repository is MIT, so adding it as a test-only dependency is a
-  licensing decision for the project owner. The underlying Raxoft vectors are MIT and their
-  author approved the reuse.
+Instead, `--oracle-fuse` reads the **Fuse Z80 test corpus** with our own MIT reader and compares
+registers, T-states and memory for one instruction per test against the corpus's independently
+produced expectations. Results are reported as counts; nothing is silently masked.
 
-Both are recorded in [references](../references.md). Until one is chosen the CPU stays covered by
-the local suite, the zx-diagnostics machine oracle and the T-cycle counts in the coverage matrix;
-no CPU-exerciser claim is made.
+## Open CPU divergences (never to be closed by loosening a test)
+1. `37_1` SCF and `3f` CCF: the undocumented X/Y bits differ from the corpus. Our rule is
+   `((Q xor F) or A) & 0x28` with `Q = 0` at test start (ADR 0013); the corpus implies no X/Y on a
+   fresh Q. Resolve against UM0080 and the Korth/David Banks sources before changing anything.
+2. `76` HALT: the corpus keeps PC at the HALT address while we advance it past HALT. Decide which
+   convention the 48K profile and the interrupt return address require.
+3. Eight `BIT n,(HL)` X/Y cases are compared with X/Y masked and counted separately because the
+   reference C integration (`floooh/chips-test` `tests/z80-fuse.c`) blacklists exactly those
+   names as Fuse defects.
 
 ## Intermediate evidence
 - `--oracle-rom local-data/zx-diagnostics-v0.37-48k.rom --settle 1500 --keys 1 --frames 4000`
@@ -95,3 +98,5 @@ no CPU-exerciser claim is made.
 - The ROM-boot and print/scroll checks on OpenSE BASIC are recorded as manual observations in the
   same testing section; the ROM's own print entry (`CALL 0x0010` -> `JP 0x15F2`) printed and
   scrolled correctly with a ~2-frame cost per 6 KiB scroll.
+- `--oracle-fuse local-data/tests.in local-data/tests.expected` reported `tests=1335 passed=1324
+  failed=3 knownXyDivergence=8 skipped=0`; the three failures are the open items above.
