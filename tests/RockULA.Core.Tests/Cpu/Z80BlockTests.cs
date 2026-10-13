@@ -321,10 +321,11 @@ public sealed class Z80BlockTests
         bus.Memory[0x4002] = 0x33;
         var cpu = new Z80Cpu(bus);
         int steps = 0;
-        while (!cpu.IsHalted && steps < 32) { cpu.Step(); steps++; }
+        ulong[] durations = [10, 10, 10, 21, 21, 16, 10, 10, 7, 21, 16, 10, 10, 21, 21, 16, 4];
+        foreach (ulong expected in durations) { Assert.Equal(expected, cpu.Step()); steps++; }
         Assert.True(cpu.IsHalted);
         Assert.Equal(17, steps);
-        Assert.Equal(230UL, bus.TStates);
+        Assert.Equal(234UL, bus.TStates);
         Assert.Equal((ushort)30, cpu.Registers.PC);
         Assert.Equal((ushort)0x5003, cpu.Registers.HL);
         Assert.Equal((ushort)0x00FE, cpu.Registers.BC);
@@ -371,6 +372,30 @@ public sealed class Z80BlockTests
         Assert.Equal((byte)0, r.R);
         Assert.Equal((byte)0x53, r.F);
         Assert.All(bus.Memory[0x4000..0x4100], value => Assert.Equal((byte)0xA5, value));
+    }
+
+    [Theory]
+    [InlineData(0xA0)]
+    [InlineData(0xA2)]
+    public void IgnoredRomWriteStillCommitsBlockRegistersAndComputedFlags(int opcode)
+    {
+        var bus = new ReadOnlyBlockBus((byte)opcode);
+        var r = new Z80Registers { HL = 0x4000, DE = 0x5000, BC = opcode == 0xA0 ? (ushort)1 : (ushort)0x0100, A = 0xA5, F = 0xFF, WZ = 0x9876 };
+        Assert.Equal(16UL, new Z80Cpu(bus, r).Step());
+        Assert.Equal((ushort)0x4001, r.HL);
+        Assert.Equal(opcode == 0xA0 ? (ushort)0x5001 : (ushort)0x5000, r.DE);
+        Assert.Equal((ushort)0, r.BC);
+        Assert.Equal(opcode == 0xA0 ? (byte)0xC1 : (byte)0x44, r.F);
+        Assert.Equal(opcode == 0xA0 ? (ushort)0x9876 : (ushort)0x0101, r.WZ);
+        Assert.Equal(1, bus.IgnoredWrites);
+    }
+
+    private sealed class ReadOnlyBlockBus(byte opcode) : Z80Bus
+    {
+        public int IgnoredWrites { get; private set; }
+        protected override byte ReadMemory(ushort address) => address switch { 0 => 0xED, 1 => opcode, 0x4000 => 0x80, _ => 0xEE };
+        protected override byte ReadPort(ushort address) => 0x42;
+        protected override void WriteMemory(ushort address, byte value) => IgnoredWrites++;
     }
 
     private static int MemoryFlags(int a, int value, int count, int incoming, bool compare)

@@ -5,14 +5,14 @@ A ZX Spectrum emulator written from scratch in C#, with a deterministic hardware
 and an Avalonia desktop interface. Original project code is licensed under MIT.
 
 **Status: executable CPU foundation, still incomplete.** The core implements registers,
-timed logical memory operations and 248 base encodings: loads, byte/word ALU, INC/DEC,
-branches, stack, DAA, accumulator rotations, exchanges, HALT and DI/EI delay state.
+timed logical memory operations and 250 base encodings: loads, byte/word ALU, INC/DEC,
+branches, stack, DAA, accumulator rotations, exchanges, IN/OUT, HALT and DI/EI delay state.
 All 256 CB encodings implement rotates/shifts and BIT/RES/SET, including SLL and WZ-dependent memory BIT flags.
 DD/FD implement IX/IY, register halves and indexed memory; all 512 DDCB/FDCB payloads are supported.
-28 ED encodings implement word ADC/SBC and memory transfers, I/R transfers, RRD/RLD,
-NEG, mode selection and interrupt returns. NMI and IM 1/2 responses can exit HALT at logical instruction boundaries.
+60 ED encodings implement word ADC/SBC and memory transfers, I/R transfers, RRD/RLD,
+NEG, mode selection, interrupt returns, register ports and all block operations. NMI and IM 1/2 responses can exit HALT at logical instruction boundaries.
 Two self-authored headless demos run without firmware.
-SCF/CCF, ports, IM 0 acceptance, remaining ED commands and Spectrum devices remain unimplemented;
+SCF/CCF, IM 0 acceptance, remaining ED commands and Spectrum devices remain unimplemented;
 this version cannot run games.
 
 ## Direction
@@ -62,7 +62,7 @@ Both demos have execution bounds and return failure if their expected result is 
 
 Start with [AGENTS.md](AGENTS.md), [architecture](docs/architecture/overview.md),
 [roadmap](docs/plans/roadmap.md), [opcode coverage](docs/architecture/z80-coverage.md) and
-[the current slice](docs/plans/001j-ed-data-operations.md).
+[the current slice](docs/plans/001k-ports-and-blocks.md).
 [Development](docs/development.md) explains commands and branching.
 [Testing](docs/testing.md) describes what each check can prove.
 

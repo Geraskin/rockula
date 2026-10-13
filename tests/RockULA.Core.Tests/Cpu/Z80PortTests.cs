@@ -138,6 +138,34 @@ public sealed class Z80PortTests
         Assert.Empty(bus.PortWrites);
     }
 
+    [Fact]
+    public void OutputHookFailureRetainsDeviceEffectAndAlreadyDecrementedB()
+    {
+        var bus = new FailingOutputBus();
+        var r = new Z80Registers { BC = 0x02FF, HL = 0x4000, F = 0xFF, WZ = 0x9876 };
+        var cpu = new Z80Cpu(bus, r);
+        Assert.Throws<IOException>(() => cpu.Step());
+        Assert.True(cpu.IsFaulted);
+        Assert.Equal((ushort)0x01FF, r.BC);
+        Assert.Equal((ushort)0x4000, r.HL);
+        Assert.Equal((byte)0xFF, r.F);
+        Assert.Equal((ushort)0x9876, r.WZ);
+        Assert.Equal(((ushort)0x01FF, (byte)0xA5), bus.Written);
+        Assert.Equal(16UL, bus.TStates);
+    }
+
+    private sealed class FailingOutputBus : Z80Bus
+    {
+        public (ushort Address, byte Value) Written { get; private set; }
+        protected override byte ReadMemory(ushort address) => address switch { 0 => 0xED, 1 => 0xA3, 0x4000 => 0xA5, _ => 0 };
+        protected override void WriteMemory(ushort address, byte value) => throw new InvalidOperationException("Unexpected memory write");
+        protected override void WritePort(ushort address, byte value)
+        {
+            Written = (address, value);
+            throw new IOException("Device fails after retaining the write");
+        }
+    }
+
     internal static int Parity(int value)
     {
         int ones = 0;

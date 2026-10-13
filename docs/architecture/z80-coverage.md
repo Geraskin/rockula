@@ -1,5 +1,5 @@
 # Implemented Z80 coverage
-Status: 248 standalone base encodings plus all 256 CB payloads, DD/FD and all 512 indexed CB payloads, 28 ED encodings and NMI/IM 1/2 responses; full M1/M2 are incomplete.
+Status: 250 standalone base encodings plus all 256 CB payloads, DD/FD and all 512 indexed CB payloads, 60 ED encodings and NMI/IM 1/2 responses; full M1/M2 are incomplete.
 Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
 
 | Encoding | Meaning | Count | Nominal T-states |
@@ -28,9 +28,10 @@ Tests use literal encoding/state/timing expectations and fail explicitly for oth
 | E3 | EX (SP),HL | 1 | 19 |
 | 76 | HALT | 1 | 4, then 4 per halted step |
 | F3,FB | DI/EI | 2 | 4 |
+| DB,D3 | IN A,(n); OUT (n),A | 2 | 11 |
 
-Total: **248 base-byte encodings**.
-ED is recognized as a prefix for 28 additional two-byte encodings:
+Total: **250 base-byte encodings**.
+ED is recognized as a prefix for 60 additional two-byte encodings:
 
 | Encoding | Meaning | Nominal T-states |
 | --- | --- | --- |
@@ -41,6 +42,12 @@ ED is recognized as a prefix for 28 additional two-byte encodings:
 | ED43,53,63,73; ED4B,5B,6B,7B | LD (nn),BC/DE/HL/SP and reverse | 20 |
 | ED47,4F; ED57,5F | LD I/R,A; LD A,I/R | 9 |
 | ED67,6F | RRD/RLD | 18 |
+| ED40,48,50,58,60,68,70,78 | IN B/C/D/E/H/L/flags/A,(C) | 12 |
+| ED41,49,51,59,61,69,71,79 | OUT (C),B/C/D/E/H/L/zero/A | 12 |
+| EDA0,A8,B0,B8 | LDI/LDD/LDIR/LDDR | 16; 21 repeating |
+| EDA1,A9,B1,B9 | CPI/CPD/CPIR/CPDR | 16; 21 repeating |
+| EDA2,AA,B2,BA | INI/IND/INIR/INDR | 16; 21 repeating |
+| EDA3,AB,B3,BB | OUTI/OUTD/OTIR/OTDR | 16; 21 repeating |
 
 Word ADC/SBC replace all F, using full-word S/Z, arithmetic overflow, bit-11
 carry/borrow and high-byte X/Y; WZ=old HL+1. ED word loads use wrapped
@@ -54,12 +61,42 @@ RRD/RLD read (HL), idle four T then write; A's high nibble and C survive and
 other flags use resulting A and parity. WZ=HL+1. An ignored ROM write still
 commits calculated A. [001j](../plans/001j-ed-data-operations.md) and
 [ADR 0011](../decisions/0011-ed-data-boundaries.md) define sources and logical
-commit/fault boundaries. Ports, blocks and remaining ED aliases/NOPs are deferred.
+commit/fault boundaries. Remaining ED aliases/NOPs are deferred.
 
-ED is not counted as a standalone base instruction. Other 228 ED payloads fault
+ED is not counted as a standalone base instruction. Other 196 ED payloads fault
 with original address, prefix and payload after two fetches (8 T). Unsupported
-aliases and ED NOPs are not silently accepted. Four other base bytes still fault
-after one fetch: SCF/CCF (37/3F), IN/OUT (DB/D3).
+aliases and ED NOPs are not silently accepted. Two other base bytes still fault
+after one fetch: SCF/CCF (37/3F).
+
+## Ports and blocks
+PortRead/PortWrite are separate four-T logical bus transactions sampled at offset
+four, including the nominal I/O wait T. Additional waits shift device sampling.
+Hosts decode all 16 port address bits. Unconnected default hooks read FF/ignore
+writes; ports never use memory or acknowledgement hooks. Immediate IN/OUT uses
+old A for the high address, preserves F and updates WZ (IN full port+1; OUT
+high=A, low=n+1 without carry). ED ports capture original BC, then set WZ=BC+1.
+IN sets input SZXY/parity, clears H/N and preserves C; output preserves F.
+ED70 changes flags without a destination; ED71 outputs zero for the NMOS profile.
+
+Every block Step executes one iteration. Transfers preserve S/Z/C, clear H/N,
+set PV if post-BC is nonzero and use A+data bit 3 for X and bit 1 for Y. Searches
+preserve C, set compare S/Z/H/N, use post-BC for PV and compare-result-minus-H
+bits 3/1 for X/Y. Zero counts wrap; searches stop on a match or exhausted count.
+Nonrepeat transfer preserves WZ; search changes old WZ by direction.
+Block input reads old BC and writes old HL; output reads old HL then decrements
+B before port transfer. Both advance HL by direction and set WZ=used port+direction.
+I/O SZXY uses post-B; N uses data bit 7; H/C and parity use the scoped data+C/L
+formulas. See [001k](../plans/001k-ports-and-blocks.md), including correction of
+the older reference's reversed input/output B timing.
+
+A nonterminal repeat adds five T and rewinds PC by two to ED; each new Step
+fetches live code again and polls interrupts. Prior index prefixes are discarded.
+EI inhibition ends after the first iteration. Repeated X/Y use ED-address bits
+11/13 (also when no interrupt is accepted). Repeated I/O also applies Banks'
+measured H/PV corrections using post-B, data and carry. Memory repeats set
+WZ=ED address+1; I/O repeats retain port-derived WZ. Final iterations use normal
+block flags. [ADR 0012](../decisions/0012-port-and-block-boundaries.md) specifies
+logical internal labels and staged fault commits; this is not a physical pipeline.
 
 CB is a prefix for **256 additional encodings**, all implemented:
 
@@ -81,8 +118,8 @@ reference discrepancy. [ADR 0009](../decisions/0009-cb-and-wz-state.md) defines
 WZ reset, writers, preservation and fault boundaries for the current instruction set.
 
 ## Index prefixes
-DD/FD are recognized prefixes, not standalone base instructions. Of the 248 base
-encodings, 85 substitute IX/IY and 163 ignore the prefix (adding four T per prefix).
+DD/FD are recognized prefixes, not standalone base instructions. Of the 250 base
+encodings, 85 substitute IX/IY and 165 ignore the prefix (adding four T per prefix).
 The last DD/FD selects the index. ED cancels substitution; EX DE,HL and EXX use
 ordinary registers. H/L become index halves except when used with indexed memory.
 No HL/index swapping is performed.

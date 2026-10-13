@@ -73,3 +73,6 @@ bound follow [ADR 0010](../decisions/0010-index-prefix-sequencing.md).
 
 ED word/I/R/nibble operation sequencing and the LD A,I/R interrupt limitation
 follow [ADR 0011](../decisions/0011-ed-data-boundaries.md).
+
+Port hooks and per-iteration block retirement/fault state follow
+[ADR 0012](../decisions/0012-port-and-block-boundaries.md). Hosts own port decoding.
