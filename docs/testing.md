@@ -25,6 +25,7 @@ on Linux. It does not launch the desktop UI or prove Spectrum/game compatibility
 | Formats | Synthetic SNA/Z80/TAP fixtures and negative cases | Bounded decode; atomic failed-load behavior |
 | Raster/audio | Exact pixel transitions and deterministic PCM hashes | Profile, phase and sample rate identified |
 | External CPU | Pinned single-step corpus, reference traces, exercisers | Source/license/hash recorded; no silent omissions |
+| External machine | Third-party diagnostic ROM PASS report through `--oracle-rom` | Asset source/license/SHA-256 recorded; explicit invocation, never a fabricated CI pass |
 | Compatibility | User-supplied images with scripted input and expected behavior | Build/profile/ROM/asset hash and accuracy policy |
 | Host | Actual input/video/audio, pause/load/reset/close | Real interactive check on claimed platform |
 
@@ -48,6 +49,51 @@ Store downloaded corpora/user files under ignored `local-data/`. A committed man
 name, source URL/revision, license/redistribution basis, SHA-256, expected scope and acquisition
 instructions, not embedded copyrighted content. No automatic game/firmware download in CI.
 A new corpus runner must enforce size/budget bounds and summarize tested/skipped/failed counts.
+
+## External oracle suite
+Every expected value in the local suite is produced by the implementation under test, so it
+cannot expose a shared misunderstanding between the code and its own tests. The headless host
+therefore exposes an explicitly-invoked suite that boots one user-supplied ROM on the real 48K
+machine:
+
+```sh
+dotnet run --project src/RockULA.Headless -c Release -- \
+  --oracle-rom local-data/zx-diagnostics-v0.37-48k.rom --settle 1500 --keys 1 --frames 4000 \
+  --png local-data/oracle-zxdiag.png
+```
+
+It settles for `--settle` frames (default 100), applies an optional comma-separated `--keys`
+script (digits `0`-`9`, `enter`, `space`, `h`/`p`/`r`/`i`/`n`/`t`) holding each key for 8
+frames and then releasing it, runs `--frames` further frames, renders the 320x240 framebuffer
+and prints `frames`, `T`, `PC`, `border` and `FramebufferSHA256`. A missing or oversized ROM
+returns exit 1 and an unknown key token returns exit 2, both with a message on stderr; an
+unavailable input is never reported as a pass. The hash is deterministic for identical inputs
+but depends on the total frame count, because the renderer flashes attributes; it is produced
+by the implementation under test, so it pins a regression and is not accuracy evidence.
+
+Assets are not committed; keep them in ignored `local-data/`.
+
+| Asset | Source (retrieved) | License | SHA-256 | Scope |
+| --- | --- | --- | --- | --- |
+| `zx-diagnostics-v0.37-48k.rom` | [brendanalford/zx-diagnostics](https://github.com/brendanalford/zx-diagnostics) release v0.37, `testrom.bin` (2026-10-13) | LGPL-3.0 | `e38354b6b8f393a65a2512cb622c6f255a4d015e9022244a873f0c6c2b0cf464` | 48K RAM, ULA, keyboard, sound, video and Z80 functional PASS/FAIL |
+| `opense-3.1.2.rom` | [knaxly-dev/zed-open-roms](https://github.com/knaxly-dev/zed-open-roms) `opense-3.1.2.rom`; upstream OpenSE BASIC, Andrew S. Owen, 2012 (2026-10-13) | GPL-2.0 | `45790ed8d7baac284b41fe1e35bcdd0c24e754c191e6fdcbaff4df2d1e44270d` | redistributable 48K firmware for the ROM-boot path |
+
+Observed on Linux, .NET SDK 10.0.401, 2026-10-13 (`feat/oracle-diagnostics`):
+
+- `--oracle-rom local-data/zx-diagnostics-v0.37-48k.rom --settle 1500 --keys 1 --frames 4000`
+  printed `frames=5510 T=385082880 PC=0943 border=7 FramebufferSHA256=AD984EDADD28FD09C4E351DC72D78A48278FDE50E3201D1C9CE92FA143863723`. The
+  scripted key selected 48K and the screen reported `Lower 16K RAM tests`, `Upper RAM
+  Walk/Inversion/March/Random` and `Testing interrupts` all `PASS`, then
+  `### Testing Completed ###`. Without a key the ROM completes after its own 20-second fallback
+  (`No selection made, assuming 48K mode.`) with the same PASS results.
+- `--oracle-rom local-data/opense-3.1.2.rom --frames 2000` printed `frames=2100 T=146764801
+  PC=10A6 border=0 FramebufferSHA256=69DCE375951CBF8D529B96451429AE62CB40F8D46E963F7A86EDA78B6C347D09`
+  with the ROM's own banner `© 1981 Nine Tiles Networks Ltd`; two runs produced the same hash.
+- A missing ROM path returned exit 1 and `--keys zzz` returned exit 2.
+
+ULA contention, floating bus, exact raster timing and AY are outside both oracles and remain
+unverified. The diagnostic ROM's `/M1 bad?` line reports its absent diagnostic board, not this
+machine.
 
 ## Determinism and state
 Same firmware/profile/state, events and T-state budget must produce the same register/RAM/frame/

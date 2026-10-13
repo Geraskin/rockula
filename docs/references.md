@@ -36,3 +36,10 @@ revision/date and small permitted citations in tests/plans, rather than copying 
 - [Martin Korth no$ Sinclair ZX specification, preserved mirror](https://k1.spdns.de/Develop/Projects/zxsp/Info/nocash%20Sinclair%20ZX%20Specs.html): Undocumented Flags, register BIT operand X/Y and memory BIT WZ dependence. Only these sections are used; unrelated older SCF/CCF simplifications are not adopted.
 - [Boo-boo/Kladov MEMPTR research, 2006](https://gist.github.com/drhelius/8497817): preserved report of physical Zilog Z80 chip measurements; used for current WZ writers and preservation, no BM1 clone policy or test code import.
 - [MEMPTR research wiki](https://github.com/redcode/Z80/wiki/MEMPTR): Sainz de Baranda/Brewer/Helcmanovsky, revision dated 2026-01-07, cross-check of current writer table. Documentation only; emulator implementation was not read or copied. Retrieved 2026-10-08.
+
+## Read for the external oracle (001o, ADR 0016)
+| Source | Used for | Limit |
+| --- | --- | --- |
+| [zx-diagnostics v0.37](https://github.com/brendanalford/zx-diagnostics) (Dylan Smith / Brendan Alford, `testrom.bin`) | Independent functional 48K RAM/interrupt/ULA/keyboard/sound/video/Z80 PASS/FAIL oracle driven through `--oracle-rom` | LGPL-3.0 image, not committed; asset SHA-256 and observed output in [testing](testing.md#external-oracle-suite); ULA contention, floating bus and AY modes not exercised |
+| [OpenSE BASIC 3.1.2](https://github.com/knaxly-dev/zed-open-roms) (Andrew S. Owen; GPL mirror of the OpenSE/Open82 firmware) | Redistributable drop-in 48K firmware so the ROM-boot path can be exercised without the Sinclair ROM | GPL-2.0 image, not committed; replacement BASIC firmware, not a Sinclair ROM and not a game; no snapshot/tape content |
+| [raxoft/z80test](https://github.com/raxoft/z80test) (Patrik Rak) | Candidate CPU-level oracle for undocumented flags, SCF/CCF flag history and MEMPTR | Not yet wired; expected values measured on a real 48K with a Zilog Z80; review licensing and runner assumptions before adding a runner |

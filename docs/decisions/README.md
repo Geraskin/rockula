@@ -14,3 +14,7 @@ proposed and superseded choices; new evidence may revise them without hiding the
 - [0010: Index prefix sequencing and bounded stepping](0010-index-prefix-sequencing.md)
 - [0011: ED data operation boundaries](0011-ed-data-boundaries.md)
 - [0012: Port transactions and block iteration boundaries](0012-port-and-block-boundaries.md)
+- [0013: First snapshot player and carry history](0013-first-player-and-q.md)
+- [0014: Worker-owned playback and SDL audio/joysticks](0014-audio-worker-and-hid.md)
+- [0015: Portable external snapshots and bounded desktop preferences](0015-external-snapshots-and-preferences.md)
+- [0016: External oracle suite for the 48K machine](0016-external-oracle.md)
