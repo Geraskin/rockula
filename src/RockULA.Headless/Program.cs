@@ -21,14 +21,16 @@ if (args.Length is 3 or 5 && args[0] is "--sna" or "--snapshot")
 }
 
 if (args.Length >= 3 && args[0] == "--oracle-rom") return OracleRunner.Run(args);
+if (args.Length == 1 && args[0] == "--oracle-smoke") return OracleRunner.Smoke();
 
 if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h"))
 {
-    Console.WriteLine("Usage: RockULA.Headless [--about | --help | --demo | --demo-loop | --demo-machine | --demo-z80 | --snapshot ROM SNAPSHOT [--frames N] | --oracle-rom ROM [--settle N] [--keys TOKENS] [--frames N] [--png PATH]]");
+    Console.WriteLine("Usage: RockULA.Headless [--about | --help | --demo | --demo-loop | --demo-machine | --demo-z80 | --snapshot ROM SNAPSHOT [--frames N] | --oracle-rom ROM [--settle N] [--keys TOKENS] [--frames N] [--png PATH] | --oracle-smoke]");
     Console.WriteLine("--demo executes a self-authored six-instruction Z80 load program without firmware.");
     Console.WriteLine("--demo-loop sums 3+2+1 using a bounded loop, subroutine and stack without firmware.");
     Console.WriteLine("--snapshot ROM SNAPSHOT resumes a user-supplied 48K SNA/Z80 snapshot (--sna is an alias) for a bounded frame count.");
     Console.WriteLine("--oracle-rom boots one user-supplied 16 KiB ROM, applies an optional --keys script after --settle frames, and reports the framebuffer SHA-256; no oracle asset is bundled.");
+    Console.WriteLine("--oracle-smoke runs the oracle report on a self-authored dummy ROM so CI can check the command path without an external asset.");
     return 0;
 }
 

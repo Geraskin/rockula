@@ -20,6 +20,7 @@ internal static class OracleRunner
     private const int MaximumKeys = 64;
     private const int KeyHoldFrames = 8;
     private const int KeyReleaseFrames = 2;
+    private const int SmokeFrames = 60;
 
     public static int Run(string[] args)
     {
@@ -93,13 +94,7 @@ internal static class OracleRunner
 
             for (int frame = 0; frame < frames; frame++) machine.RunFrame();
 
-            uint[] pixels = new uint[Spectrum48Video.Width * Spectrum48Video.Height];
-            Spectrum48Video.Render(machine.Bus, pixels, machine.FrameNumber);
-            byte[] raw = new byte[pixels.Length * sizeof(uint)];
-            Buffer.BlockCopy(pixels, 0, raw, 0, raw.Length);
-            string hash = Convert.ToHexString(SHA256.HashData(raw));
-
-            Console.WriteLine($"frames={machine.FrameNumber} T={machine.Bus.TStates} PC={machine.Cpu.Registers.PC:X4} border={machine.Bus.BorderColor} FramebufferSHA256={hash}");
+            Console.WriteLine(Describe(machine, out uint[] pixels));
             if (pngPath is not null)
             {
                 PngImage.Write(pngPath, pixels, Spectrum48Video.Width, Spectrum48Video.Height);
@@ -113,6 +108,29 @@ internal static class OracleRunner
             Console.Error.WriteLine($"{romPath}: {exception.Message}");
             return 1;
         }
+    }
+
+    /// <summary>
+    /// Tool-path smoke: runs the oracle report on a self-authored dummy ROM so CI can exercise the
+    /// command without an external asset. The dummy buffer is not firmware and proves nothing
+    /// about machine accuracy.
+    /// </summary>
+    public static int Smoke()
+    {
+        var machine = new Spectrum48Machine(RomImage.FromSpectrum48(new byte[RomImage.Spectrum48Size]));
+        for (int frame = 0; frame < SmokeFrames; frame++) machine.RunFrame();
+        Console.WriteLine(Describe(machine, out _));
+        return 0;
+    }
+
+    private static string Describe(Spectrum48Machine machine, out uint[] pixels)
+    {
+        pixels = new uint[Spectrum48Video.Width * Spectrum48Video.Height];
+        Spectrum48Video.Render(machine.Bus, pixels, machine.FrameNumber);
+        byte[] raw = new byte[pixels.Length * sizeof(uint)];
+        Buffer.BlockCopy(pixels, 0, raw, 0, raw.Length);
+        string hash = Convert.ToHexString(SHA256.HashData(raw));
+        return $"frames={machine.FrameNumber} T={machine.Bus.TStates} PC={machine.Cpu.Registers.PC:X4} border={machine.Bus.BorderColor} FramebufferSHA256={hash}";
     }
 
     private static bool TryParseKeys(string script, out SpectrumKey[] keys, out string error)

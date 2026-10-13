@@ -90,6 +90,14 @@ Observed on Linux, .NET SDK 10.0.401, 2026-10-13 (`feat/oracle-diagnostics`):
   PC=10A6 border=0 FramebufferSHA256=69DCE375951CBF8D529B96451429AE62CB40F8D46E963F7A86EDA78B6C347D09`
   with the ROM's own banner `© 1981 Nine Tiles Networks Ltd`; two runs produced the same hash.
 - A missing ROM path returned exit 1 and `--keys zzz` returned exit 2.
+- `--oracle-smoke` runs the same report path on a self-authored dummy ROM (no external asset) and
+  prints `frames=60 T=4193280 PC=FF00 border=0 FramebufferSHA256=4D856B7A9008759AFF68A0D1CDE95B895FB952761719549F339D00D6EDA9F543`;
+  CI runs it so the command cannot rot. It is a tool-path check, not firmware and not accuracy
+  evidence.
+- Manual check on OpenSE BASIC: a self-authored guest program calling the ROM's print entry
+  (`CALL 0x0010` -> `JP 0x15F2`) printed a character and scrolled the screen, and one 6 KiB scroll
+  cost about two frames, matching real hardware. The ROM also reports `ERR_NR` OK after an ENTER.
+  These are session observations with a host-side guest program, not a committed suite.
 
 ULA contention, floating bus, exact raster timing and AY are outside both oracles and remain
 unverified. The diagnostic ROM's `/M1 bad?` line reports its absent diagnostic board, not this

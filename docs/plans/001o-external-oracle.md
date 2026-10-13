@@ -63,10 +63,35 @@ it is not accuracy evidence, because it is produced by the implementation under 
   outside both oracles and remain unverified.
 
 ## Not in this order
-CI integration and any committed ROM; automated parsing of the diagnostic ROM's screen text;
-ULAContention/floating-bus or sound tests; TAP/TZX; a bundled reference emulator.
+Committed ROM or corpus assets; automated parsing of the diagnostic ROM's screen text; ULA
+contention, floating-bus or sound tests; a tape reader; a bundled reference emulator. The only
+CI integration is the asset-free `--oracle-smoke` tool-path check.
+
+## CPU-level oracle: pending an owner decision
+The next M2 gate is a CPU exerciser with independently measured expected values. Two candidate
+paths were investigated and neither can be adopted unilaterally:
+
+- **raxoft/z80test** (MIT, Patrik Rak, v1.2a). Ships only as `.tap` plus assembly sources; there
+  is no raw or snapshot build. Its `print.asm` hard-codes stock 48K ROM entry points
+  (`ld a,2; jp 0x1601` CHAN-OPEN and `rst 0x10`), so it needs the copyrighted Sinclair ROM,
+  which this repository must not bundle or download, and Formats has no tape reader (M5). Not
+  runnable here.
+- **MrKWatkins.EmulatorTestSuites** packages the Raxoft, Fuse, ZEXALL, DAA, interrupt and
+  single-step vectors behind C# harness base classes, which would drop into our xUnit suite.
+  It is **GPL-3.0** while this repository is MIT, so adding it as a test-only dependency is a
+  licensing decision for the project owner. The underlying Raxoft vectors are MIT and their
+  author approved the reuse.
+
+Both are recorded in [references](../references.md). Until one is chosen the CPU stays covered by
+the local suite, the zx-diagnostics machine oracle and the T-cycle counts in the coverage matrix;
+no CPU-exerciser claim is made.
 
 ## Intermediate evidence
-Recorded during implementation (Linux, .NET SDK 10.0.401). Command and observed output are
-reproduced in [testing](../testing.md#external-oracle-suite); the raw `--oracle-rom` runs and
-their framebuffer hashes are listed there so a reviewer can repeat them.
+- `--oracle-rom local-data/zx-diagnostics-v0.37-48k.rom --settle 1500 --keys 1 --frames 4000`
+  passes every listed RAM and interrupt check. Exact output, hashes and the asset manifest are in
+  [testing](../testing.md#external-oracle-suite).
+- `--oracle-smoke` runs the report path on a self-authored dummy ROM and is wired into CI so the
+  command path cannot rot; it is a tool-path check, not firmware and not accuracy evidence.
+- The ROM-boot and print/scroll checks on OpenSE BASIC are recorded as manual observations in the
+  same testing section; the ROM's own print entry (`CALL 0x0010` -> `JP 0x15F2`) printed and
+  scrolled correctly with a ~2-frame cost per 6 KiB scroll.

@@ -58,9 +58,12 @@ reproducible, redistributable fixture; M2 gains an external report instead of an
 Costs and limits: the run is manual, so it is not a regression gate; the framebuffer hash is
 deterministic per ROM/keys but is not accuracy evidence; zx-diagnostics exercises the 48K
 functional profile and does not cover ULA contention, floating bus, exact raster timing or AY,
-which remain M6/M7 scope. Unresolved: whether to add raxoft/z80test (`z80ccf`, `z80memptr`) as a
-CPU-level oracle for undocumented flags and MEMPTR, and whether any redistributable firmware
-could be pinned for CI without weakening the no-download rule.
+which remain M6/M7 scope. Unresolved and needing an owner decision: the CPU-level exerciser.
+raxoft/z80test ships only as `.tap` and hard-codes the stock 48K ROM entry points (`0x1601`
+CHAN-OPEN and `rst 0x10`), so it needs the copyrighted Sinclair ROM plus a tape reader we do not
+have, and the .NET packaging of the same vectors (MrKWatkins.EmulatorTestSuites) is GPL-3.0
+against this MIT repository. Neither can be adopted without the owner's licensing and asset
+decision.
 
 ## Verification
 - `--oracle-rom local-data/zx-diagnostics-v0.37-48k.rom --settle 1500 --keys 1 --frames 4000`
