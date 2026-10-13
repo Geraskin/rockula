@@ -3,17 +3,17 @@ using RockULA.Headless;
 if (args.Length == 0 || (args.Length == 1 && args[0] == "--about"))
 {
     Console.WriteLine("RockULA! - Rock Your Spectrum.");
-    Console.WriteLine("Status: functional Spectrum 48K SNA player; complete opcode decoding, NMI/IM 1/2 and IM 0 RST responses. Final-RAM video, keyboard/Kempston/Sinclair and opt-in beeper PCM; no contention.");
+    Console.WriteLine("Status: functional Spectrum 48K SNA/Z80 player; complete opcode decoding, NMI/IM 1/2 and IM 0 RST responses. Final-RAM video, keyboard/Kempston/Sinclair and opt-in beeper PCM; no contention.");
     return 0;
 }
 
 if (args.Length == 1 && args[0] == "--demo-machine") return SnapshotRunner.Demo();
-if (args.Length is 3 or 5 && args[0] == "--sna")
+if (args.Length is 3 or 5 && args[0] is "--sna" or "--snapshot")
 {
     int frames = 100;
     if (args.Length == 5 && (args[3] != "--frames" || !int.TryParse(args[4], out frames) || frames is < 1 or > 10000))
     {
-        Console.Error.WriteLine("Use --sna ROM SNA [--frames 1..10000].");
+        Console.Error.WriteLine("Use --snapshot ROM SNAPSHOT [--frames 1..10000].");
         return 2;
     }
     return SnapshotRunner.Run(args[1], args[2], frames);
@@ -21,10 +21,10 @@ if (args.Length is 3 or 5 && args[0] == "--sna")
 
 if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h"))
 {
-    Console.WriteLine("Usage: RockULA.Headless [--about | --help | --demo | --demo-loop | --demo-machine | --sna ROM SNA [--frames N]]");
+    Console.WriteLine("Usage: RockULA.Headless [--about | --help | --demo | --demo-loop | --demo-machine | --snapshot ROM SNAPSHOT [--frames N]]");
     Console.WriteLine("--demo executes a self-authored six-instruction Z80 load program without firmware.");
     Console.WriteLine("--demo-loop sums 3+2+1 using a bounded loop, subroutine and stack without firmware.");
-    Console.WriteLine("--sna ROM SNA resumes a user-supplied 48K snapshot for a bounded frame count.");
+    Console.WriteLine("--snapshot ROM SNAPSHOT resumes a user-supplied 48K SNA/Z80 snapshot (--sna is an alias) for a bounded frame count.");
     return 0;
 }
 

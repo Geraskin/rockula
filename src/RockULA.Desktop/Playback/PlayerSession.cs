@@ -25,10 +25,10 @@ public sealed class PlayerSession
     private readonly short[] _pcm = new short[2048];
     private readonly Thread _thread;
     private PlayerInput _input = new();
-    private PlayerFrame _latest = new(new uint[320 * 240], 0, 0, 0, false, "Load a ROM and 48K SNA", 0);
+    private PlayerFrame _latest = new(new uint[320 * 240], 0, 0, 0, false, "Load a ROM and 48K snapshot", 0);
     private Spectrum48Machine? _machine;
     private RomImage? _rom;
-    private Sna48Snapshot? _snapshot;
+    private ISpectrum48Snapshot? _snapshot;
     private bool _running;
     private bool _stopping;
     private bool _audioFailed;
@@ -59,7 +59,7 @@ public sealed class PlayerSession
             _wake.Set();
         }
     }
-    public Task LoadAsync(RomImage rom, Sna48Snapshot? snapshot = null) => Submit(() =>
+    public Task LoadAsync(RomImage rom, ISpectrum48Snapshot? snapshot = null) => Submit(() =>
     {
         var candidate = CreateMachine(rom, snapshot); // Validate completely before replacing the old machine.
         ResetDelivery(false);
@@ -131,7 +131,7 @@ public sealed class PlayerSession
         }
         await completion.Task;
     }
-    private static Spectrum48Machine CreateMachine(RomImage rom, Sna48Snapshot? snapshot)
+    private static Spectrum48Machine CreateMachine(RomImage rom, ISpectrum48Snapshot? snapshot)
     {
         var machine = new Spectrum48Machine(rom);
         if (snapshot != null) machine.LoadSnapshot(snapshot.CpuState, snapshot.Ram, snapshot.BorderColor);

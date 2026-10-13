@@ -30,7 +30,8 @@ internal static class DeviceSmoke
             if (index < 0) throw new InvalidOperationException(SdlNative.Error);
             virtualJoystick = SdlNative.SDL_JoystickOpen(index);
             int instance = SdlNative.SDL_JoystickGetDeviceInstanceID(index);
-            if (!devices.Enumerate().Any(x => x.InstanceId == instance)) throw new InvalidOperationException("Virtual HID not enumerated");
+            var descriptor = devices.Enumerate().Single(x => x.InstanceId == instance);
+            if (descriptor.Guid.Length != 32 || !descriptor.Guid.All(Uri.IsHexDigit)) throw new InvalidOperationException("Native joystick GUID mismatch");
             devices.Select(instance);
             Set(SdlNative.SDL_JoystickSetVirtualAxis(virtualJoystick, 0, 20000));
             Set(SdlNative.SDL_JoystickSetVirtualAxis(virtualJoystick, 1, -20000));

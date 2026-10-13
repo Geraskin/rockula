@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text;
 using System.Runtime.InteropServices;
 
 namespace RockULA.Desktop.Devices;
@@ -34,6 +35,16 @@ internal static class SdlNative
         public IntPtr Callback;
         public IntPtr UserData;
     }
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct JoystickGuid
+    {
+        public uint A;
+        public uint B;
+        public uint C;
+        public uint D;
+    }
+    [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern JoystickGuid SDL_JoystickGetDeviceGUID(int index);
+    [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern void SDL_JoystickGetGUIDString(JoystickGuid guid, StringBuilder text, int length);
     [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern int SDL_InitSubSystem(uint flags);
     [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern void SDL_QuitSubSystem(uint flags);
     [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] internal static extern IntPtr SDL_GetError();

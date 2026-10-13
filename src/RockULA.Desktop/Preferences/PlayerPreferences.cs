@@ -15,6 +15,12 @@ public sealed record PlayerPreferences
     public KeyboardJoystickKeys Keyboard { get; init; } = new();
     public string JoystickGuid { get; init; } = "";
     public string JoystickName { get; init; } = "";
-    public JoystickDevice? FindJoystick(IEnumerable<JoystickDevice> devices) => throw new NotImplementedException();
+    public JoystickDevice? FindJoystick(IEnumerable<JoystickDevice> devices)
+    {
+        if (JoystickGuid.Length == 0) return null;
+        var matches = devices.Where(x => string.Equals(x.Guid, JoystickGuid, StringComparison.OrdinalIgnoreCase)
+            && x.Name == JoystickName).Take(2).ToArray();
+        return matches.Length == 1 ? matches[0] : null;
+    }
 }
 public sealed record PreferencesLoad(PlayerPreferences Value, string? Warning, bool CanSave = true);

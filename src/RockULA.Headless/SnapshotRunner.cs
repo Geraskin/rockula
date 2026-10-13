@@ -9,12 +9,12 @@ namespace RockULA.Headless;
 
 internal static class SnapshotRunner
 {
-    public static int Run(string romPath, string snaPath, int frames)
+    public static int Run(string romPath, string snapshotPath, int frames)
     {
         try
         {
             var rom = RomImage.FromSpectrum48(ReadBounded(romPath, 16384));
-            var snapshot = Sna48Snapshot.Parse(ReadBounded(snaPath, Sna48Snapshot.FileSize));
+            var snapshot = SpectrumSnapshotReader.Parse(Path.GetExtension(snapshotPath), ReadBounded(snapshotPath, SpectrumSnapshotReader.MaximumFileSize));
             var machine = new Spectrum48Machine(rom);
             machine.LoadSnapshot(snapshot.CpuState, snapshot.Ram, snapshot.BorderColor);
             for (int frame = 0; frame < frames; frame++) machine.RunFrame();

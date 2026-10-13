@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Text;
 using RockULA.Core.Input;
 using RockULA.Desktop.Playback;
 
@@ -83,7 +84,12 @@ public sealed class SdlDevices : IAudioOutput, IDisposable
         if (!JoysticksAvailable) return result;
         SdlNative.SDL_JoystickUpdate();
         for (int index = 0; index < SdlNative.SDL_NumJoysticks(); index++)
-            result.Add(new(SdlNative.SDL_JoystickGetDeviceInstanceID(index), Marshal.PtrToStringUTF8(SdlNative.SDL_JoystickNameForIndex(index)) ?? $"Joystick {index + 1}"));
+        {
+            var guid = new StringBuilder(33);
+            SdlNative.SDL_JoystickGetGUIDString(SdlNative.SDL_JoystickGetDeviceGUID(index), guid, 33);
+            result.Add(new(SdlNative.SDL_JoystickGetDeviceInstanceID(index),
+                Marshal.PtrToStringUTF8(SdlNative.SDL_JoystickNameForIndex(index)) ?? $"Joystick {index + 1}", guid.ToString()));
+        }
         return result;
     }
     public void Select(int instanceId)

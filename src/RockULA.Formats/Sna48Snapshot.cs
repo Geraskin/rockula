@@ -4,7 +4,7 @@ using RockULA.Core.Machines;
 namespace RockULA.Formats;
 
 /// <summary>Strict 48K SNA import; owns its RAM, does not execute/mutate a machine.</summary>
-public sealed class Sna48Snapshot
+public sealed class Sna48Snapshot : ISpectrum48Snapshot
 {
     public const int FileSize = 49179;
     private readonly byte[] _ram;
