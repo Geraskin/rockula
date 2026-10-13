@@ -11,7 +11,9 @@ public abstract class Z80Bus : IZ80Bus
             && cycle.Kind != Z80BusCycleKind.MemoryRead
             && cycle.Kind != Z80BusCycleKind.MemoryWrite
             && cycle.Kind != Z80BusCycleKind.Internal
-            && cycle.Kind != Z80BusCycleKind.InterruptAcknowledge)
+            && cycle.Kind != Z80BusCycleKind.InterruptAcknowledge
+            && cycle.Kind != Z80BusCycleKind.PortRead
+            && cycle.Kind != Z80BusCycleKind.PortWrite)
         {
             throw new ArgumentOutOfRangeException(nameof(cycle), "Unknown bus transaction kind.");
         }
@@ -42,6 +44,13 @@ public abstract class Z80Bus : IZ80Bus
                 break;
             case Z80BusCycleKind.InterruptAcknowledge:
                 value = AcknowledgeInterrupt(cycle.Address);
+                break;
+            case Z80BusCycleKind.PortRead:
+                value = ReadPort(cycle.Address);
+                break;
+            case Z80BusCycleKind.PortWrite:
+                WritePort(cycle.Address, cycle.Data);
+                value = cycle.Data;
                 break;
             case Z80BusCycleKind.MemoryWrite:
                 WriteMemory(cycle.Address, cycle.Data);

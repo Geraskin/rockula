@@ -99,7 +99,7 @@ public sealed partial class Z80Cpu
 
     private void Execute(byte opcode, ushort address, byte? indexPrefix = null)
     {
-        if (TryExecuteAlu(opcode) || TryExecuteControl(opcode, address) || TryExecuteMisc(opcode, address))
+        if (TryExecuteImmediatePort(opcode) || TryExecuteAlu(opcode) || TryExecuteControl(opcode, address) || TryExecuteMisc(opcode, address))
         {
             return;
         }
