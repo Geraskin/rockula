@@ -1,4 +1,5 @@
 using RockULA.Core.Cpu;
+using RockULA.Core.Audio;
 using RockULA.Core.Input;
 
 namespace RockULA.Core.Machines;
@@ -14,6 +15,13 @@ public sealed class Spectrum48Bus : Z80Bus
     {
         ArgumentNullException.ThrowIfNull(rom);
         rom.Bytes.CopyTo(_memory);
+    }
+    public BeeperSampler? Audio { get; private set; }
+    public void EnableAudio(int sampleRate = 48000)
+    {
+        var audio = new BeeperSampler(sampleRate);
+        audio.Reset(Beeper);
+        Audio = audio;
     }
     public byte BorderColor { get; private set; }
     public bool Beeper { get; private set; }
@@ -68,6 +76,9 @@ public sealed class Spectrum48Bus : Z80Bus
         Mic = (value & 8) != 0;
         Beeper = (value & 0x10) != 0;
     }
-    protected override void OnAdvance(ulong previous, ulong current) =>
+    protected override void OnAdvance(ulong previous, ulong current)
+    {
+        Audio?.Advance(current - previous, Beeper);
         InterruptLevel?.Invoke(current % Spectrum48Machine.FrameTStates < 32);
+    }
 }

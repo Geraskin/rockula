@@ -75,6 +75,22 @@ public sealed class AudioAndJoystickTests
         Assert.Equal(1UL, audio.TotalSamples);
     }
 
+    [Fact]
+    public void BusIntegratesOldLevelBeforeEvenPortTransferAndImportDiscardsAudioState()
+    {
+        var machine = new Spectrum48Machine(RomImage.FromSpectrum48(new byte[16384]));
+        machine.Bus.EnableAudio();
+        machine.Bus.Execute(new(Z80BusCycleKind.PortWrite, 0x00FE, 4, 4, 0x10));
+        machine.Bus.Execute(new(Z80BusCycleKind.Internal, 0, 69, 69));
+        short[] output = new short[2];
+        Assert.Equal(1, machine.Bus.Audio!.Drain(output));
+        // First window has 192000 low units and 3308000 high units out of 3500000.
+        Assert.Equal((short)15485, output[0]);
+        machine.LoadSnapshot(default, new byte[49152], 0);
+        Assert.Null(machine.Bus.Audio);
+        Assert.False(machine.Bus.Beeper);
+    }
+
     [Theory]
     [InlineData(0, 100, 2)]
     [InlineData(101, 100, 2)]
