@@ -31,7 +31,7 @@ public sealed record JoystickMapping(int XAxis = 0, int YAxis = 1, int FireButto
         return state;
     }
 }
-public sealed record JoystickDevice(int InstanceId, string Name)
+public sealed record JoystickDevice(int InstanceId, string Name, string Guid = "")
 {
     public override string ToString() => Name;
 }
