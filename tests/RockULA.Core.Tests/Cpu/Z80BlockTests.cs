@@ -180,7 +180,7 @@ public sealed class Z80BlockTests
         bus.Memory[0x4000] = 0xA5;
         var r = new Z80Registers { PC = 0x27FF, BC = 2, HL = 0x4000, DE = 0x5000, IY = 0x1234, SP = 0x8000 };
         var cpu = new Z80Cpu(bus, r);
-        bus.Advancing = time => { if (time == 16) cpu.SetNmiLine(true); };
+        bus.Advancing = time => { if (time == 18) cpu.SetNmiLine(true); };
         Assert.Equal(25UL, cpu.Step());
         Assert.Equal((ushort)0x2800, r.PC);
         Assert.Equal((ushort)0x2801, r.WZ);
@@ -333,6 +333,44 @@ public sealed class Z80BlockTests
         Assert.Equal((byte)25, cpu.Registers.R);
         Assert.Equal(new (ushort, byte)[] { (0x02FE, 0x11), (0x01FE, 0x22), (0x00FE, 0x33) }, bus.PortWrites.ToArray());
         Assert.Equal(new byte[] { 0x11, 0x22, 0x33 }, bus.Memory[0x5000..0x5003]);
+    }
+
+    [Fact]
+    public void ZeroTransferCountCompletesSixtyFourKThroughBoundedSteps()
+    {
+        var bus = Program(0xB0);
+        var r = new Z80Registers { PC = 0x2800, HL = 0x4000, DE = 0x4000, BC = 0 };
+        var cpu = new Z80Cpu(bus, r);
+        for (int step = 0; step < 65536; step++)
+        {
+            bus.Events.Clear();
+            Assert.Equal(step == 65535 ? 16UL : 21UL, cpu.Step());
+        }
+        Assert.Equal(1376251UL, bus.TStates);
+        Assert.Equal((ushort)0, r.BC);
+        Assert.Equal((ushort)0x4000, r.HL);
+        Assert.Equal((ushort)0x4000, r.DE);
+        Assert.Equal((ushort)0x2802, r.PC);
+        Assert.Equal((ushort)0x2801, r.WZ);
+        Assert.Equal((byte)0, r.R);
+    }
+
+    [Fact]
+    public void ZeroIoCountCompletesTwoHundredFiftySixThroughBoundedSteps()
+    {
+        var bus = Program(0xB2);
+        bus.PortReading = _ => 0xA5;
+        var r = new Z80Registers { PC = 0x2800, HL = 0x4000, BC = 0x00FE };
+        var cpu = new Z80Cpu(bus, r);
+        for (int step = 0; step < 256; step++) Assert.Equal(step == 255 ? 16UL : 21UL, cpu.Step());
+        Assert.Equal(5371UL, bus.TStates);
+        Assert.Equal((ushort)0x00FE, r.BC);
+        Assert.Equal((ushort)0x4100, r.HL);
+        Assert.Equal((ushort)0x01FF, r.WZ);
+        Assert.Equal((ushort)0x2802, r.PC);
+        Assert.Equal((byte)0, r.R);
+        Assert.Equal((byte)0x53, r.F);
+        Assert.All(bus.Memory[0x4000..0x4100], value => Assert.Equal((byte)0xA5, value));
     }
 
     private static int MemoryFlags(int a, int value, int count, int incoming, bool compare)
