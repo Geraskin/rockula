@@ -63,6 +63,13 @@ public abstract class Z80Bus : IZ80Bus
     {
     }
 
+    /// <summary>Unconnected port data defaults to FF; hosts provide decoding.</summary>
+    protected virtual byte ReadPort(ushort address) => 0xFF;
+
+    protected virtual void WritePort(ushort address, byte value)
+    {
+    }
+
     protected abstract byte ReadMemory(ushort address);
 
     protected abstract void WriteMemory(ushort address, byte value);

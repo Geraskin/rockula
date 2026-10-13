@@ -6,5 +6,7 @@ public enum Z80BusCycleKind
     MemoryRead,
     MemoryWrite,
     Internal,
-    InterruptAcknowledge
+    InterruptAcknowledge,
+    PortRead,
+    PortWrite
 }

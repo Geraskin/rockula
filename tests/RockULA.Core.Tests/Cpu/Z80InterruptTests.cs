@@ -14,7 +14,7 @@ public sealed class Z80InterruptTests
     public void NmiPreservesIff2AndAllFlagsPushesUnchangedPcAndWrapsStack(bool iff1, bool iff2)
     {
         var bus = new RecordingBus();
-        bus.Memory[0xABCD] = 0xD3; // Ignored fetch must not decode an unsupported byte.
+        bus.Memory[0xABCD] = 0xD3; // Ignored fetch must not decode a port instruction.
         var registers = new Z80Registers();
         var cpu = new Z80Cpu(bus, registers);
         for (int flags = 0; flags < 256; flags++)

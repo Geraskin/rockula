@@ -161,7 +161,7 @@ public sealed class Z80InterruptEnableTests
     {
         var bus = new RecordingBus();
         bus.Memory[0] = 0xFB;
-        bus.Memory[1] = 0xD3;
+        bus.Memory[1] = 0x37;
         var cpu = new Z80Cpu(bus);
         cpu.Step();
         Assert.Throws<UnsupportedOpcodeException>(() => cpu.Step());

@@ -9,6 +9,20 @@ internal sealed class RecordingBus : Z80Bus
 {
     public byte[] Memory { get; } = new byte[65536];
 
+    public byte[] Ports { get; } = new byte[65536];
+
+    public Func<ushort, byte>? PortReading { get; set; }
+
+    public List<(ushort Address, byte Value)> PortWrites { get; } = [];
+
+    protected override byte ReadPort(ushort address) => PortReading?.Invoke(address) ?? Ports[address];
+
+    protected override void WritePort(ushort address, byte value)
+    {
+        Ports[address] = value;
+        PortWrites.Add((address, value));
+    }
+
     public List<CycleEvent> Events { get; } = [];
 
     public Func<Z80BusCycle, int>? WaitStates { get; set; }
