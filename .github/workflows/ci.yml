@@ -42,6 +42,8 @@ jobs:
         run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo-machine
       - name: Synthetic Z80 v3 machine demo
         run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo-z80
+      - name: Oracle command smoke
+        run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --oracle-smoke
       - name: Native audio and virtual joystick smoke
         env:
           SDL_AUDIODRIVER: dummy
