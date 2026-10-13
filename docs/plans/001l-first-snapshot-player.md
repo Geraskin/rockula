@@ -1,5 +1,5 @@
 # Work order 001l: First 48K snapshot player
-Status: test-first. Branch feat/z80-foundation, PR #6 to main.
+Status: implemented and CI verified; real-file interactive acceptance pending. Branch feat/z80-foundation, PR #6 to main.
 
 ## Goal
 Deliver an executable desktop path: choose user 16 KiB ROM, open a strict 48K
@@ -16,6 +16,8 @@ World of Spectrum FAQ SNA schema and 48K technical research:
 https://worldofspectrum.net/faq/reference/formats.htm and
 https://worldofspectrum.net/faq/reference/48kreference.htm ;
 Claus Jahn SNA schema https://worldofspectrum.net/zx-modules/fileformats/snaformat.html .
+World of Spectrum Z80 interrupt reference (32-T INT pulse):
+https://worldofspectrum.net/faq/reference/z80reference.htm .
 Avalonia official WriteableBitmap/StorageProvider API docs and selected package API.
 
 ## CPU prerequisite
@@ -56,3 +58,14 @@ Windows/Linux restore/Release/test, demos, Linux format. Actual interactive UI,
 real firmware boot and a real game require local user files/display; report pending.
 No audio, TAP/TZX/Z80/128K, floating bus/contention, exact raster, full state restore
 or tested game compatibility claim. Provide concrete launch instructions.
+
+## Verification
+Independent red tests: commit 7501d924284fd0d8c81f3e79379349665b8ae794, CI 38333703020:
+69 expected failures, 1,477 passes, no skips. Core completion and host implementation
+are on the same authorized feature branch; host commit bea022a2fdcd20216bf882593367a818fa2d5744.
+[CI 38334641862](https://github.com/Geraskin/rockula/actions/runs/38334641862)
+passed Windows/Linux restore, Release build (zero warnings/errors), all 1,546 tests,
+all three headless demos, Linux format and Linux Xvfb native-window/bitmap-upload smoke.
+No external ROM/game was supplied; real boot, game compatibility, file dialogs and
+interactive Windows keyboard/pause responsiveness remain pending, not inferred passes.
+Concrete launch and controls: [playing](../playing.md).

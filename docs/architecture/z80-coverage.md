@@ -1,6 +1,8 @@
 # Implemented Z80 coverage
-Status: 250 standalone base encodings plus all 256 CB payloads, DD/FD and all 512 indexed CB payloads, 60 ED encodings and NMI/IM 1/2 responses; full M1/M2 are incomplete.
-Tests use literal encoding/state/timing expectations and fail explicitly for other base bytes.
+Status: all 252 standalone base encodings, all CB/indexed-CB payloads and all
+256 ED payloads decode. NMI/IM 1/2 and IM0 RST are implemented. External oracle,
+full IM0 instruction execution and physical sampling remain pending.
+
 
 | Encoding | Meaning | Count | Nominal T-states |
 | --- | --- | --- | --- |
@@ -24,20 +26,21 @@ Tests use literal encoding/state/timing expectations and fail explicitly for oth
 | F9 | LD SP,HL | 1 | 6 |
 | 07,0F,17,1F | RLCA/RRCA/RLA/RRA | 4 | 4 |
 | 27,2F | DAA/CPL | 2 | 4 |
+| 37,3F | SCF/CCF | 2 | 4 |
 | 08,EB,D9 | EX AF,AF'; EX DE,HL; EXX | 3 | 4 |
 | E3 | EX (SP),HL | 1 | 19 |
 | 76 | HALT | 1 | 4, then 4 per halted step |
 | F3,FB | DI/EI | 2 | 4 |
 | DB,D3 | IN A,(n); OUT (n),A | 2 | 11 |
 
-Total: **250 base-byte encodings**.
-ED is recognized as a prefix for 60 additional two-byte encodings:
+Total: **252 standalone base-byte encodings**.
+ED recognizes 78 semantic encodings and 178 two-fetch NOPs:
 
 | Encoding | Meaning | Nominal T-states |
 | --- | --- | --- |
-| ED44 | NEG | 8 |
-| ED46, ED56, ED5E | IM 0, IM 1, IM 2 | 8 |
-| ED45, ED4D | RETN, RETI | 14 |
+| ED44,4C,54,5C,64,6C,74,7C | NEG aliases | 8 |
+| ED46,4E,66,6E; ED56,76; ED5E,7E | IM 0/1/2 aliases | 8 |
+| ED45,55,5D,65,6D,75,7D; ED4D | RETN aliases; RETI | 14 |
 | ED42,52,62,72; ED4A,5A,6A,7A | SBC/ADC HL,BC/DE/HL/SP | 15 |
 | ED43,53,63,73; ED4B,5B,6B,7B | LD (nn),BC/DE/HL/SP and reverse | 20 |
 | ED47,4F; ED57,5F | LD I/R,A; LD A,I/R | 9 |
@@ -61,12 +64,17 @@ RRD/RLD read (HL), idle four T then write; A's high nibble and C survive and
 other flags use resulting A and parity. WZ=HL+1. An ignored ROM write still
 commits calculated A. [001j](../plans/001j-ed-data-operations.md) and
 [ADR 0011](../decisions/0011-ed-data-boundaries.md) define sources and logical
-commit/fault boundaries. Remaining ED aliases/NOPs are deferred.
+commit/fault boundaries. ED aliases and undefined NOPs are now implemented (see completion below).
 
-ED is not counted as a standalone base instruction. Other 196 ED payloads fault
-with original address, prefix and payload after two fetches (8 T). Unsupported
-aliases and ED NOPs are not silently accepted. Two other base bytes still fault
-after one fetch: SCF/CCF (37/3F).
+ED is a prefix, not a standalone base instruction. 78 payloads are semantic
+encodings (including NEG/IM/RETN aliases); the other 178 are hardware two-fetch
+NOPs. Only ED4D notifies RETI completion; RETN aliases restore IFF1 without it.
+SCF/CCF (37/3F) execute in 4 T (8 T with an ignored index prefix).
+Their X/Y flags use `((Q xor F) or A) & 28`. Q becomes F after an actual
+flag-generating operation, even if F is unchanged; otherwise Q becomes zero.
+POP AF/EX AF and RES/SET are non-generators. Q retires after successful whole
+instructions; reset/import clears it, while faults retain prior Q. See
+[001l](../plans/001l-first-snapshot-player.md) and ADR 0013.
 
 ## Ports and blocks
 PortRead/PortWrite are separate four-T logical bus transactions sampled at offset
@@ -118,8 +126,8 @@ reference discrepancy. [ADR 0009](../decisions/0009-cb-and-wz-state.md) defines
 WZ reset, writers, preservation and fault boundaries for the current instruction set.
 
 ## Index prefixes
-DD/FD are recognized prefixes, not standalone base instructions. Of the 250 base
-encodings, 85 substitute IX/IY and 165 ignore the prefix (adding four T per prefix).
+DD/FD are recognized prefixes, not standalone base instructions. Of the 252 base
+encodings, 85 substitute IX/IY and 167 ignore the prefix (adding four T per prefix).
 The last DD/FD selects the index. ED cancels substitution; EX DE,HL and EXX use
 ordinary registers. H/L become index halves except when used with indexed memory.
 No HL/index swapping is performed.
@@ -150,12 +158,12 @@ DD/FD bytes faults explicitly to bound Step; this is an emulator policy, not
 silicon behavior. Diagnostics identify the first instruction address and last
 index prefix (ED diagnostics retain ED). See [001i](../plans/001i-index-prefixes.md)
 and [ADR 0010](../decisions/0010-index-prefix-sequencing.md) for source, timing,
-logical internal address labels and partial-effect boundaries. Q remains absent.
+logical internal address labels and partial-effect boundaries. Q history is implemented.
 
 The register file includes main/alternate byte/pair views, IX/IY, PC/SP, I/R, IFFs and IM.
 DI/EI update IFFs and track inhibition through the following instruction. Interrupt
-request acceptance implements NMI and IM 1/2. Eligible IM 0/invalid modes fault
-explicitly before bus effects. ED mode commands preserve all F and both IFFs.
+request acceptance implements NMI and IM 1/2. Invalid modes fault before bus effects. IM0 supports acknowledged RST bytes;
+other bytes fault after acknowledgement. ED mode commands preserve all F and both IFFs.
 RETN/RETI pop PC, restore IFF1 from IFF2 and preserve F; RETI also emits a logical
 completion notification. ED and CB prefix/payload sequences are atomic with respect to interrupt polling. R increments once per opcode fetch, including both ED bytes.
 Faulted CPUs cannot step again until Reset. Reset leaves bus time and memory untouched.
@@ -171,8 +179,8 @@ byte separately from memory and ignores it. Signals arriving during a transactio
 apply at next Step entry, an explicitly scoped boundary model.
 IM2 uses the full acknowledged byte with I, pushes PC then reads the target low/high
 with wrap (19 T). See [ADR 0008](../decisions/0008-ed-interrupt-control.md).
-IM0, daisy-chain pin decoding and electrical interrupt sampling remain deferred.
-This is not a complete save-state API: WZ is implemented at logical boundaries; Q and future device state are absent.
+Non-RST IM0, daisy-chain pin decoding and electrical interrupt sampling remain deferred.
+This is not a complete save-state API: WZ is implemented at logical boundaries; Q is implemented; complete device-state capture remains absent.
 
 ## Timing evidence and limits
 Ordered memory operations, nominal instruction totals, little-endian/wrapped transfers,
@@ -187,7 +195,7 @@ The netlist reference establishes nominal order only, not full NMOS internal sta
 Current logical offsets are specified in [ADR 0004](../decisions/0004-initial-cpu-bus.md).
 Internal durations use logical address labels as documented in [ADR 0005](../decisions/0005-internal-cycle-scope.md).
 Electrical pin edges, internal address-pin accuracy, refresh, dynamic WAIT polling, wider NMOS quirks,
-ULA/contention/floating bus and real ROM boot are not verified or implemented.
+Timed ULA/contention/floating bus are absent; real ROM boot remains unverified.
 
 ## Demo
 `dotnet run --project src/RockULA.Headless -- --demo` executes this self-authored program:
@@ -198,3 +206,6 @@ The demo bus is flat RAM, not a Spectrum machine, and requires no firmware.
 `--demo-loop` sums 3+2+1 through a subroutine preserving BC on stack, then stores the result.
 It is bounded to 64 steps; expected completion takes 23 instructions and 234 T-states:
 PC=0012 A=06 F=00 BC=0000 SP=8000 R=17 RAM[4000]=06. Both demos run in CI.
+
+`--demo-machine` imports a self-authored 48K SNA and checks keyboard, frame
+execution, border and final-RAM video through the actual machine path.

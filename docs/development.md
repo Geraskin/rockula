@@ -42,3 +42,7 @@ Use focused plans with observable exit gates. Hardware changes need source secti
 vectors. Format changes need malformed-input tests. Reversible documentation-only changes need
 link/structure checks rather than artificial unit tests.
 A review explains behavior, evidence and limits, not a chronology of edits.
+
+The desktop command now opens the first 48K SNA player; see
+[playing instructions](playing.md) for user firmware/snapshot sizes and controls.
+CI also runs `--demo-machine` and a Linux Xvfb `--smoke-gui` window/upload check.

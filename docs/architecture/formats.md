@@ -1,5 +1,9 @@
 # File format plan
-Status: reserved Formats project; no tape or snapshot parser exists yet.
+Status: strict 48K SNA parser implemented; tape and other snapshot formats deferred.
+SNA requires exactly 49,179 bytes, saved SP 4000–FFFE, IM 0–2 and border 0–7.
+PC is popped from copied RAM without erasing bytes; restored SP wraps at FFFE.
+Header IFF2 bit 2 initializes both IFFs. Import initializes clock/phase and missing
+latches as described in ADR 0013; this is not a lossless internal save state.
 
 ## Loading boundary
 Hosts read user files with size limits and pass bytes to Formats. Parsers return validated

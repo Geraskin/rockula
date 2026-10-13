@@ -1,7 +1,10 @@
 # State and host contracts
 Whole-machine contracts remain proposals. Existing Core APIs include RomImage, Z80Registers,
 Z80Cpu, IZ80Bus and Z80Bus for the declared CPU instruction slices; see [opcode coverage](z80-coverage.md).
-Complete CPU/device state capture, remaining interrupt modes and machine restore are not yet implemented.
+Spectrum48Machine supports bounded RunFrame and atomic external SNA installation.
+Spectrum48CpuState imports architectural registers; absent Q/WZ, time, HALT/EI,
+pending signals, input and device latches initialize deterministically. Full internal
+state capture/restore and IM0 non-RST execution remain deferred.
 
 ## Execution and ownership
 A machine has reset, instruction stepping, bounded running, input submission, inspection and
@@ -61,7 +64,8 @@ Queue reset on state load/pause/resume must avoid stale output and audible burst
 ## Errors and compatibility metadata
 Malformed files, unsupported variants, missing firmware and execution faults are distinct errors.
 Report format/version/offset where useful, without exposing arbitrary user paths in shared logs.
-Never treat an unknown instruction as NOP or ignore unsupported snapshot fields silently.
+Only hardware-defined undefined ED payloads decode as two-fetch NOPs; do not
+silently ignore unsupported snapshot variants or acknowledged non-RST IM0 data.
 
 Compatibility results identify build, model/profile, ROM and input hashes, execution budget,
 input schedule, enabled fast-load policy, expected outputs and actual outputs.

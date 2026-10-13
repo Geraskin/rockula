@@ -1,6 +1,7 @@
 # Architecture
 Status: accepted design; implemented scope is the declared CPU instruction slices listed in README and
-[opcode coverage](z80-coverage.md). Spectrum devices, formats and complete save states are future work.
+[opcode coverage](z80-coverage.md). Functional 48K memory/ports/frame interrupts, final-RAM video and strict SNA import are
+implemented. Complete save states, tape/audio and accurate ULA timing remain future work.
 
 ## Product and scope
 RockULA! is both a playable emulator and an inspectable model of a historical computer.
@@ -33,7 +34,7 @@ flowchart TD
 | Desktop | Window, input mappings, framebuffer presentation, audio output, pacing | Mutating guest registers from the render thread |
 | Tests | Synthetic fixtures, expected states, bus traces, regression evidence | Hidden dependence on copyrighted ROMs or network downloads |
 
-No shared UI project is needed for the welcome shell. Add `RockULA.App` only when a second host
+No shared UI project is needed for the first snapshot player. Add `RockULA.App` only when a second host
 actually needs common views/view-models. A browser project is deferred; preserve portability in
 Core now without inventing unused browser adapters.
 
@@ -62,10 +63,14 @@ license to round the video refresh to exactly 50 Hz. Exact rules live in
 
 Firmware is an immutable, validated input identified by a hash. Startup without required firmware
 shows a clear actionable error; a zero-filled buffer is never presented as a working Spectrum ROM.
-The current shell requires none because it does not start a machine.
+The player remains idle until a user supplies a validated ROM.
 
 ## Host integration
-One worker owns machine state on desktop. Commands cross into that owner at specified
+The first player has one UI-thread owner and runs one bounded frame per timer tick
+([ADR 0013](../decisions/0013-first-player-and-q.md)). This interim host has no audio
+or worker handoff. The production design below remains planned.
+
+One worker will own machine state on desktop. Commands cross into that owner at specified
 instruction or device-safe boundaries. The GUI consumes published frame buffers and inspection
 snapshots; the audio callback consumes a bounded PCM queue. Pausing, resetting, loading state and
 closing the app coordinate on the owner, with explicit completion and cancellation.

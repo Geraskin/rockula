@@ -4,16 +4,17 @@
 A ZX Spectrum emulator written from scratch in C#, with a deterministic hardware core
 and an Avalonia desktop interface. Original project code is licensed under MIT.
 
-**Status: executable CPU foundation, still incomplete.** The core implements registers,
-timed logical memory operations and 250 base encodings: loads, byte/word ALU, INC/DEC,
-branches, stack, DAA, accumulator rotations, exchanges, IN/OUT, HALT and DI/EI delay state.
-All 256 CB encodings implement rotates/shifts and BIT/RES/SET, including SLL and WZ-dependent memory BIT flags.
-DD/FD implement IX/IY, register halves and indexed memory; all 512 DDCB/FDCB payloads are supported.
-60 ED encodings implement word ADC/SBC and memory transfers, I/R transfers, RRD/RLD,
-NEG, mode selection, interrupt returns, register ports and all block operations. NMI and IM 1/2 responses can exit HALT at logical instruction boundaries.
-Two self-authored headless demos run without firmware.
-SCF/CCF, IM 0 acceptance, remaining ED commands and Spectrum devices remain unimplemented;
-this version cannot run games.
+**Status: first functional Spectrum 48K snapshot player in PR #6.**
+The original Z80 implements 252 standalone base encodings, all CB/indexed-CB
+payloads and all ED payloads (78 semantic encodings and 178 hardware NOPs),
+including SCF/CCF flag history. Interrupts support NMI, IM 1/2 and IM 0 RST.
+The machine provides protected ROM, RAM, keyboard/Kempston, frame interrupts and
+final-RAM bitmap/attributes/FLASH/border. Desktop supports ROM/SNA selection,
+run/pause and restart; headless supports bounded snapshot runs.
+
+This is a prototype: no sound, tape, Z80 snapshots, 128K, contention, raster border
+or floating bus. Real firmware boot and game compatibility still require testing
+with user-supplied files on the target desktop. External CPU exercisers remain pending.
 
 ## Direction
 Start with a documented Spectrum 48K hardware profile and get snapshot-based games playable.
@@ -35,24 +36,29 @@ dotnet run --project src/RockULA.Headless -- --demo-loop
 dotnet run --project src/RockULA.Desktop
 ```
 
-The last command opens the welcome shell. Linux needs Avalonia's native display dependencies;
+The last command opens the snapshot player. Linux needs Avalonia's native display dependencies;
 the dev container supports builds and headless tests, not a configured GUI session.
-No ROM or game file is needed for the current shell, demo or tests.
-The demo executes six instructions and finishes at PC=000C, A=2A, B=03, HL=4000,
-R=06, RAM[4000]=RAM[4001]=2A and 51 T-states. This is synthetic flat memory,
-not an implemented Spectrum address map.
-The loop demo sums 3+2+1 through CALL/RET and PUSH/POP, executes 23 instructions and
-finishes at PC=0012, A=06, F=00, BC=0000, SP=8000, R=17, RAM[4000]=06, 234 T-states.
-Both demos have execution bounds and return failure if their expected result is missed.
+For games, click **Load ROM** (a 16,384-byte Spectrum 48K ROM), then
+**Open 48K SNA** (a 49,179-byte `.sna`). Execution starts automatically.
+Letters/numbers map to Spectrum keys; Shift is CAPS SHIFT, Ctrl is SYMBOL SHIFT.
+Choose Kempston in the game's controls menu for arrows and Space (fire).
+**Run / Pause** pauses; **Restart** restores the originally opened snapshot.
+See [playing instructions](docs/playing.md) for diagnostics and limits.
+
+No external assets are required for tests or self-authored demos:
+```sh
+dotnet run --project src/RockULA.Headless -- --demo-machine
+dotnet run --project src/RockULA.Headless -- --sna local-data/48.rom local-data/game.sna --frames 100
+```
 
 ## Repository map
 | Path | Responsibility |
 | --- | --- |
-| `src/RockULA.Core/` | Z80 instruction slices, timed bus and ROM validation |
-| `src/RockULA.Formats/` | Reserved project for bounded snapshot/tape parsers |
-| `src/RockULA.Headless/` | CLI status and bounded synthetic CPU demos |
-| `src/RockULA.Desktop/` | Avalonia desktop host; currently a welcome window |
-| `tests/` | CPU/ALU/control/bus regressions and ROM validation; other suites are future work |
+| `src/RockULA.Core/` | Z80, functional 48K machine, video/input and ROM validation |
+| `src/RockULA.Formats/` | Strict bounded 48K SNA parser; other formats deferred |
+| `src/RockULA.Headless/` | CLI, bounded snapshot runner and synthetic demos |
+| `src/RockULA.Desktop/` | Avalonia ROM/SNA player with keyboard and pause/restart |
+| `tests/` | CPU, bus, ROM, SNA, machine, keyboard and video regressions |
 | `docs/architecture/` | Hardware boundaries, timing, host and file contracts |
 | `docs/plans/` | Roadmap and executable milestone work orders |
 | `docs/decisions/` | Architecture decision records |
@@ -62,13 +68,13 @@ Both demos have execution bounds and return failure if their expected result is 
 
 Start with [AGENTS.md](AGENTS.md), [architecture](docs/architecture/overview.md),
 [roadmap](docs/plans/roadmap.md), [opcode coverage](docs/architecture/z80-coverage.md) and
-[the current slice](docs/plans/001k-ports-and-blocks.md).
+[the current slice](docs/plans/001l-first-snapshot-player.md).
 [Development](docs/development.md) explains commands and branching.
 [Testing](docs/testing.md) describes what each check can prove.
 
 ## ROMs, games and references
 Original ROMs, commercial game images and downloaded external test corpora are not bundled.
-Users supply their own authorized files when loaders are implemented. Keep local data in
+Users supply their own authorized files for the player. Keep local data in
 ignored `local-data/`. A raw ROM is firmware; TAP/TZX and SNA/Z80 are different formats.
 Our MIT license covers our code, not third-party files; see
 [asset and dependency policy](docs/licensing.md) and [references](docs/references.md).

@@ -1,5 +1,5 @@
 # Verification strategy
-Tests cover ROM validation, registers/reset, all 250 supported base encodings, exhaustive
+Tests cover ROM validation, registers/reset, all 252 standalone base encodings, exhaustive
 byte ALU inputs, all flag values for conditional flow, stack/PC wrap, memory/idle traces,
 waits, explicit unsupported bytes, partial-transfer faults and self-authored guest programs.
 The ALU pair tests execute 1,048,576 vectors inside eight xUnit cases; INC/DEC executes
@@ -114,11 +114,26 @@ faults, EI/NMI between iterations, self-modified code and PC/HL/DE wrap are cove
 Zero-count programs execute all 65,536 transfer iterations and all 256 input
 iterations through bounded Steps; a synthetic copy/search/output program takes
 17 steps and 234 T, with each step checked against a literal duration list.
-Explicit unsupported checks now reject 196 ED payloads and the two SCF/CCF base
-bytes. Ignored index-prefix coverage grows to 165 encodings per prefix.
+At 001k, explicit unsupported checks rejected 196 ED payloads and the two SCF/CCF
+base bytes. Ignored index-prefix coverage then covered 165 encodings per prefix.
 [001k](plans/001k-ports-and-blocks.md) records sources, corrections and CI evidence.
 
 Port/block-slice evidence: [CI 38331001314](https://github.com/Geraskin/rockula/actions/runs/38331001314),
 all 1,486 tests passed on both Windows/Linux, zero failures/skips/warnings/errors,
 both demos and Linux format passed. [001k](plans/001k-ports-and-blocks.md) records
 test-first, port-only and verified commits and source discrepancies.
+
+## First snapshot player evidence
+001l replaces obsolete unsupported-byte assertions with independent SCF/CCF Q,
+ED alias/NOP and IM0 RST checks. It adds strict SNA length/stack/register/ownership
+and atomic-import cases, ROM protection, all keyboard half-rows and aliases,
+Kempston/latches, bitmap layout, bright/FLASH, frame overshoot and interrupt phase.
+A self-authored SNA executes actual input/output/video paths without external assets.
+
+Test-first CI 38333703020 produced 69 expected failures and 1,477 passes. Host/core
+[CI 38334641862](https://github.com/Geraskin/rockula/actions/runs/38334641862)
+passed all 1,546 tests on Windows and Linux with zero warnings/errors/skips;
+three headless demos and Linux format passed. Linux Xvfb smoke opened the native
+Avalonia window, executed three frames and verified the uploaded bitmap pixel.
+This smoke does not prove file-picker behavior, interactive keys or a real game.
+Real firmware boot, interactive Windows acceptance and game compatibility remain pending.

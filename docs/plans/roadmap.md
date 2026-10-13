@@ -4,10 +4,10 @@ Updated: 2026-10-13. Status is about implemented evidence, not intended scope.
 | Milestone | Status | Deliverable | Exit gate |
 | --- | --- | --- | --- |
 | M0 Foundation | Build/test verified; interactive UI check pending | Solution, shell, CLI, ROM validation, docs, agent workflow, CI | Build/tests plus honest validation record |
-| M1 Z80 foundation | 250 base encodings, 256 CB payloads, WZ, 60 ED encodings and NMI/IM 1/2 responses in PR #6; M1 incomplete | State, bus, ALU, unprefixed instruction slices | Independent semantic and nominal bus tests |
-| M2 Complete CPU | CB, DD/FD and indexed-CB implemented; ED data, blocks and I/O implemented; SCF/CCF/Q and remaining aliases/IM0 next, CPU incomplete | CB/ED/DD/FD/indexed-CB, remaining interrupts, undocumented NMOS behavior | Coverage matrix and external oracle/exerciser reports |
-| M3 48K machine | Not started | Memory, keyboard/ports, basic ULA, interrupts, run loop | Deterministic synthetic machine programs |
-| M4 First playable | Not started | SNA, Z80 v1, firmware selection, desktop input/video | Curated user-supplied snapshot cases and responsive host |
+| M1 Z80 foundation | 252 standalone base encodings implemented; independent synthetic semantics/bus tests in PR #6 | State, bus, ALU, unprefixed instruction slices | Independent semantic and nominal bus tests |
+| M2 Complete CPU | All opcode pages and Q implemented; IM0 RST supported; non-RST IM0 and external exerciser gates pending | CB/ED/DD/FD/indexed-CB, remaining interrupts, undocumented NMOS behavior | Coverage matrix and external oracle/exerciser reports |
+| M3 48K machine | Functional memory/ports/input/video/frame loop implemented; accurate timing and replay pending | Memory, keyboard/ports, basic ULA, interrupts, run loop | Deterministic synthetic machine programs |
+| M4 First playable | SNA and desktop player implemented; real game/Windows acceptance and Z80 v1 pending | SNA, Z80 v1, firmware selection, desktop input/video | Curated user-supplied snapshot cases and responsive host |
 | M5 Sound and tape | Not started | Beeper/audio pacing, TAP pulse playback | Signal tests, sustained audio and real tape loads |
 | M6 Timing and tooling | Not started | Contention, raster/floating bus, debugger, complete save states | Event traces, raster regressions, state/replay equality |
 | M7 128K | Deferred | Explicit model, paging, AY, applicable formats | 128K-specific tests without 48K regressions |

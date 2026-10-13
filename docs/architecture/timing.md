@@ -1,6 +1,9 @@
 # Timing and bus contract
 Accepted design. The CPU slices implement nominal memory-transaction ordering and sequenced internal durations.
-ULA execution and Spectrum contention are not implemented. [ADR 0004](../decisions/0004-initial-cpu-bus.md)
+Timed ULA fetches and Spectrum contention are not implemented. The functional
+48K bus uses a 69,888-T frame, INT high at logical phases 0–31, and samples at
+Step boundaries. RunFrame preserves instruction overshoot; the UI timer does
+not alter guest timing. Final-RAM video is explicitly approximate (ADR 0013). [ADR 0004](../decisions/0004-initial-cpu-bus.md)
 defines logical transfers; [ADR 0005](../decisions/0005-internal-cycle-scope.md) defines
 internal logical address labels. Neither establishes electrical address/refresh accuracy.
 
@@ -63,7 +66,8 @@ bounded logical M1 fetch. NMI/IM 1 acceptance and HALT exit are defined by
 11/13 nominal T-states, separate acknowledgement and high/low stack writes.
 [ADR 0008](../decisions/0008-ed-interrupt-control.md) adds IM2 (19 T), mode selection
 and RETN/RETI, with a zero-time RETI completion notification.
-IM0 acceptance, physical sampling apertures and electrical refresh are deferred.
+IM0 accepts acknowledged RST bytes (13 T); other IM0 bytes fault after the
+acknowledgement. Physical sampling apertures and electrical refresh are deferred.
 
 ## Tape and audio
 Tape advances its pulse cursor against absolute T-states; EAR reads observe the current signal.
