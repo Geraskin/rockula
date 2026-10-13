@@ -101,3 +101,12 @@ on pause/load/restart/fault. Volume/mute alters queued delivery, not guest time.
 Audio ABI access is serialized, uses fixed 48 kHz mono signed-16 little-endian
 queue mode, and closes after owner shutdown. Missing/stalled output falls back
 to silent pacing. Exact audible latency and physical-device quality are unverified.
+
+## Snapshot and preference integration (001n)
+ISpectrum48Snapshot carries validated architectural CPU/RAM/border data for both
+SNA and Z80. The worker retains the immutable original import for restart and
+initializes absent internal state. Host configuration persists outside the machine
+in bounded versioned JSON; no runtime IDs, held keys or guest state are serialized.
+ROM restoration remains paused. Native GUID/name identity is distinct from SDL
+instance IDs; only one matching current device is auto-selected. Native/UI smoke
+bypasses personal settings. ADR 0015 specifies corruption/future-schema/save policy.

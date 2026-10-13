@@ -7,6 +7,7 @@ if (args.Length == 0 || (args.Length == 1 && args[0] == "--about"))
     return 0;
 }
 
+if (args.Length == 1 && args[0] == "--demo-z80") return SnapshotRunner.DemoZ80();
 if (args.Length == 1 && args[0] == "--demo-machine") return SnapshotRunner.Demo();
 if (args.Length is 3 or 5 && args[0] is "--sna" or "--snapshot")
 {
@@ -21,7 +22,7 @@ if (args.Length is 3 or 5 && args[0] is "--sna" or "--snapshot")
 
 if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h"))
 {
-    Console.WriteLine("Usage: RockULA.Headless [--about | --help | --demo | --demo-loop | --demo-machine | --snapshot ROM SNAPSHOT [--frames N]]");
+    Console.WriteLine("Usage: RockULA.Headless [--about | --help | --demo | --demo-loop | --demo-machine | --demo-z80 | --snapshot ROM SNAPSHOT [--frames N]]");
     Console.WriteLine("--demo executes a self-authored six-instruction Z80 load program without firmware.");
     Console.WriteLine("--demo-loop sums 3+2+1 using a bounded loop, subroutine and stack without firmware.");
     Console.WriteLine("--snapshot ROM SNAPSHOT resumes a user-supplied 48K SNA/Z80 snapshot (--sna is an alias) for a bounded frame count.");

@@ -7,7 +7,7 @@ Updated: 2026-10-13. Status is about implemented evidence, not intended scope.
 | M1 Z80 foundation | 252 standalone base encodings implemented; independent synthetic semantics/bus tests in PR #6 | State, bus, ALU, unprefixed instruction slices | Independent semantic and nominal bus tests |
 | M2 Complete CPU | All opcode pages and Q implemented; IM0 RST supported; non-RST IM0 and external exerciser gates pending | CB/ED/DD/FD/indexed-CB, remaining interrupts, undocumented NMOS behavior | Coverage matrix and external oracle/exerciser reports |
 | M3 48K machine | Functional memory/ports/input/video/frame loop implemented; accurate timing and replay pending | Memory, keyboard/ports, basic ULA, interrupts, run loop | Deterministic synthetic machine programs |
-| M4 First playable | SNA and desktop player implemented; real game/Windows acceptance and Z80 v1 pending | SNA, Z80 v1, firmware selection, desktop input/video | Curated user-supplied snapshot cases and responsive host |
+| M4 First playable | SNA/Z80 v1–3, persisted preferences and desktop player implemented; real game/Windows acceptance pending | SNA, Z80 v1, firmware selection, desktop input/video | Curated user-supplied snapshot cases and responsive host |
 | M5 Sound and tape | Digital beeper PCM, SDL output and worker pacing implemented; physical audio acceptance/tape pending | Beeper/audio pacing, TAP pulse playback | Signal tests, sustained audio and real tape loads |
 | M6 Timing and tooling | Not started | Contention, raster/floating bus, debugger, complete save states | Event traces, raster regressions, state/replay equality |
 | M7 128K | Deferred | Explicit model, paging, AY, applicable formats | 128K-specific tests without 48K regressions |

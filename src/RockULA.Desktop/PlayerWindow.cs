@@ -148,6 +148,7 @@ public sealed class PlayerWindow : Window
     private async Task RestorePreferences()
     {
         if (_preferencesStore == null) return;
+        _restoring = true;
         var saved = await _preferencesStore.LoadAsync();
         if (_closing) return;
         _preferences = saved.Value;

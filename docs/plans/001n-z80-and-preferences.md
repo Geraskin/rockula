@@ -1,5 +1,5 @@
 # Work order 001n: 48K Z80 snapshots and desktop preferences
-Status: test-first. Authorized continuation feat/z80-foundation, PR #6 to main.
+Status: implemented; final CI and real-file acceptance pending. Authorized continuation feat/z80-foundation, PR #6 to main.
 
 ## Scope and sources
 Support ordinary 48K Z80 v1 raw/compressed and v2/v3 page blocks, plus existing
@@ -44,3 +44,12 @@ failure tests before implementation, observe red CI. Windows/Linux restore/build
 tests/demos/format, native GUID virtual HID smoke and Linux worker Z80-window smoke.
 Synthetic fixtures exercise desktop worker/headless import; real games, physical
 USB identity, file dialogs and audible output remain user-hardware acceptance.
+
+## Intermediate evidence
+Independent red CI 38355641107: zero build warnings/errors, 37 parser and 13
+preference failures, 1,578 existing tests passed. Implementation CI 38356176978
+passed all 1,628 tests and native GUID/device/window checks; format identified
+inline-attribute/initializer/import ordering corrections. Host CI 38356612281
+passed both platforms, all 1,628 tests, demos/native smokes and Linux format.
+Further integration tests cover extended-page guest execution, Z80 worker restart
+and future-schema detection even before loading settings. Final evidence follows.

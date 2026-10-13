@@ -45,6 +45,21 @@ public sealed class PreferencesStore
         {
             if (!_canSave) return "Newer-version settings are read-only; current session changes were not saved.";
             Validate(value);
+            if (File.Exists(FilePath))
+            {
+                try
+                {
+                    using var current = JsonDocument.Parse(await ReadBounded(FilePath).ConfigureAwait(false), new JsonDocumentOptions { MaxDepth = 8 });
+                    if (current.RootElement.ValueKind == JsonValueKind.Object && current.RootElement.TryGetProperty("Version", out var schema)
+                        && schema.ValueKind == JsonValueKind.Number && schema.TryGetInt32(out int version) && version > 1)
+                    {
+                        _canSave = false;
+                        return "Newer-version settings will not be overwritten.";
+                    }
+                }
+                catch (JsonException) { } // Explicit user changes can replace corrupt preferences.
+                catch (ArgumentException) { } // Oversized corrupt settings may likewise be repaired.
+            }
             byte[] bytes = JsonSerializer.SerializeToUtf8Bytes(value, Json);
             if (bytes.Length > MaximumBytes) throw new ArgumentException("Settings exceed the encoded size limit.");
             string directory = Path.GetDirectoryName(FilePath)!;

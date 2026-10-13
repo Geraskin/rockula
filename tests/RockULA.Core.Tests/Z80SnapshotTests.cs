@@ -152,6 +152,22 @@ public sealed class Z80SnapshotTests
     }
 
     [Fact]
+    public void ExtendedPagesExecuteThroughMachineAndUnknownPagesAreExplicitFailures()
+    {
+        byte[] data = Extended(23); data[33] = 0x80;
+        byte[] program = [0x3E, 7, 0x32, 0, 0x58, 0x3E, 0x80, 0x32, 0, 0x40, 0x18, 0xFE];
+        program.CopyTo(data, 321); // 55-byte header + 3 + 260-byte page 5 + page 4 header.
+        var snapshot = Z8048Snapshot.Parse(data);
+        var machine = new RockULA.Core.Machines.Spectrum48Machine(RockULA.Core.RomImage.FromSpectrum48(new byte[16384]));
+        machine.LoadSnapshot(snapshot.CpuState, snapshot.Ram, snapshot.BorderColor);
+        machine.RunFrame();
+        Assert.Equal((byte)0x80, machine.Bus.Peek(0x4000));
+        Assert.Equal((byte)7, machine.Bus.Peek(0x5800));
+        data[57] = 3;
+        Assert.Throws<NotSupportedException>(() => Z8048Snapshot.Parse(data));
+    }
+
+    [Fact]
     public void InvalidInterruptModeRejects()
     {
         byte[] data = Raw(); data[29] = 3;

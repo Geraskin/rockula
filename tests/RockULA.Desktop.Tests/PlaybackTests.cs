@@ -82,6 +82,29 @@ public sealed class PlaybackTests
     }
 
     [Fact]
+    public async Task Z80SnapshotRunsAndRestartUsesOriginalImportedRamAndPc()
+    {
+        byte[] bytes = new byte[49182]; bytes[7] = 0x80; bytes[8] = 0xFF; bytes[9] = 0xFF;
+        new byte[] { 0x3E, 7, 0x32, 0, 0x58, 0x3E, 0x80, 0x32, 0, 0x40, 0x18, 0xFE }.CopyTo(bytes, 30 + 0x4000);
+        var snapshot = SpectrumSnapshotReader.Parse(".Z80", bytes);
+        var session = new PlayerSession(new FakeAudio());
+        try
+        {
+            await session.LoadAsync(RomImage.FromSpectrum48(new byte[16384]), snapshot);
+            Assert.Equal((ushort)0x8000, session.Latest.PC);
+            await session.SetRunningAsync(true);
+            await Until(() => session.Latest.Number >= 1);
+            Assert.Equal(0xFFCDCDCDU, session.Latest.Pixels[24 * 320 + 32]);
+            await session.SetRunningAsync(false);
+            await session.RestartAsync();
+            Assert.Equal((ushort)0x8000, session.Latest.PC);
+            Assert.Equal(0UL, session.Latest.TStates);
+            Assert.Equal(0xFF000000U, session.Latest.Pixels[24 * 320 + 32]);
+        }
+        finally { await session.CloseAsync(); }
+    }
+
+    [Fact]
     public async Task BoundedCommandQueueDoesNotDeadlockAndVolumeIsValidated()
     {
         var session = new PlayerSession(new FakeAudio());

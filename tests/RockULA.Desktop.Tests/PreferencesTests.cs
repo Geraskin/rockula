@@ -66,6 +66,7 @@ public sealed class PreferencesTests
             string path = Path.Combine(directory, "settings.json");
             var store = new PreferencesStore(path);
             await File.WriteAllTextAsync(path, "{\"Version\":2,\"Volume\":9}");
+            Assert.NotNull(await store.SaveAsync(new())); // Protected even before LoadAsync.
             var loaded = await store.LoadAsync();
             Assert.False(loaded.CanSave); Assert.NotNull(loaded.Warning);
             Assert.NotNull(await store.SaveAsync(new()));

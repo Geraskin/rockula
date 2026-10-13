@@ -36,6 +36,30 @@ internal static class SnapshotRunner
         if (input.ReadByte() != -1) throw new ArgumentException("File changed while reading.");
         return bytes;
     }
+    public static int DemoZ80()
+    {
+        byte[] header = new byte[86];
+        header[30] = 54; header[33] = 0x80; header[9] = 0x90; header[29] = 1;
+        byte[] ram = new byte[49152];
+        new byte[] { 0x3E, 7, 0x32, 0, 0x58, 0x3E, 0x80, 0x32, 0, 0x40, 0x18, 0xFE }.CopyTo(ram, 0x4000);
+        var bytes = new List<byte>(header);
+        foreach (byte page in new byte[] { 5, 8, 4 })
+        {
+            int slot = page == 8 ? 0 : page == 4 ? 1 : 2;
+            bytes.AddRange(new byte[] { 0xFF, 0xFF, page });
+            bytes.AddRange(ram.AsSpan(slot * 16384, 16384).ToArray());
+        }
+        var snapshot = SpectrumSnapshotReader.Parse(".z80", bytes.ToArray());
+        var machine = new Spectrum48Machine(RomImage.FromSpectrum48(new byte[16384]));
+        machine.LoadSnapshot(snapshot.CpuState, snapshot.Ram, snapshot.BorderColor);
+        for (int frame = 0; frame < 3; frame++) machine.RunFrame();
+        uint[] pixels = new uint[320 * 240];
+        Spectrum48Video.Render(machine.Bus, pixels, machine.FrameNumber);
+        bool valid = machine.FrameNumber == 3 && machine.Cpu.Registers.PC == 0x800A
+            && machine.Cpu.Registers.SP == 0x9000 && pixels[24 * 320 + 32] == 0xFFCDCDCD;
+        Console.WriteLine($"Synthetic Z80 v3/machine demo: frames={machine.FrameNumber} PC={machine.Cpu.Registers.PC:X4} SP={machine.Cpu.Registers.SP:X4} pixel={pixels[24 * 320 + 32]:X8}");
+        return valid ? 0 : 1;
+    }
     public static int Demo()
     {
         // Self-authored snapshot and dummy ROM; no downloaded firmware or game.

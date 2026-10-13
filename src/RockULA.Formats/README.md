@@ -1,6 +1,7 @@
 # RockULA.Formats
-Strict 48K SNA parsing into immutable portable CPU/RAM data. Exactly 49,179 bytes;
-little-endian fields, validated stack-derived PC, IM/border and defensive RAM ownership.
-Core installs the result atomically. Formats never opens files or runs a machine.
-Z80, 128K SNA and tape formats remain deferred.
+Bounded 48K SNA and ordinary 48K Z80 v1/v2/v3 import. Both own RAM and implement
+ISpectrum48Snapshot architectural CPU/RAM/border data. Z80 supports raw/compressed
+v1 and exact three-page extended snapshots, rejects incompatible hardware and
+malformed runs/blocks, and never changes SP to recover PC. Hosts select by extension
+and bound reads; Core installs atomically. Tape/128K/full internal saves are deferred.
 See [format contract](../../docs/architecture/formats.md).

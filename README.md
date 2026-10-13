@@ -9,13 +9,13 @@ The original Z80 implements 252 standalone base encodings, all CB/indexed-CB
 payloads and all ED payloads (78 semantic encodings and 178 hardware NOPs),
 including SCF/CCF flag history. Interrupts support NMI, IM 1/2 and IM 0 RST.
 The machine provides protected ROM, RAM, keyboard/Kempston, frame interrupts and
-final-RAM bitmap/attributes/FLASH/border. Desktop supports ROM/SNA selection,
+final-RAM bitmap/attributes/FLASH/border. Desktop supports ROM/SNA/Z80 selection,
 run/pause and restart; headless supports bounded snapshot runs.
 Desktop execution has a background machine owner, queued beeper sound with
 volume/mute, and configurable USB game HID axes/hat/buttons. Controls selects
 Kempston or Sinclair number-key rows and can rebind keyboard joystick aliases.
 
-This is a prototype: no tape, Z80 snapshots, 128K, contention, raster border
+This is a prototype: no tape, 128K, contention, raster border
 or floating bus. Real firmware boot and game compatibility still require testing
 with user-supplied files on the target desktop. External CPU exercisers remain pending.
 
@@ -42,13 +42,15 @@ dotnet run --project src/RockULA.Desktop
 The last command opens the snapshot player. Linux needs Avalonia's native display dependencies;
 the dev container supports builds and headless tests, not a configured GUI session.
 For games, click **Load ROM** (a 16,384-byte Spectrum 48K ROM), then
-**Open 48K SNA** (a 49,179-byte `.sna`). Execution starts automatically.
+**Open snapshot** (a 49,179-byte 48K `.sna` or ordinary 48K `.z80` v1/v2/v3). Execution starts automatically.
 Letters/numbers map to Spectrum keys; Shift is CAPS SHIFT, Ctrl is SYMBOL SHIFT.
 Choose Kempston in the game's controls menu for arrows and Space (fire).
 For USB, open **Controls / USB**, refresh/select your joystick and check the live
 preview. Configure axes, hat, fire, direction buttons and dead zone as needed.
 Use the same Kempston/Sinclair selection in the game and host. Volume/mute is in
-the main toolbar. Settings are currently session-only.
+the main toolbar. ROM path, last snapshot folder, volume/mute and controller mappings persist per user.
+The saved ROM is validated and restored paused; snapshots/games are not auto-started.
+USB selection uses GUID/name and is automatic only for one unambiguous match.
 **Run / Pause** pauses; **Restart** restores the originally opened snapshot.
 See [playing instructions](docs/playing.md) for diagnostics and limits.
 
@@ -62,9 +64,9 @@ dotnet run --project src/RockULA.Headless -- --sna local-data/48.rom local-data/
 | Path | Responsibility |
 | --- | --- |
 | `src/RockULA.Core/` | Z80, functional 48K machine, video/input and ROM validation |
-| `src/RockULA.Formats/` | Strict bounded 48K SNA parser; other formats deferred |
+| `src/RockULA.Formats/` | Bounded 48K SNA and Z80 v1/v2/v3 parsers; tape deferred |
 | `src/RockULA.Headless/` | CLI, bounded snapshot runner and synthetic demos |
-| `src/RockULA.Desktop/` | Avalonia ROM/SNA player with keyboard and pause/restart |
+| `src/RockULA.Desktop/` | Avalonia ROM/SNA/Z80 player with keyboard and pause/restart |
 | `tests/` | CPU, bus, ROM, SNA, machine, keyboard and video regressions |
 | `docs/architecture/` | Hardware boundaries, timing, host and file contracts |
 | `docs/plans/` | Roadmap and executable milestone work orders |
@@ -75,7 +77,7 @@ dotnet run --project src/RockULA.Headless -- --sna local-data/48.rom local-data/
 
 Start with [AGENTS.md](AGENTS.md), [architecture](docs/architecture/overview.md),
 [roadmap](docs/plans/roadmap.md), [opcode coverage](docs/architecture/z80-coverage.md) and
-[the current slice](docs/plans/001m-audio-and-usb-joystick.md).
+[the current slice](docs/plans/001n-z80-and-preferences.md).
 [Development](docs/development.md) explains commands and branching.
 [Testing](docs/testing.md) describes what each check can prove.
 
