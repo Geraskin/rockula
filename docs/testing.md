@@ -92,12 +92,15 @@ Observed on Linux, .NET SDK 10.0.401, 2026-10-13 (`feat/oracle-diagnostics`):
   with the ROM's own banner `© 1981 Nine Tiles Networks Ltd`; two runs produced the same hash.
 - A missing ROM path returned exit 1 and `--keys zzz` returned exit 2.
 - `--oracle-fuse local-data/tests.in local-data/tests.expected` runs the Fuse single-instruction
-  corpus on a flat 64 KiB bus and reported `tests=1335 passed=1324 failed=3 knownXyDivergence=8
-  skipped=0`. The three failures are the undocumented X/Y bits after SCF (`37_1`) and CCF (`3f`)
-  and the HALT PC convention (`76`); the eight `knownXyDivergence` entries are the `BIT n,(HL)`
-  cases the reference integration blacklists as "FUSE handles those wrong". Contention events
-  (MC/PC) and bus read/write events are not compared: this machine has no contention model.
-  The runner exits non-zero while those three remain open.
+  corpus on a flat 64 KiB bus and reported `tests=1335 passed=1326 failed=1 knownXyDivergence=8
+  skipped=0`. Two of the original failures (`37_1` SCF, `3f` CCF) exposed a real defect: X/Y were
+  derived from the incoming F instead of the flags the instruction produces; the fix is in
+  `Z80Cpu.Misc.cs` and the corpus values are an independent anchor test. The remaining failure is
+  the HALT PC convention (`76`), tracked in [001o](plans/001o-external-oracle.md) pending
+  hardware-level evidence. The eight `knownXyDivergence` entries are the `BIT n,(HL)` cases the
+  reference integration blacklists as "FUSE handles those wrong". Contention events (MC/PC) and
+  bus read/write events are not compared: this machine has no contention model. The runner exits
+  non-zero while the HALT divergence is open.
 - `--oracle-smoke` runs the same report path on a self-authored dummy ROM (no external asset) and
   prints `frames=60 T=4193280 PC=FF00 border=0 FramebufferSHA256=4D856B7A9008759AFF68A0D1CDE95B895FB952761719549F339D00D6EDA9F543`;
   CI runs it so the command cannot rot. It is a tool-path check, not firmware and not accuracy

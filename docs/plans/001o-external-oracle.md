@@ -80,14 +80,17 @@ registers, T-states and memory for one instruction per test against the corpus's
 produced expectations. Results are reported as counts; nothing is silently masked.
 
 ## Open CPU divergences (never to be closed by loosening a test)
-1. `37_1` SCF and `3f` CCF: the undocumented X/Y bits differ from the corpus. Our rule is
-   `((Q xor F) or A) & 0x28` with `Q = 0` at test start (ADR 0013); the corpus implies no X/Y on a
-   fresh Q. Resolve against UM0080 and the Korth/David Banks sources before changing anything.
-2. `76` HALT: the corpus keeps PC at the HALT address while we advance it past HALT. Decide which
-   convention the 48K profile and the interrupt return address require.
-3. Eight `BIT n,(HL)` X/Y cases are compared with X/Y masked and counted separately because the
+1. `76` HALT: the corpus keeps PC at the HALT address while we advance it past HALT. ADR 0006
+   already calls our PC policy "an explicit logical abstraction, not independent electrical-pin
+   evidence", and the interrupt return address needs the advanced PC. Resolve only with
+   hardware-level evidence; until then the runner reports the divergence instead of masking it.
+2. Eight `BIT n,(HL)` X/Y cases are compared with X/Y masked and counted separately because the
    reference C integration (`floooh/chips-test` `tests/z80-fuse.c`) blacklists exactly those
    names as Fuse defects.
+
+Resolved by this work order: `37_1` SCF and `3f` CCF. X/Y were derived from the incoming F but
+must come from the flags the instruction produces. Fixed in `Z80Cpu.Misc.cs`, with the two corpus
+values added as an independent anchor test; the corpus moved from `failed=3` to `failed=1`.
 
 ## Intermediate evidence
 - `--oracle-rom local-data/zx-diagnostics-v0.37-48k.rom --settle 1500 --keys 1 --frames 4000`
@@ -98,5 +101,5 @@ produced expectations. Results are reported as counts; nothing is silently maske
 - The ROM-boot and print/scroll checks on OpenSE BASIC are recorded as manual observations in the
   same testing section; the ROM's own print entry (`CALL 0x0010` -> `JP 0x15F2`) printed and
   scrolled correctly with a ~2-frame cost per 6 KiB scroll.
-- `--oracle-fuse local-data/tests.in local-data/tests.expected` reported `tests=1335 passed=1324
-  failed=3 knownXyDivergence=8 skipped=0`; the three failures are the open items above.
+- `--oracle-fuse local-data/tests.in local-data/tests.expected` reported `tests=1335 passed=1326
+  failed=1 knownXyDivergence=8 skipped=0`; the single failure is the open HALT item above.
