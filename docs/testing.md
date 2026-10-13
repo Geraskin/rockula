@@ -137,3 +137,16 @@ three headless demos and Linux format passed. Linux Xvfb smoke opened the native
 Avalonia window, executed three frames and verified the uploaded bitmap pixel.
 This smoke does not prove file-picker behavior, interactive keys or a real game.
 Real firmware boot, interactive Windows acceptance and game compatibility remain pending.
+
+## Audio and USB player evidence
+[CI 38342608249](https://github.com/Geraskin/rockula/actions/runs/38342608249),
+code commit a188d587feb752d7b128a4a8658cb8cccba934c7: 1,565 Core plus 13 Desktop
+tests passed on Windows/Linux (1,578 total, no failures/skips, zero build warnings/errors).
+Independent tests cover rational PCM pulse area, fractional counts, DC/reset/ring
+bounds and bus-transfer timing; Sinclair rows/keyboard overlap; raw HID mapping;
+worker command acknowledgement, pause/restart/fault/close, output fallback and
+real synthetic guest-tone/mute delivery. Headless demos and Linux format passed.
+Native dummy-audio/virtual-joystick smoke passed on both platforms; Linux Xvfb
+verified worker-frame presentation and actual queued PCM. Virtual input and dummy
+audio do not establish real game/device compatibility or audible quality. See
+[001m](plans/001m-audio-and-usb-joystick.md) and [playing](playing.md) for limits.

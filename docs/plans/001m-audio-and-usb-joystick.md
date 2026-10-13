@@ -1,5 +1,5 @@
 # Work order 001m: Beeper, worker host and USB joystick
-Status: implemented; final CI and physical-device acceptance pending. Continues authorized feat/z80-foundation, PR #6 to main.
+Status: implemented and CI verified; physical-device acceptance pending. Continues authorized feat/z80-foundation, PR #6 to main.
 
 ## Goal
 48K bit-4 beeper sound; volume/mute; one worker owns all machine mutation;
@@ -55,3 +55,16 @@ CI 38341974935 passed native audio/virtual HID and worker-window smoke on Linux;
 format verification identified three whitespace and two import-order corrections.
 Physical speakers, the user's USB device, real games and sustained latency remain
 pending. See docs/playing.md for exact configuration and limits.
+
+## Verified acceptance
+Code commit a188d587feb752d7b128a4a8658cb8cccba934c7:
+[CI 38342608249](https://github.com/Geraskin/rockula/actions/runs/38342608249)
+passed restore, Release builds with zero warnings/errors, 1,565 Core tests and
+13 Desktop tests on both Windows and Linux (1,578 total, zero failures/skips).
+All three headless demos and Linux format passed. Both native device smokes
+queued/consumed/cleared PCM and verified virtual joystick axes, hat, buttons,
+remapping and unplug. Linux Xvfb opened the worker-driven Avalonia window,
+verified framebuffer upload and queued beeper PCM. The guest-tone/mute test
+checks nonzero output, clearing old queued sound and silence without resetting
+guest time. No real ROM/game, speakers or physical USB device was supplied;
+interactive and sustained physical-device acceptance remains pending.
