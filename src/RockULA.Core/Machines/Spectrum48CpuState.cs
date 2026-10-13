@@ -9,9 +9,22 @@ public readonly record struct Spectrum48CpuState(
 {
     public Z80Registers CreateRegisters() => new()
     {
-        AF = AF, BC = BC, DE = DE, HL = HL, AlternateAF = AlternateAF,
-        AlternateBC = AlternateBC, AlternateDE = AlternateDE, AlternateHL = AlternateHL,
-        IX = IX, IY = IY, PC = PC, SP = SP, I = I, R = R,
-        Iff1 = Iff1, Iff2 = Iff2, InterruptMode = InterruptMode
+        AF = AF,
+        BC = BC,
+        DE = DE,
+        HL = HL,
+        AlternateAF = AlternateAF,
+        AlternateBC = AlternateBC,
+        AlternateDE = AlternateDE,
+        AlternateHL = AlternateHL,
+        IX = IX,
+        IY = IY,
+        PC = PC,
+        SP = SP,
+        I = I,
+        R = R,
+        Iff1 = Iff1,
+        Iff2 = Iff2,
+        InterruptMode = InterruptMode
     };
 }

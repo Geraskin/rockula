@@ -38,6 +38,11 @@ jobs:
         run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo
       - name: Synthetic loop and stack demo
         run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo-loop
+      - name: Synthetic 48K SNA machine demo
+        run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo-machine
+      - name: Desktop native-window smoke
+        if: runner.os == 'Linux'
+        run: timeout 30s xvfb-run -a dotnet run --project src/RockULA.Desktop -c Release --no-build -- --smoke-gui
       - name: Check formatting
         if: runner.os == 'Linux'
         run: dotnet format RockULA.slnx --verify-no-changes --no-restore
