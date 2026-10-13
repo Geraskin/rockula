@@ -1,9 +1,9 @@
-using System.Collections.Concurrent;
-using RockULA.Core;
 using RockULA.Core.Input;
-using RockULA.Formats;
+using RockULA.Core;
 using RockULA.Desktop.Devices;
 using RockULA.Desktop.Playback;
+using RockULA.Formats;
+using System.Collections.Concurrent;
 
 namespace RockULA.Desktop.Tests;
 
@@ -17,6 +17,26 @@ public sealed class PlaybackTests
     [InlineData(0, 0, 12, false, 6)]
     public void AxisThresholdHatAndFireUseLiteralBits(short x, short y, byte hat, bool fire, byte expected) =>
         Assert.Equal((JoystickButtons)expected, new JoystickMapping().Map(x, y, hat, fire));
+
+    [Fact]
+    public void KeyboardRebindingPreservesMultipleActionsOnOneKeyAndRelease()
+    {
+        var mapping = new KeyboardJoystickKeys(Left: Avalonia.Input.Key.A, Fire: Avalonia.Input.Key.A);
+        var held = new HashSet<Avalonia.Input.Key> { Avalonia.Input.Key.A };
+        Assert.Equal((JoystickButtons)18, mapping.Read(held));
+        held.Clear();
+        Assert.Equal(JoystickButtons.None, mapping.Read(held));
+    }
+
+    [Fact]
+    public void DigitalDirectionButtonsSupportBothMasksAndDisabledBindings()
+    {
+        var mapping = new JoystickMapping(LeftButton: 0, RightButton: 64, UpButton: 1, DownButton: 127);
+        Assert.Equal((JoystickButtons)15, mapping.MapDirectionButtons(3, 1UL | (1UL << 63)));
+        Assert.Equal(JoystickButtons.None, new JoystickMapping().MapDirectionButtons(ulong.MaxValue, ulong.MaxValue));
+        Assert.False(JoystickMapping.Pressed(-1, ulong.MaxValue, ulong.MaxValue));
+        Assert.False(JoystickMapping.Pressed(128, ulong.MaxValue, ulong.MaxValue));
+    }
 
     [Fact]
     public void AxisInversionHandlesSignedMinimumWithoutOverflow()

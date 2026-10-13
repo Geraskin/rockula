@@ -11,6 +11,8 @@ public sealed class SdlDevices : IAudioOutput, IDisposable
     private const uint JoystickFlag = 0x200;
     private readonly object _audioLock = new();
     private uint _audio;
+    private long _queuedTotal;
+    internal long TotalQueuedSamples => Interlocked.Read(ref _queuedTotal);
     private uint _initialized;
     private IntPtr _joystick;
     public string Status { get; private set; } = "SDL unavailable";
@@ -58,8 +60,12 @@ public sealed class SdlDevices : IAudioOutput, IDisposable
     {
         if (count < 0 || count > samples.Length) throw new ArgumentOutOfRangeException(nameof(count));
         lock (_audioLock)
-            if (_audio != 0 && SdlNative.SDL_QueueAudio(_audio, samples, checked((uint)count * 2)) != 0)
+        {
+            if (_audio == 0) return;
+            if (SdlNative.SDL_QueueAudio(_audio, samples, checked((uint)count * 2)) != 0)
                 throw new InvalidOperationException("Audio queue failed: " + SdlNative.Error);
+            Interlocked.Add(ref _queuedTotal, count);
+        }
     }
     public void Reset(bool playing)
     {
@@ -110,9 +116,17 @@ public sealed class SdlDevices : IAudioOutput, IDisposable
         short x = mapping.XAxis >= 0 && mapping.XAxis < axes ? SdlNative.SDL_JoystickGetAxis(_joystick, mapping.XAxis) : (short)0;
         short y = mapping.YAxis >= 0 && mapping.YAxis < axes ? SdlNative.SDL_JoystickGetAxis(_joystick, mapping.YAxis) : (short)0;
         byte hat = mapping.Hat >= 0 && mapping.Hat < hats ? SdlNative.SDL_JoystickGetHat(_joystick, mapping.Hat) : (byte)0;
-        bool fire = mapping.FireButton >= 0 && mapping.FireButton < buttons && SdlNative.SDL_JoystickGetButton(_joystick, mapping.FireButton) != 0;
-        var state = mapping.Map(x, y, hat, fire);
-        return new(state, $"USB: axes={axes}, buttons={buttons}, hats={hats} · X={x} Y={y} hat={hat} · {state}");
+        ulong low = 0, high = 0;
+        var pressed = new List<int>();
+        for (int button = 0; button < Math.Min(buttons, 128); button++)
+            if (SdlNative.SDL_JoystickGetButton(_joystick, button) != 0)
+            {
+                if (button < 64) low |= 1UL << button; else high |= 1UL << (button - 64);
+                pressed.Add(button);
+            }
+        bool fire = JoystickMapping.Pressed(mapping.FireButton, low, high);
+        var state = mapping.Map(x, y, hat, fire) | mapping.MapDirectionButtons(low, high);
+        return new(state, $"USB: axes={axes}, buttons={buttons}, hats={hats} · X={x} Y={y} hat={hat} · pressed=[{string.Join(",", pressed)}] · {state}");
     }
     public void Dispose()
     {

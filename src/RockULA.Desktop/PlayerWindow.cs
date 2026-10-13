@@ -168,8 +168,8 @@ public sealed class PlayerWindow : Window
                 using (var bitmap = _bitmap.Lock())
                     if (unchecked((uint)Marshal.ReadInt32(bitmap.Address, 24 * bitmap.RowBytes + 32 * 4)) != 0xFFCDCDCD)
                         throw new InvalidOperationException("Worker GUI bitmap upload mismatch");
-                if (!_devices.Available) throw new InvalidOperationException("GUI smoke requires the dummy audio backend");
-                Console.WriteLine("GUI smoke passed: worker frames, native window, bitmap upload and initialized audio.");
+                if (!_devices.Available || _devices.TotalQueuedSamples == 0) throw new InvalidOperationException("GUI smoke requires the dummy audio backend");
+                Console.WriteLine("GUI smoke passed: worker frames, native window, bitmap upload and queued beeper PCM.");
             }
             catch (Exception ex) { Console.Error.WriteLine(ex); Environment.ExitCode = 1; }
             Close();
@@ -199,7 +199,8 @@ public sealed class PlayerWindow : Window
         await _session.SetRunningAsync(false);
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = firmware ? "48K firmware (16384 bytes)" : "48K SNA snapshot (49179 bytes)", AllowMultiple = false,
+            Title = firmware ? "48K firmware (16384 bytes)" : "48K SNA snapshot (49179 bytes)",
+            AllowMultiple = false,
             FileTypeFilter = [new FilePickerFileType(firmware ? "Firmware" : "48K SNA") { Patterns = firmware ? ["*.rom", "*.bin"] : ["*.sna"] }]
         });
         if (_closing || files.Count == 0) return;

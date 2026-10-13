@@ -39,6 +39,9 @@ internal static class DeviceSmoke
             if ((byte)devices.Poll(new()).Buttons != 27) throw new InvalidOperationException("Native axis/hat/fire mapping mismatch");
             if ((byte)devices.Poll(new(XAxis: 1, YAxis: 0, FireButton: 1, Hat: -1)).Buttons != 6)
                 throw new InvalidOperationException("Native remapping mismatch");
+            Set(SdlNative.SDL_JoystickSetVirtualButton(virtualJoystick, 1, 1));
+            if ((byte)devices.Poll(new(XAxis: -1, YAxis: -1, FireButton: -1, Hat: -1, LeftButton: 0, UpButton: 1)).Buttons != 10)
+                throw new InvalidOperationException("Native digital direction-button mapping mismatch");
             Set(SdlNative.SDL_JoystickDetachVirtual(index));
             index = -1;
             if (devices.Poll(new()).Buttons != JoystickButtons.None) throw new InvalidOperationException("Unplug left stuck input");

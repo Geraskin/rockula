@@ -11,8 +11,11 @@ including SCF/CCF flag history. Interrupts support NMI, IM 1/2 and IM 0 RST.
 The machine provides protected ROM, RAM, keyboard/Kempston, frame interrupts and
 final-RAM bitmap/attributes/FLASH/border. Desktop supports ROM/SNA selection,
 run/pause and restart; headless supports bounded snapshot runs.
+Desktop execution has a background machine owner, queued beeper sound with
+volume/mute, and configurable USB game HID axes/hat/buttons. Controls selects
+Kempston or Sinclair number-key rows and can rebind keyboard joystick aliases.
 
-This is a prototype: no sound, tape, Z80 snapshots, 128K, contention, raster border
+This is a prototype: no tape, Z80 snapshots, 128K, contention, raster border
 or floating bus. Real firmware boot and game compatibility still require testing
 with user-supplied files on the target desktop. External CPU exercisers remain pending.
 
@@ -42,6 +45,10 @@ For games, click **Load ROM** (a 16,384-byte Spectrum 48K ROM), then
 **Open 48K SNA** (a 49,179-byte `.sna`). Execution starts automatically.
 Letters/numbers map to Spectrum keys; Shift is CAPS SHIFT, Ctrl is SYMBOL SHIFT.
 Choose Kempston in the game's controls menu for arrows and Space (fire).
+For USB, open **Controls / USB**, refresh/select your joystick and check the live
+preview. Configure axes, hat, fire, direction buttons and dead zone as needed.
+Use the same Kempston/Sinclair selection in the game and host. Volume/mute is in
+the main toolbar. Settings are currently session-only.
 **Run / Pause** pauses; **Restart** restores the originally opened snapshot.
 See [playing instructions](docs/playing.md) for diagnostics and limits.
 

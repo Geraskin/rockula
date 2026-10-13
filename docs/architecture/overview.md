@@ -66,16 +66,15 @@ shows a clear actionable error; a zero-filled buffer is never presented as a wor
 The player remains idle until a user supplies a validated ROM.
 
 ## Host integration
-The first player has one UI-thread owner and runs one bounded frame per timer tick
-([ADR 0013](../decisions/0013-first-player-and-q.md)). This interim host has no audio
-or worker handoff. The production design below remains planned.
+The current desktop has one background machine owner ([ADR 0014](../decisions/0014-audio-worker-and-hid.md)).
+Bounded commands acknowledge load/pause/restart/volume/close; coalesced immutable
+input applies before each frame. The UI receives immutable latest-frame pixels,
+not live CPU/RAM. Joystick polling stays on the UI thread. SDL queued audio is
+fed by the owner, with no application audio callback. Closing awaits ownership
+shutdown before closing native handles. Complete save states remain deferred.
 
-One worker will own machine state on desktop. Commands cross into that owner at specified
-instruction or device-safe boundaries. The GUI consumes published frame buffers and inspection
-snapshots; the audio callback consumes a bounded PCM queue. Pausing, resetting, loading state and
-closing the app coordinate on the owner, with explicit completion and cancellation.
-
-Host pacing follows produced audio and bounded wall-clock drift. It may drop presentation frames
+Current pacing uses a bounded queued-audio high-water and monotonic guest-time
+fallback for missing/stalled audio. Future pacing may follow produced audio and bounded wall-clock drift. It may drop presentation frames
 but never guest cycles to catch up. Turbo changes delivery/pacing, not the CPU's hardware model.
 Headless runs use an execution budget and no sleeps. Browser support must use its own scheduling
 and audio adapter; desktop threading assumptions cannot become Core requirements.

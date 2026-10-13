@@ -3,7 +3,7 @@ using RockULA.Headless;
 if (args.Length == 0 || (args.Length == 1 && args[0] == "--about"))
 {
     Console.WriteLine("RockULA! - Rock Your Spectrum.");
-    Console.WriteLine("Status: functional Spectrum 48K SNA player; complete opcode decoding, NMI/IM 1/2 and IM 0 RST responses. Final-RAM video and keyboard/Kempston input; no audio or contention.");
+    Console.WriteLine("Status: functional Spectrum 48K SNA player; complete opcode decoding, NMI/IM 1/2 and IM 0 RST responses. Final-RAM video, keyboard/Kempston/Sinclair and opt-in beeper PCM; no contention.");
     return 0;
 }
 

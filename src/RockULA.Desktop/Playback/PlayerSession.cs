@@ -220,7 +220,12 @@ public sealed class PlayerSession
         }
         finally
         {
-            _closed.TrySetResult();
+            lock (_commandLock)
+            {
+                _closeRequested = 1;
+                _wake.Dispose();
+                _closed.TrySetResult();
+            }
         }
     }
     private void Anchor()

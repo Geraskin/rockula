@@ -96,3 +96,13 @@ and additional bus waits. Each repeated block iteration is a separate Step (16/2
 with interrupts allowed between them. [ADR 0012](../decisions/0012-port-and-block-boundaries.md)
 defines nominal sequence, logical internal labels and fault commits; no electrical IORQ/WAIT
 accuracy or Spectrum contention is claimed.
+
+## Functional beeper sampling (001m)
+Spectrum48Bus advances its opt-in sampler over each interval using the old bit-4
+level before a port transfer commits. Fractional sample phase is retained across
+frames. At 48 kHz/3.5 MHz, each sample integrates its exact rational window; no
+per-frame rounding or end-of-frame latch sampling is used. A deterministic integer
+DC blocker follows area averaging. Pending PCM is bounded and must be drained by
+the owner; headless sampling remains opt-in. This is not the analog MIC/EAR network
+or a complete band-limited reconstruction. Host queue/volume/pacing does not advance
+hardware time. Pause/import delivery discontinuities reset sampler phase/DC explicitly.

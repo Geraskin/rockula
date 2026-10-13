@@ -3,8 +3,20 @@ using RockULA.Core.Input;
 namespace RockULA.Desktop.Devices;
 
 public sealed record JoystickMapping(int XAxis = 0, int YAxis = 1, int FireButton = 0, int Hat = 0,
-    int DeadZone = 8000, bool InvertX = false, bool InvertY = false)
+    int DeadZone = 8000, bool InvertX = false, bool InvertY = false,
+    int LeftButton = -1, int RightButton = -1, int UpButton = -1, int DownButton = -1)
 {
+    public JoystickButtons MapDirectionButtons(ulong low, ulong high)
+    {
+        JoystickButtons state = JoystickButtons.None;
+        if (Pressed(LeftButton, low, high)) state |= JoystickButtons.Left;
+        if (Pressed(RightButton, low, high)) state |= JoystickButtons.Right;
+        if (Pressed(UpButton, low, high)) state |= JoystickButtons.Up;
+        if (Pressed(DownButton, low, high)) state |= JoystickButtons.Down;
+        return state;
+    }
+    public static bool Pressed(int button, ulong low, ulong high) => button is >= 0 and < 128
+        && ((button < 64 ? low : high) & (1UL << (button % 64))) != 0;
     public JoystickButtons Map(short x, short y, byte hat, bool fire)
     {
         if (DeadZone is < 1 or > 32767) throw new ArgumentOutOfRangeException(nameof(DeadZone));

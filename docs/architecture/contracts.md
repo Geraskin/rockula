@@ -80,3 +80,24 @@ follow [ADR 0011](../decisions/0011-ed-data-boundaries.md).
 
 Port hooks and per-iteration block retirement/fault state follow
 [ADR 0012](../decisions/0012-port-and-block-boundaries.md). Hosts own port decoding.
+
+## Implemented playback contract (001m)
+PlayerSession owns CPU/RAM/sampler mutation on one background thread. A bounded
+16-command queue acknowledges load/pause/restart/volume/close; input is coalesced
+and applied at frame boundaries. Frames publish immutable-by-contract 320x240 ARGB
+arrays, frame number, T-state, PC, running/status and version. Presentation may
+replace an older frame; it never skips guest execution. This input policy is not
+timestamped replay. Keyboard and mapped joystick keys are unioned, preserving aliases.
+
+SDL game joysticks are selected by instance ID. Raw axes/hat/buttons and optional
+digital direction buttons map into Kempston or explicitly labelled Sinclair rows.
+Unplug returns neutral; reconnect requires refresh/reselection. The UI releases
+held keys on focus loss, pause and load. Real USB acceptance remains separate.
+
+Opt-in BeeperSampler has rational phase, integrated area, DC history and a bounded
+PCM ring; these must be included in future complete save states. External SNA
+import creates fresh device state; the host then enables sampling. Delivery resets
+on pause/load/restart/fault. Volume/mute alters queued delivery, not guest time.
+Audio ABI access is serialized, uses fixed 48 kHz mono signed-16 little-endian
+queue mode, and closes after owner shutdown. Missing/stalled output falls back
+to silent pacing. Exact audible latency and physical-device quality are unverified.

@@ -8,7 +8,7 @@ Updated: 2026-10-13. Status is about implemented evidence, not intended scope.
 | M2 Complete CPU | All opcode pages and Q implemented; IM0 RST supported; non-RST IM0 and external exerciser gates pending | CB/ED/DD/FD/indexed-CB, remaining interrupts, undocumented NMOS behavior | Coverage matrix and external oracle/exerciser reports |
 | M3 48K machine | Functional memory/ports/input/video/frame loop implemented; accurate timing and replay pending | Memory, keyboard/ports, basic ULA, interrupts, run loop | Deterministic synthetic machine programs |
 | M4 First playable | SNA and desktop player implemented; real game/Windows acceptance and Z80 v1 pending | SNA, Z80 v1, firmware selection, desktop input/video | Curated user-supplied snapshot cases and responsive host |
-| M5 Sound and tape | Not started | Beeper/audio pacing, TAP pulse playback | Signal tests, sustained audio and real tape loads |
+| M5 Sound and tape | Digital beeper PCM, SDL output and worker pacing implemented; physical audio acceptance/tape pending | Beeper/audio pacing, TAP pulse playback | Signal tests, sustained audio and real tape loads |
 | M6 Timing and tooling | Not started | Contention, raster/floating bus, debugger, complete save states | Event traces, raster regressions, state/replay equality |
 | M7 128K | Deferred | Explicit model, paging, AY, applicable formats | 128K-specific tests without 48K regressions |
 | M8 Browser and extras | Deferred | WASM host, supported TZX blocks, optional rewind | Browser performance/audio tests; per-feature gates |
@@ -42,7 +42,9 @@ and complete-machine replay before connecting a wall-clock host.
 Implement 48K SNA and Z80 v1 parsing with malformed-input tests and paused atomic installation.
 Add firmware file selection and clear errors, pixel viewport, key mapping, pause/reset and integer
 scaling. Track game compatibility by format/hash/profile; no game assets in source control.
-Require a real interactive session on Windows, and deterministic bounded headless runs.
+USB game HID configuration and keyboard joystick rebinding now exist; physical
+controller acceptance remains pending. Require a real interactive session on Windows,
+and deterministic bounded headless runs.
 First release supports only formats and profiles backed by these results.
 
 ## M5 sound/tape

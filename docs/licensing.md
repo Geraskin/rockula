@@ -15,6 +15,7 @@ a release, including bundled render/audio components and fonts.
 | Direct dependency | Bootstrap version | Role | Reference |
 | --- | --- | --- | --- |
 | Avalonia, Avalonia.Desktop, Avalonia.Themes.Fluent | 12.1.3 | Desktop shell | [Upstream license](https://github.com/AvaloniaUI/Avalonia/blob/12.1.3/licence.md) |
+| Ultz.Native.SDL | 2.32.10 | Desktop SDL2 audio/game HID native binaries (zlib) | [Pinned upstream notice](https://github.com/libsdl-org/SDL/blob/release-2.32.10/LICENSE.txt) |
 | xunit | 2.9.3 | Test framework | [Upstream project](https://github.com/xunit/xunit) |
 | xunit.runner.visualstudio | 3.1.1 | Test runner | [Upstream project](https://github.com/xunit/visualstudio.xunit) |
 | Microsoft.NET.Test.Sdk | 17.13.0 | Test discovery/execution | [Upstream project](https://github.com/microsoft/vstest) |
@@ -41,3 +42,7 @@ before accepting it. Do not relicense incompatible upstream work under MIT.
 External test-vector data, ZEX binaries and oracle executables also need provenance review.
 Keep restricted or unreviewed assets outside Git. Commit manifests and reproducible acquisition
 instructions only after their terms and source have been checked.
+
+SDL2 is used only for host audio and game joystick input, not emulator execution.
+The pinned license notice is preserved in [third-party notices](../THIRD_PARTY_NOTICES.md).
+Native package/runtime dependencies still need release inventory review before binary publication.

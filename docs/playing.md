@@ -19,7 +19,8 @@ ROM writes are protected. Files and assets are never downloaded automatically.
 
 Only fixed-size 48K SNA is supported. SNA does not contain firmware. Z80, TAP/TZX,
 128K and compressed archives are unsupported. Keep user assets in ignored `local-data/`.
-There is no sound. Video redraws final RAM once per logical frame; contention,
+Desktop plays the 48K bit-4 beeper. Use toolbar volume/mute. No AY/128K or tape
+audio is implemented. Video redraws final RAM once per logical frame; contention,
 raster effects and floating bus are absent. Host pacing may run slowly on busy machines.
 
 For a reproducible bounded run:
@@ -31,3 +32,36 @@ nonzero exit code. `--demo-machine` checks a self-authored SNA without external 
 
 Real ROM boot, game compatibility and interactive Windows file/input handling
 are pending user-file acceptance; synthetic tests do not establish those results.
+
+## USB joystick and controls
+Open **Controls / USB**. The machine pauses while you configure it, then resumes
+if it was running. Refresh, select the USB game joystick/gamepad, and move it while
+watching the live preview. This uses raw SDL joystick input, not Xbox-only mappings.
+
+Indices start at zero. Defaults: horizontal axis 0, vertical axis 1, hat 0,
+fire button 0, approximately 24% dead zone. Change/invert axes if needed. Disable
+unused sources with -1. The preview lists pressed button numbers; choose the fire
+button you prefer. For digital pads exposing directions as buttons, expand the
+optional direction-button settings. Axes, hat and direction buttons are combined.
+
+Choose **Kempston**, **Sinclair: keys 6–0**, or **Sinclair: keys 1–5**, matching
+the game's menu. Keyboard-only disables joystick aliases. Keyboard joystick
+aliases default to arrows/Space and can be rebound by clicking each action then
+pressing a key (Escape cancels). Spectrum letter/number keys remain available.
+
+Unplug releases USB directions/fire. Reconnect, refresh and select again.
+Focus loss, pause and loading release input. Configuration lasts for this session.
+SDL supports devices exposed as game joysticks by the OS; arbitrary non-game HID
+report protocols are not parsed. Your physical USB joystick still needs acceptance
+on your machine; virtual HID smoke proves the host path, not every device.
+
+## Audio and pacing
+One worker owns execution, PCM generation and delivery. Audio queue depth paces
+production; the GUI displays the latest immutable frame and submits input. If the
+audio backend is unavailable or stops consuming PCM, playback falls back to silent
+monotonic pacing and reports that state. Pause/restart/load clears pending audio;
+mute/volume changes clear previously queued output without changing guest cycles.
+The first sampler averages digital bit-4 intervals at 48 kHz and removes DC; analog
+MIC/EAR mixing, contention and band-limited reconstruction remain deferred.
+Real speakers, sustained playback quality and interactive USB/file controls need
+local user-hardware validation.

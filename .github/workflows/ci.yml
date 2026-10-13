@@ -40,11 +40,6 @@ jobs:
         run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo-loop
       - name: Synthetic 48K SNA machine demo
         run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo-machine
-      - name: Inspect Linux SDL native assets
-        if: runner.os == 'Linux'
-        run: |
-          ls -l src/RockULA.Desktop/bin/Release/net10.0/runtimes/linux-x64/native
-          ldd src/RockULA.Desktop/bin/Release/net10.0/runtimes/linux-x64/native/*SDL*.so*
       - name: Native audio and virtual joystick smoke
         env:
           SDL_AUDIODRIVER: dummy

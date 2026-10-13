@@ -1,10 +1,10 @@
 # Work order 001m: Beeper, worker host and USB joystick
-Status: test-first. Continues authorized feat/z80-foundation, PR #6 to main.
+Status: implemented; final CI and physical-device acceptance pending. Continues authorized feat/z80-foundation, PR #6 to main.
 
 ## Goal
 48K bit-4 beeper sound; volume/mute; one worker owns all machine mutation;
 USB game HID selection with raw axes/hats/buttons (not Xbox-only), configurable
-X/Y/fire/dead zone/inversion; keyboard and USB combine into Kempston or either
+X/Y/fire/dead zone/inversion and optional direction buttons; keyboard and USB combine into Kempston or either
 Sinclair half-row. Unplug, focus loss, pause, load and close release input/audio.
 No installer/distribution changes requested.
 
@@ -45,3 +45,13 @@ pause/load/restart/fault/close tests and raw-axis/hat/button mapping boundaries.
 CI Windows/Linux build/test/format; native dummy audio and virtual USB joystick
 smoke on both; Linux native-window worker/frame/audio smoke. No game assets needed.
 Real speakers/USB joystick and interactive controls remain user-hardware acceptance.
+
+## Evidence so far
+Test-first commit 389921b313a7018d2be12438eb7ffc5a5943e9e9e4, CI 38340942667: both platforms built
+with zero warnings/errors; 15 expected failures, 1,549 passes, zero skips.
+Implementation CI 38341772519 passed Core/desktop tests and native Windows device
+smoke; Linux exposed the package's actual libSDL2-2.0.so filename. Resolver fix
+CI 38341974935 passed native audio/virtual HID and worker-window smoke on Linux;
+format verification identified three whitespace and two import-order corrections.
+Physical speakers, the user's USB device, real games and sustained latency remain
+pending. See docs/playing.md for exact configuration and limits.

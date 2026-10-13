@@ -67,6 +67,12 @@ public sealed class ControlsWindow : Window
         AddNumber(panel, "Fire button", mapping.FireButton, -1, 127, value => Mapping = Mapping with { FireButton = value });
         AddNumber(panel, "Dead zone (%)", (int)Math.Round(mapping.DeadZone * 100.0 / 32767), 1, 80,
             value => Mapping = Mapping with { DeadZone = (int)Math.Round(value * 32767.0 / 100) });
+        var buttonPanel = new StackPanel { Spacing = 8 };
+        AddNumber(buttonPanel, "Left button", mapping.LeftButton, -1, 127, value => Mapping = Mapping with { LeftButton = value });
+        AddNumber(buttonPanel, "Right button", mapping.RightButton, -1, 127, value => Mapping = Mapping with { RightButton = value });
+        AddNumber(buttonPanel, "Up button", mapping.UpButton, -1, 127, value => Mapping = Mapping with { UpButton = value });
+        AddNumber(buttonPanel, "Down button", mapping.DownButton, -1, 127, value => Mapping = Mapping with { DownButton = value });
+        panel.Children.Add(new Expander { Header = "Optional directions as buttons (for digital pads)", Content = buttonPanel });
         var invertX = new CheckBox { Content = "Invert horizontal axis", IsChecked = mapping.InvertX };
         var invertY = new CheckBox { Content = "Invert vertical axis", IsChecked = mapping.InvertY };
         invertX.IsCheckedChanged += (_, _) => Mapping = Mapping with { InvertX = invertX.IsChecked == true };
@@ -92,8 +98,10 @@ public sealed class ControlsWindow : Window
             if (e.Key != Key.Escape)
                 Keyboard = slot switch
                 {
-                    0 => Keyboard with { Up = e.Key }, 1 => Keyboard with { Down = e.Key },
-                    2 => Keyboard with { Left = e.Key }, 3 => Keyboard with { Right = e.Key },
+                    0 => Keyboard with { Up = e.Key },
+                    1 => Keyboard with { Down = e.Key },
+                    2 => Keyboard with { Left = e.Key },
+                    3 => Keyboard with { Right = e.Key },
                     _ => Keyboard with { Fire = e.Key }
                 };
             Key[] current = [Keyboard.Up, Keyboard.Down, Keyboard.Left, Keyboard.Right, Keyboard.Fire];
@@ -102,7 +110,7 @@ public sealed class ControlsWindow : Window
             e.Handled = true;
         };
         panel.Children.Add(_live);
-        panel.Children.Add(new TextBlock { Text = "Axes and hat are combined. Unplugging releases all USB input. Refresh and select after reconnecting. Settings last for this session.", TextWrapping = Avalonia.Media.TextWrapping.Wrap });
+        panel.Children.Add(new TextBlock { Text = "Axes, hat and optional direction buttons are combined. Unplugging releases all USB input. Refresh and select after reconnecting. Settings last for this session.", TextWrapping = Avalonia.Media.TextWrapping.Wrap });
         var done = new Button { Content = "Done", HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right };
         done.Click += (_, _) => Close();
         panel.Children.Add(done);
