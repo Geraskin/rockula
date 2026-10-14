@@ -59,7 +59,8 @@ The current index-prefix slice is [001i](001i-index-prefixes.md); it extends the
 existing base and CB work without declaring M1/M2 complete.
 
 [001j](001j-ed-data-operations.md) extends ED support to word arithmetic and
-transfers, I/R transfers and nibble rotations. Ports/blocks remain pending.
+transfers, I/R transfers and nibble rotations; ports and blocks remained pending
+until [001k](001k-ports-and-blocks.md).
 
 [001k](001k-ports-and-blocks.md) implements immediate/register ports and all 16
 block encodings, with one repeat iteration per Step and measured intermediate flags.
