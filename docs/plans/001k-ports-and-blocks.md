@@ -1,5 +1,6 @@
 # Work order 001k: Ports and block instructions
-Status: implemented; Windows/Linux CI verified. Branch feat/z80-foundation, PR #6 to main.
+Status: implemented; Windows/Linux CI verified. Merged to `main` in PR #6
+(merge commit `0a8e744`).
 
 ## Scope and sources
 Add immediate IN/OUT (base DB/D3), all 16 ED register-port encodings including

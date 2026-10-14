@@ -1,6 +1,6 @@
 # Work order 001a: first executable Z80 load slice
-Status: implemented and build/test verified; awaiting PR review/merge. Branch: `feat/z80-foundation`; base/merge target: main at
-`9806310c19552c4e845d564ebf765a51e82f851f`.
+Status: implemented and build/test verified; merged to `main` in PR #6 (merge
+commit `0a8e744`), based on main at `9806310c19552c4e845d564ebf765a51e82f851f`.
 
 ## Outcome and scope
 Implement the register file, synchronous CPU stepping, timed bus transactions, NOP and 83
@@ -70,6 +70,6 @@ No test expectations are weakened for the implementation.
 - XML/JSON/YAML, relative links and explicit 84-opcode coverage checks passed.
 - Formatter fixes were whitespace only; test expressions and expectations stayed identical.
 
-[PR #6](https://github.com/Geraskin/rockula/pull/6) contains this slice.
+[PR #6](https://github.com/Geraskin/rockula/pull/6) merged this slice to `main`.
 M1 remains incomplete. Interactive desktop, full NMOS behavior, Spectrum hardware and games
 are not verified. No external firmware/test corpus was downloaded or committed.

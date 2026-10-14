@@ -4,7 +4,7 @@
 A ZX Spectrum emulator written from scratch in C#, with a deterministic hardware core
 and an Avalonia desktop interface. Original project code is licensed under MIT.
 
-**Status: first functional Spectrum 48K snapshot player in PR #6.**
+**Status: first functional Spectrum 48K snapshot player, merged to `main` in PR #6 (merge commit `0a8e744`).**
 The original Z80 implements 252 standalone base encodings, all CB/indexed-CB
 payloads and all ED payloads (78 semantic encodings and 178 hardware NOPs),
 including SCF/CCF flag history. Interrupts support NMI, IM 1/2 and IM 0 RST.

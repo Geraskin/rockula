@@ -1,6 +1,6 @@
 # Work order 001f: ED interrupt control and IM 2
-Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
-Branch feat/z80-foundation, PR #6 to main.
+Status: implemented and verified on Windows/Linux; merged to `main` in PR #6
+(merge commit `0a8e744`).
 
 ## Scope and sources
 Keep 248 standalone base encodings; recognize ED as a prefix for five documented

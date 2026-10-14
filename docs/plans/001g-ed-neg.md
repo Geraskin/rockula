@@ -1,6 +1,6 @@
 # Work order 001g: ED NEG
-Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
-Branch feat/z80-foundation, PR #6 to main.
+Status: implemented and verified on Windows/Linux; merged to `main` in PR #6
+(merge commit `0a8e744`).
 
 Implement documented ED44 only: A becomes 0−A in 8 T through two M1 fetches.
 Sources: Zilog UM008011-0816 printed pp.176–177,

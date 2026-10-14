@@ -1,5 +1,6 @@
 # Work order 001m: Beeper, worker host and USB joystick
-Status: implemented and CI verified; physical-device acceptance pending. Continues authorized feat/z80-foundation, PR #6 to main.
+Status: implemented and CI verified; physical-device acceptance pending. Merged to
+`main` in PR #6 (merge commit `0a8e744`).
 
 ## Goal
 48K bit-4 beeper sound; volume/mute; one worker owns all machine mutation;
