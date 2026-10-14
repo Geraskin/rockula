@@ -1,6 +1,6 @@
 # Work order 001c: word arithmetic, decimal adjustment and exchanges
-Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
-Branch `feat/z80-foundation`, PR #6 to `main`.
+Status: implemented and verified on Windows/Linux; merged to `main` in PR #6
+(merge commit `0a8e744`).
 Starting commit: `2fb334fcbad9b2525e869b96c38ec22ba2bdcfd4`.
 
 ## Scope

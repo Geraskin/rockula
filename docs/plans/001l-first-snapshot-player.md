@@ -1,5 +1,6 @@
 # Work order 001l: First 48K snapshot player
-Status: implemented and CI verified; real-file interactive acceptance pending. Branch feat/z80-foundation, PR #6 to main.
+Status: implemented and CI verified; real-file interactive acceptance pending. Merged
+to `main` in PR #6 (merge commit `0a8e744`).
 
 ## Goal
 Deliver an executable desktop path: choose user 16 KiB ROM, open a strict 48K

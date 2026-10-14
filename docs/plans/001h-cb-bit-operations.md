@@ -1,6 +1,6 @@
 # Work order 001h: complete CB page and scoped WZ
-Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
-Branch feat/z80-foundation, PR #6 to main.
+Status: implemented and verified on Windows/Linux; merged to `main` in PR #6
+(merge commit `0a8e744`).
 
 ## Scope and sources
 Implement all 256 non-indexed CB payloads: RLC/RRC/RL/RR/SLA/SRA/SLL/SRL,

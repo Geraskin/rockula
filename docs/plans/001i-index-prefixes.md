@@ -1,6 +1,6 @@
 # Work order 001i: DD/FD and indexed CB
-Status: implemented; Windows/Linux CI verified, with limits below.
-Branch feat/z80-foundation, PR #6 to main.
+Status: implemented; Windows/Linux CI verified, with limits below. Merged to `main`
+in PR #6 (merge commit `0a8e744`).
 
 ## Scope and sources
 Extend the existing 248 base encodings and six ED commands through DD/FD decoding;

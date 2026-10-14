@@ -1,5 +1,6 @@
 # Work order 001j: ED data operations
-Status: implemented and verified in Windows/Linux CI. Branch feat/z80-foundation, PR #6 to main.
+Status: implemented and verified in Windows/Linux CI. Merged to `main` in PR #6
+(merge commit `0a8e744`).
 
 ## Goal and sources
 Add 22 ED encodings: ADC/SBC HL,BC/DE/HL/SP (8), LD (nn),BC/DE/HL/SP

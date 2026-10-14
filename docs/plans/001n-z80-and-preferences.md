@@ -1,5 +1,6 @@
 # Work order 001n: 48K Z80 snapshots and desktop preferences
-Status: implemented; final CI and real-file acceptance pending. Authorized continuation feat/z80-foundation, PR #6 to main.
+Status: implemented; final CI and real-file acceptance pending. Merged to `main` in
+PR #6 (merge commit `0a8e744`).
 
 ## Scope and sources
 Support ordinary 48K Z80 v1 raw/compressed and v2/v3 page blocks, plus existing

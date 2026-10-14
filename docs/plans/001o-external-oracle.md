@@ -1,8 +1,8 @@
 # Work order 001o: external oracle suite for the 48K machine
 Status: implemented; Windows/real-asset acceptance pending. Authorized continuation,
-`feat/oracle-diagnostics`. **Base and merge target: `feat/z80-foundation` (PR #6)**, because
-the CPU, machine and headless host this slice extends exist only there; retarget to `main`
-once PR #6 lands.
+`feat/oracle-diagnostics`; merged into `feat/z80-foundation` as PR #7, which PR #6 then
+carried to `main` (merge commit `0a8e744`), because the CPU, machine and headless host
+this slice extends existed only there.
 
 ## Goal
 Let an independent, third-party program judge the machine, instead of only our own tests. Every

@@ -1,6 +1,6 @@
 # Work order 001e: NMI and IM 1 acceptance
-Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
-Branch `feat/z80-foundation`, PR #6 to `main`.
+Status: implemented and verified on Windows/Linux; merged to `main` in PR #6
+(merge commit `0a8e744`).
 Starting commit: `00c199da4c2ba6beca677912c0be6454baab09c9`.
 
 ## Scope and sources

@@ -1,6 +1,6 @@
 # Work order 001d: HALT and interrupt enable state
-Status: implemented and verified on Windows/Linux; awaiting PR review/merge.
-Branch `feat/z80-foundation`, PR #6 to `main`.
+Status: implemented and verified on Windows/Linux; merged to `main` in PR #6
+(merge commit `0a8e744`).
 Starting commit: `52d554f4a01d9c79560a29ee5210757615a9c49e`.
 
 ## Scope and sources

@@ -1,7 +1,7 @@
 # Playing a 48K snapshot
 
-Install the stable .NET 10 SDK and use branch `feat/z80-foundation` until PR #6
-is merged. From the repository root:
+Install the stable .NET 10 SDK and check out `main`; the player landed in PR #6
+(merge commit `0a8e744`). From the repository root:
 
 ```sh
 dotnet run --project src/RockULA.Desktop

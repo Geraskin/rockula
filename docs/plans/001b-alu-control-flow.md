@@ -1,6 +1,6 @@
 # Work order 001b: byte ALU, branches and stack
-Status: implemented and verified on Windows/Linux; awaiting PR review/merge. Continues PR #6 on `feat/z80-foundation`,
-merge target `main`. Starting commit: `4c6a6d42a23bfbaf6c214a69bb22a7a2d71486c7`.
+Status: implemented and verified on Windows/Linux; merged to `main` in PR #6 (merge
+commit `0a8e744`). Starting commit: `4c6a6d42a23bfbaf6c214a69bb22a7a2d71486c7`.
 
 ## Scope
 Add 72 ADD/ADC/SUB/SBC/AND/XOR/OR/CP register, (HL) and immediate encodings;

@@ -1,10 +1,10 @@
 # Development roadmap
-Updated: 2026-10-13. Status is about implemented evidence, not intended scope.
+Updated: 2026-10-14. Status is about implemented evidence, not intended scope.
 
 | Milestone | Status | Deliverable | Exit gate |
 | --- | --- | --- | --- |
 | M0 Foundation | Build/test verified; interactive UI check pending | Solution, shell, CLI, ROM validation, docs, agent workflow, CI | Build/tests plus honest validation record |
-| M1 Z80 foundation | 252 standalone base encodings implemented; independent synthetic semantics/bus tests in PR #6 | State, bus, ALU, unprefixed instruction slices | Independent semantic and nominal bus tests |
+| M1 Z80 foundation | 252 standalone base encodings implemented; independent synthetic semantics/bus tests in `main` (PR #6, merge commit `0a8e744`) | State, bus, ALU, unprefixed instruction slices | Independent semantic and nominal bus tests |
 | M2 Complete CPU | All opcode pages and Q implemented; IM0 RST supported; external machine oracle (48K diagnostics PASS) and the Fuse CPU corpus wired, which found and closed one CPU defect; non-RST IM0, the HALT PC divergence and full-corpus coverage pending | CB/ED/DD/FD/indexed-CB, remaining interrupts, undocumented NMOS behavior | Coverage matrix and external oracle/exerciser reports |
 | M3 48K machine | Functional memory/ports/input/video/frame loop implemented; accurate timing and replay pending | Memory, keyboard/ports, basic ULA, interrupts, run loop | Deterministic synthetic machine programs |
 | M4 First playable | SNA/Z80 v1–3, persisted preferences and desktop player implemented; real game/Windows acceptance pending | SNA, Z80 v1, firmware selection, desktop input/video | Curated user-supplied snapshot cases and responsive host |
