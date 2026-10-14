@@ -7,5 +7,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/RockULA.Core.Tests/RockULA.Core.Tests.csproj" />
+    <Project Path="tests/RockULA.Desktop.Tests/RockULA.Desktop.Tests.csproj" />
   </Folder>
 </Solution>

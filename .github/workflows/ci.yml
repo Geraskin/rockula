@@ -34,6 +34,25 @@ jobs:
         run: dotnet test RockULA.slnx -c Release --no-build --logger "trx;LogFileName=tests.trx"
       - name: Headless status
         run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --about
+      - name: Synthetic CPU demo
+        run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo
+      - name: Synthetic loop and stack demo
+        run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo-loop
+      - name: Synthetic 48K SNA machine demo
+        run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo-machine
+      - name: Synthetic Z80 v3 machine demo
+        run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --demo-z80
+      - name: Oracle command smoke
+        run: dotnet run --project src/RockULA.Headless -c Release --no-build -- --oracle-smoke
+      - name: Native audio and virtual joystick smoke
+        env:
+          SDL_AUDIODRIVER: dummy
+        run: dotnet run --project src/RockULA.Desktop -c Release --no-build -- --smoke-devices
+      - name: Desktop native-window smoke
+        if: runner.os == 'Linux'
+        env:
+          SDL_AUDIODRIVER: dummy
+        run: timeout 30s xvfb-run -a dotnet run --project src/RockULA.Desktop -c Release --no-build -- --smoke-gui
       - name: Check formatting
         if: runner.os == 'Linux'
         run: dotnet format RockULA.slnx --verify-no-changes --no-restore

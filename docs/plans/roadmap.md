@@ -1,14 +1,14 @@
 # Development roadmap
-Updated: 2026-10-08. Status is about implemented evidence, not intended scope.
+Updated: 2026-10-13. Status is about implemented evidence, not intended scope.
 
 | Milestone | Status | Deliverable | Exit gate |
 | --- | --- | --- | --- |
 | M0 Foundation | Build/test verified; interactive UI check pending | Solution, shell, CLI, ROM validation, docs, agent workflow, CI | Build/tests plus honest validation record |
-| M1 Z80 foundation | Not started | State, bus, ALU, unprefixed instruction slices | Independent semantic and nominal bus tests |
-| M2 Complete CPU | Not started | CB/ED/DD/FD/indexed-CB, interrupts, undocumented NMOS behavior | Coverage matrix and external oracle/exerciser reports |
-| M3 48K machine | Not started | Memory, keyboard/ports, basic ULA, interrupts, run loop | Deterministic synthetic machine programs |
-| M4 First playable | Not started | SNA, Z80 v1, firmware selection, desktop input/video | Curated user-supplied snapshot cases and responsive host |
-| M5 Sound and tape | Not started | Beeper/audio pacing, TAP pulse playback | Signal tests, sustained audio and real tape loads |
+| M1 Z80 foundation | 252 standalone base encodings implemented; independent synthetic semantics/bus tests in PR #6 | State, bus, ALU, unprefixed instruction slices | Independent semantic and nominal bus tests |
+| M2 Complete CPU | All opcode pages and Q implemented; IM0 RST supported; external machine oracle (48K diagnostics PASS) and the Fuse CPU corpus wired, which found and closed one CPU defect; non-RST IM0, the HALT PC divergence and full-corpus coverage pending | CB/ED/DD/FD/indexed-CB, remaining interrupts, undocumented NMOS behavior | Coverage matrix and external oracle/exerciser reports |
+| M3 48K machine | Functional memory/ports/input/video/frame loop implemented; accurate timing and replay pending | Memory, keyboard/ports, basic ULA, interrupts, run loop | Deterministic synthetic machine programs |
+| M4 First playable | SNA/Z80 v1–3, persisted preferences and desktop player implemented; real game/Windows acceptance pending | SNA, Z80 v1, firmware selection, desktop input/video | Curated user-supplied snapshot cases and responsive host |
+| M5 Sound and tape | Digital beeper PCM, SDL output and worker pacing implemented; physical audio acceptance/tape pending | Beeper/audio pacing, TAP pulse playback | Signal tests, sustained audio and real tape loads |
 | M6 Timing and tooling | Not started | Contention, raster/floating bus, debugger, complete save states | Event traces, raster regressions, state/replay equality |
 | M7 128K | Deferred | Explicit model, paging, AY, applicable formats | 128K-specific tests without 48K regressions |
 | M8 Browser and extras | Deferred | WASM host, supported TZX blocks, optional rewind | Browser performance/audio tests; per-feature gates |
@@ -32,6 +32,9 @@ R and interrupt behavior. Enable tracing without per-instruction allocations in 
 Run curated single-step vectors and a separately licensed reference oracle; pin revisions and
 record corpus hashes. Integrate ZEXDOC/ZEXALL only after their source/license and runner assumptions
 are understood. Never use their final success message as the only accuracy gate.
+A first external machine oracle is wired into the headless host (001o, ADR 0016): the
+zx-diagnostics 48K test ROM reports PASS for all 48K RAM and interrupt checks. See
+[testing](../testing.md#external-oracle-suite).
 
 ## M3 machine
 Wire firmware/RAM, active-low keyboard, ULA port aliases, border/beeper latches and interrupt line.
@@ -42,7 +45,9 @@ and complete-machine replay before connecting a wall-clock host.
 Implement 48K SNA and Z80 v1 parsing with malformed-input tests and paused atomic installation.
 Add firmware file selection and clear errors, pixel viewport, key mapping, pause/reset and integer
 scaling. Track game compatibility by format/hash/profile; no game assets in source control.
-Require a real interactive session on Windows, and deterministic bounded headless runs.
+USB game HID configuration and keyboard joystick rebinding now exist; physical
+controller acceptance remains pending. Require a real interactive session on Windows,
+and deterministic bounded headless runs.
 First release supports only formats and profiles backed by these results.
 
 ## M5 sound/tape
