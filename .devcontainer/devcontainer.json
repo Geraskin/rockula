@@ -3,22 +3,26 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-    "features": {
-    "ghcr.io/devcontainers/features/copilot-cli:1": {}
+  "features": {
+    "ghcr.io/devcontainers/features/copilot-cli:1": {},
+    "ghcr.io/geraskin/ai-workspace/opencode:0.1.0": {
+      "version": "2.1.1"
+    }
   },
-  "remoteUser": "vscode",
+  "remoteUser": "developer",
   "workspaceFolder": "/repos/rockula",
   "workspaceMount": "source=R:\\repos\\rockula,target=/repos,type=bind,consistency=cached",
   "mounts": [
-    "source=${localEnv:USERPROFILE}\\.agents,target=/home/alexey/.agents,type=bind,readonly",
+    "source=${localEnv:USERPROFILE}\\.agents,target=/home/developer/.agents,type=bind,readonly",
+    "source=${localWorkspaceFolderBasename}-copilot-state,target=/home/developer/.copilot,type=volume",
+    "source=${localWorkspaceFolderBasename}-opencode-data,target=/home/developer/.local/share/opencode,type=volume",
+    "source=${localWorkspaceFolderBasename}-opencode-config,target=/home/developer/.config/opencode,type=volume",
+    "source=${localWorkspaceFolderBasename}-opencode-state,target=/home/developer/.local/state/opencode,type=volume"
   ],
+  "shutdownAction": "none",
   "updateRemoteUserUID": true,
   "customizations": {
     "vscode": {
-      "settings": {
-        "dev.containers.copyGitConfig": false,
-        "dev.containers.gitCredentialHelperConfigLocation": "none"
-        },      
       "extensions": [
         "ms-dotnettools.csharp",
         "ms-python.python",
@@ -28,27 +32,7 @@
         "GitHub.copilot",
         "GitHub.copilot-chat",
         "vizards.deepseek-v4-for-copilot"
-      ],
-      "mcp": {
-        "servers": {
-          "github-rockula": {
-            "type": "http",
-            "url": "https://api.githubcopilot.com/mcp/",
-            "headers": {
-              "Authorization": "Bearer ${input:rockula_github_pat}",
-              "X-MCP-Tools": "get_file_contents,get_me,create_branch,create_or_update_file,create_pull_request,pull_request_read"
-            }
-          }
-        },
-        "inputs": [
-          {
-            "type": "promptString",
-            "id": "rockula_github_pat",
-            "description": "GitHub Fine-grained PAT for RockULA",
-            "password": true
-          }
-        ]
-      }
+      ]
     }
   },
   "postCreateCommand": "git config --global 'credential.https://github.com/Geraskin/rockula.git.useHttpPath' true && git config --global 'credential.https://github.com/Geraskin/rockula.git.helper' 'cache --timeout=3600' && dotnet restore RockULA.slnx"
