@@ -9,15 +9,15 @@
       "version": "2.1.1"
     }
   },
-  "remoteUser": "vscode",
+  "remoteUser": "developer",
   "workspaceFolder": "/repos/rockula",
   "workspaceMount": "source=R:\\repos\\rockula,target=/repos,type=bind,consistency=cached",
   "mounts": [
-    "source=${localEnv:USERPROFILE}\\.agents,target=/home/alexey/.agents,type=bind,readonly",
-    "source=${localWorkspaceFolderBasename}-copilot-state,target=/home/vscode/.copilot,type=volume",
-    "source=${localWorkspaceFolderBasename}-opencode-data,target=/home/vscode/.local/share/opencode,type=volume",
-    "source=${localWorkspaceFolderBasename}-opencode-config,target=/home/vscode/.config/opencode,type=volume",
-    "source=${localWorkspaceFolderBasename}-opencode-state,target=/home/vscode/.local/state/opencode,type=volume"
+    "source=${localEnv:USERPROFILE}\\.agents,target=/home/developer/.agents,type=bind,readonly",
+    "source=${localWorkspaceFolderBasename}-copilot-state,target=/home/developer/.copilot,type=volume",
+    "source=${localWorkspaceFolderBasename}-opencode-data,target=/home/developer/.local/share/opencode,type=volume",
+    "source=${localWorkspaceFolderBasename}-opencode-config,target=/home/developer/.config/opencode,type=volume",
+    "source=${localWorkspaceFolderBasename}-opencode-state,target=/home/developer/.local/state/opencode,type=volume"
   ],
   "shutdownAction": "none",
   "updateRemoteUserUID": true,

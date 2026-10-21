@@ -14,7 +14,7 @@ existing Copilot CLI in RockULA! without requiring VS Code to remain open.
   Docker socket, or provider credentials are configured here.
 - Existing repository-specific GitHub MCP entry was removed in prior local
   edits; this branch follows those edits. It does not silently reintroduce it.
-- Untracked `.vscode/settings.json` and `.devcontainer/devcontainer-lock.json`
+- Untracked `.developer/settings.json` and `.devcontainer/devcontainer-lock.json`
   from the local machine are not committed into this branch.
 
 ## Local sync warning
@@ -34,10 +34,13 @@ untracked local settings separately after verifying status.
    through Docker's saved credentials; this has already been verified.
 2. Verify local `git status`, back up existing changes, then obtain branch.
 3. Review changes before rebuilding; confirm the Copilot CLI feature and
-   workspace mount are unchanged.
+   workspace mount are unchanged. This branch renames the container user
+   from `vscode` to `developer`, holding Linux UID 1000 stable so the existing
+   persistent volumes retain access. It also moves the .agents bind target to
+   `/home/developer/.agents`; the Windows source remains the same.
 4. Rebuild only RockULA!'s Dev Container. Verify with:
    `devcontainer.cmd exec --workspace-folder "R:\repos\rockula\rockula" -- opencode --version`
-5. Confirm `vscode` owns/may write all three OpenCode mountpoints and
+5. Confirm `developer` owns/may write all three OpenCode mountpoints and
    Copilot still works.
 6. Restart without VS Code and check persistent data; do **not** infer
    automatic startup from `shutdownAction` alone.
