@@ -20,7 +20,7 @@
     "source=${localWorkspaceFolderBasename}-opencode-state,target=/home/developer/.local/state/opencode,type=volume"
   ],
   "shutdownAction": "none",
-  "updateRemoteUserUID": true,
+  "updateRemoteUserUID": false,
   "customizations": {
     "vscode": {
       "extensions": [
