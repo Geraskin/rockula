@@ -21,4 +21,7 @@ RUN mkdir -p /home/developer/.local/share/opencode \
     && chown -R developer:developer /home/developer/.local /home/developer/.config
 
 USER developer
-WORKDIR /workspaces/rockula
+WORKDIR /repos/rockula
+
+# Start the authenticated OpenCode service as the main process.
+CMD ["opencode", "serve", "--service"]

@@ -20,6 +20,8 @@
     "source=${localWorkspaceFolderBasename}-opencode-state,target=/home/developer/.local/state/opencode,type=volume"
   ],
   "shutdownAction": "none",
+  "overrideCommand": false,
+  "runArgs": ["--publish", "127.0.0.1:14096:49374", "--restart=unless-stopped"],
   "updateRemoteUserUID": false,
   "customizations": {
     "vscode": {
